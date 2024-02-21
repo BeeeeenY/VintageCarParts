@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h2>Search Results</h2>
+    {% for product in results %}
+        <div>
+            <h3>{{ product.title }}</h3>
+            <p>ISBN-13: {{ product.isbn13 }}</p>
+            <p>Price: ${{ product.price }}</p>
+            <p>Availability: {{ product.availability }}</p>
+        </div>
+    {% else %}
+        <p>No results found.</p>
+    {% endfor %}
+</body>
+</html>

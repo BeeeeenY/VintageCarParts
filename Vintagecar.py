@@ -331,7 +331,7 @@ def seller_product_listing():
     parts_data = []  # List to hold data for each post
 
     # Fetch all posts
-    part_ids = db.session.query(Listing.PartID).filter(Listing.UserID == 3).all() # hard code userid first
+    part_ids = db.session.query(Listing.PartID).filter(Listing.UserID == 3).all()
 
     for part_id in part_ids:
         part_id = part_id[0]  # Extract PartID from tuple

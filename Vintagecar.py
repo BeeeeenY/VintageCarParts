@@ -4,6 +4,7 @@ from sqlalchemy import update
 from datetime import datetime
 from sqlalchemy import ForeignKey
 import firebase_admin
+import datetime as dt
 from firebase_admin import credentials, storage
 from sqlalchemy import and_
 
@@ -149,7 +150,7 @@ def get_all_posts():
         first_picture_url = None
 
         # Define a distant future timestamp
-        future_timestamp = datetime.datetime.utcnow() + datetime.timedelta(days=3650)
+        future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
         for blob in blobs:
             first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
@@ -282,7 +283,7 @@ def create_part():
 
     part_id = part.PartID
     print(part_id)
-    listing = Listing(part_id, 3, add_info, datetime.datetime.now())
+    listing = Listing(part_id, 3, add_info, dt.datetime.now())
     
     try:
         db.session.add(listing)
@@ -357,7 +358,7 @@ def seller_product_listing():
         first_picture_url = None
 
         # Define a distant future timestamp
-        future_timestamp = datetime.datetime.utcnow() + datetime.timedelta(days=3650)
+        future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
         for blob in blobs:
             first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)

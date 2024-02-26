@@ -171,7 +171,8 @@ def get_all_posts():
                 "Brand": part_details.Brand,
                 "Model": part_details.Model,
                 "UserName": user_name,
-                "Pic": first_picture_url  # Pass the download URL to the HTML template
+                "Pic": first_picture_url,  # Pass the download URL to the HTML template
+                "Status": part_details.Status
             }
 
             posts_data.append(post_data)  # Add post data to the list

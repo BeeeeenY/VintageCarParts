@@ -143,17 +143,19 @@
                 </div>
             </div>
             <!-- User -->
-            <div class="col-3" style="font-weight: ligher; font-size: xx-large;">
-                {{post.UserName}}
+            <div class="col-3" style="font-weight: lighter; font-size: xx-large;">
+                {{ post.UserName }}
                 <div class="row">
-                    <div class="col-3">
-                        <button type="button" class="btn btn-primary btn-lg">Chat</button>
-                    </div>
-                    <div class="col  mx-2">
-                        <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
-                    </div>    
+                    <!-- Create a form to submit data to Flask route -->
+                    <form id="cartForm" method="POST" action="{{ url_for('create_cart') }}">
+                        <input type="hidden" id="UserID" name="UserID" value="{{ post.UserID }}">
+                        <input type="hidden" id="PartID" name="PartID" value="{{ post.PartID }}">
+                        <input type="hidden" id="Price" name="Price" value="{{ post.Price }}">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" min="1">
+                        <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+                    </form>
                 </div>
-                
             </div>
         </div>
 

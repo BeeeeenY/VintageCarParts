@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            background-color: white; /* Sets the background color to white */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            background-color: orange;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            width: calc(100% - 40px); /* Adjust width to account for padding */
+            margin-bottom: 10px;
+        }
+        input[type="email"], input[type="password"] {
+            width: 220px; /* Adjust if you want these fields smaller */
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px; /* Adds rounded corners to the inputs */
+            border: 1px solid #ccc; /* Adds a light border to the inputs */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        input[type="submit"] {
+            width: 200px; /* Makes the button a bit smaller */
+            padding: 10px;
+            margin: 10px auto; /* Centers the button horizontally and maintains vertical spacing */
+            border-radius: 5px; /* Adds rounded corners to the button */
+            border: 1px solid #ccc; /* Adds a light border to the button */
+            cursor: pointer; /* Changes the cursor to a pointer on hover */
+            background-color: #f2f2f2; /* Light grey background, adjust as needed */
+            color: black; /* Text color, adjust as needed */
+        }
+        .image-container img {
+            width: 200px; /* Makes the image larger */
+            margin-bottom: 20px;
+            border-radius: 10px; /* Optional: Adds rounded corners to the image */
+            display: block; /* Ensures the image is a block-level element, which can be centered with margin: auto */
+            margin-left: auto; /* Center-align the image horizontally */
+            margin-right: auto; /* Center-align the image horizontally */
+        }
+        
+        .register-link {
+            display: block;
+            margin-top: 20px; /* Adjust the margin as needed */
+            color: #0000EE; /* Standard link color, adjust as needed */
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-container">
+            <!-- The src attribute points to the image in the static folder -->
+            <img src="static/car.jpg" alt="Car" />
+        </div>
+        <h2>Login</h2>
+        <form method="POST" action="/login">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+            <input type="submit" value="Login">
+        </form>
+        <!-- Register link -->
+        <a href="/register" class="register-link">Don't have an account? Register here.</a>
+    </div>
+</body>
+</html>
+</html>

@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
 from datetime import datetime
-from sqlalchemy import ForeignKey
 import firebase_admin
 import datetime as dt
 from firebase_admin import credentials, storage

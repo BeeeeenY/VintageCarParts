@@ -4,6 +4,7 @@
 	-- Create Parts table
 	CREATE TABLE Parts (
 		PartID INT AUTO_INCREMENT PRIMARY KEY,
+		UserID INT NOT NULL
 		Name VARCHAR(255) NOT NULL,
 		AuthenticationNum VARCHAR(255) NULL,
 		Category VARCHAR(255) NOT NULL,
@@ -14,11 +15,13 @@
 		Brand VARCHAR(255) NULL,
 		Model VARCHAR(255) NULL,
         PostDate DATETIME,
+		Content VARCHAR(255) NULL,
 		status VARCHAR(255) NULL
 	);
     
       CREATE TABLE Comments (
 		CommentID INT AUTO_INCREMENT PRIMARY KEY,
+		PartID Int NOT NULL,
 		UserID INT,
 		Content TEXT,
 		CommentDate DATETIME
@@ -146,15 +149,15 @@
 	USE `Products`;
 
 	-- Insert into Parts
-	INSERT INTO Parts (Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, PostDate, status) VALUES 
-	('Part A', '12345', 'Electronics', 'Description of part A', 99.99, 10, 'Korea', 'BMW', 'X5', NOW(), 'Available'),
-	('Part B', '67890', 'Automotive', 'Description of part B', 199.99, 5, 'USA', 'Mini Cooper', 'Countryman',NOW(), 'Available'),
-	('Part C', '11223', 'Hardware', 'Description of part C', 9.99, 20, 'Europe', 'Ferrari', '812 GTS',NOW(), 'Available');
+	INSERT INTO Parts (UserID, Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, PostDate, Content, status) VALUES 
+	(1, 'Part A', '12345', 'Electronics', 'Description of part A', 99.99, 10, 'Korea', 'BMW', 'X5', NOW(), 'Selling Part A, barely used', 'Available'),
+	(2, 'Part B', '67890', 'Automotive', 'Description of part B', 199.99, 5, 'USA', 'Mini Cooper', 'Countryman',NOW(), 'Looking for Part B, willing to trade', 'Available'),
+	(3, 'Part C', '11223', 'Hardware', 'Description of part C', 9.99, 20, 'Europe', 'Ferrari', '812 GTS',NOW(), 'Discount on Part C for bulk purchase', 'Available');
     
-	INSERT INTO Comments (CommentID, UserID, Content, CommentDate) VALUES 
-	(3, 1, 'I am interested in Part A', NOW()),
-	(2, 1, 'I have Part B available for trade', NOW()),
-	(1, 1, 'How much discount on bulk purchase for Part C?', NOW());
+	INSERT INTO Comments (CommentID, PartID, UserID, Content, CommentDate) VALUES 
+	(3, 1, 1, 'I am interested in Part A', NOW()),
+	(2, 2, 1, 'I have Part B available for trade', NOW()),
+	(1, 3, 1, 'How much discount on bulk purchase for Part C?', NOW());
     
 	USE `Users`;
 

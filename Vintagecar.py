@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
 from datetime import datetime
+from sqlalchemy import ForeignKey
 import firebase_admin
 from firebase_admin import credentials, storage
-import datetime
+from sqlalchemy import and_
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -18,7 +19,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'mysql+mysqlconnector://root@localhost:3306/users',
-    'listing': 'mysql+mysqlconnector://root@localhost:3306/listing'
+    'listing': 'mysql+mysqlconnector://root@localhost:3306/listing',
+    'orders': 'mysql+mysqlconnector://root@localhost:3306/orders'
 }
 
 db = SQLAlchemy(app)
@@ -204,6 +206,8 @@ def find_by_postID(PostID):
     if part_details:
         # Create a dictionary to hold post data
         post = {
+            "PartID": part_id,
+            "UserID": user_id,
             "ProductName": part_details.Name,
             "Description": part_details.Description,
             "Price": part_details.Price,
@@ -331,7 +335,7 @@ def seller_product_listing():
     parts_data = []  # List to hold data for each post
 
     # Fetch all posts
-    part_ids = db.session.query(Listing.PartID).filter(Listing.UserID == 3).all()
+    part_ids = db.session.query(Listing.PartID).filter(Listing.UserID == 3).all() # hard code userid first
 
     for part_id in part_ids:
         part_id = part_id[0]  # Extract PartID from tuple
@@ -556,6 +560,130 @@ def display_post(post):
 @app.route('/store')
 def store_page():
     return render_template('store.html')
+
+class Cart(db.Model):
+    __bind_key__ = 'orders'
+    __tablename__ = 'cart'
+
+    CartID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UserID = db.Column(db.Integer)
+    OrderDate = db.Column(db.DateTime)
+    Status = db.Column(db.String(255))
+
+    def __init__(self, UserID, OrderDate, Status):
+        self.UserID = UserID
+        self.OrderDate = OrderDate
+        self.Status = Status
+
+    def json(self):
+        return {"CartID": self.CartID, "UserID": self.UserID, "OrderDate": self.OrderDate, "Status": self.Status}
+
+class Orderdetails(db.Model):
+    __bind_key__ = 'orders'
+    __tablename__ = 'orderdetails'
+
+    OrderDetailID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    CartID = db.Column(db.Integer)
+    PartID = db.Column(db.Integer)
+    Quantity = db.Column(db.Integer)
+    Purchaseddate = db.Column(db.DateTime)
+    Price = db.Column(db.Float)
+
+    def __init__(self, CartID, PartID, Quantity, Purchaseddate, Price):
+        self.CartID = CartID
+        self.PartID = PartID
+        self.Quantity = Quantity
+        self.Purchaseddate = Purchaseddate
+        self.Price = Price
+
+    def json(self):
+        return {"OrderDetailID": self.OrderDetailID, "CartID": self.CartID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Price": self.Price}
+
+@app.route("/cart/<int:UserID>")
+def find_by_cartID(UserID):
+    cart_details = db.session.query(Cart).filter(and_(Cart.UserID == UserID, Cart.Status == "pending")).limit(1).scalar()
+
+    if cart_details:
+        CartID = cart_details.CartID
+        order_details = db.session.query(Orderdetails).filter_by(CartID=CartID).all()
+
+        cart = {}
+        for order_detail in order_details:
+            part_details = db.session.query(Parts).filter_by(PartID=order_detail.PartID).first()
+            if part_details:
+                cart_item = {
+                    "ProductName": part_details.Name,
+                    "Description": part_details.Description,
+                    "Quantity": order_detail.Quantity,
+                    "Unit Price": part_details.Price,
+                    "Total Price": order_detail.Quantity * part_details.Price
+                }
+                cart[order_detail.OrderDetailID] = cart_item
+
+        return display_cart(cart)
+
+    return jsonify(
+        {
+            "code": 404,
+            "message": "Cart not found."
+        }
+    ), 404
+
+@app.route("/create_cart", methods=['POST'])
+def create_cart():
+    try:
+        # Get form data
+        UserID = request.form.get('UserID')
+        PartID = request.form.get('PartID')
+        Quantity = int(request.form.get('quantity'))  # Note: 'quantity' field, not 'Quantity'
+        Price = float(request.form.get('Price'))
+        print("Form Data:", request.form)
+        
+        # Get current date and time
+        current_datetime = datetime.now()
+
+        # Check if the user has an active cart with "pending" status
+        existing_cart = Cart.query.filter(and_(Cart.UserID == UserID, Cart.Status == 'Pending')).first()
+
+        if existing_cart:
+            # Check if the part already exists in the current user's pending cart
+            existing_orderdetail = Orderdetails.query.filter(and_(Orderdetails.CartID == existing_cart.CartID, Orderdetails.PartID == PartID)).first()
+            
+            if existing_orderdetail:
+                # Update quantity for existing order detail
+                existing_orderdetail.Quantity += Quantity
+            else:
+                # Create a new Orderdetails instance
+                orderdetails = Orderdetails(CartID=existing_cart.CartID, PartID=PartID, Quantity=Quantity, Purchaseddate=current_datetime.date(), Price=Price)
+                db.session.add(orderdetails)
+        else:
+            # Create a new Cart instance
+            cart = Cart(UserID=UserID, OrderDate=current_datetime, Status='Pending')
+            db.session.add(cart)
+            db.session.commit()
+
+            # Create a new Orderdetails instance
+            orderdetails = Orderdetails(CartID=cart.CartID, PartID=PartID, Quantity=Quantity, Purchaseddate=current_datetime.date(), Price=Price)
+            db.session.add(orderdetails)
+
+        db.session.commit()
+
+        # Return success response
+        return jsonify({
+            "code": 201,
+            "message": "Item added to cart successfully."
+        }), 201
+    
+    except Exception as e:
+        # Return error response
+        return jsonify({
+            "code": 500,
+            "message": "An error occurred while adding the item to cart. " + str(e)
+        }), 500
+
+# Display cart
+def display_cart(cart):
+    return render_template('cart.html', cart=cart)
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

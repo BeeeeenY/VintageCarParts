@@ -80,32 +80,32 @@
     
     <div class="container">
         <div class="row">
-            {% for post in posts %}
-                {% if post.Status == 'Available' %}
+            {% for part in parts %}
+                {% if part.Status == 'Available' %}
                     <div class="col-md-3 mb-4">
                         <div class="card custom-card" style="width: 18rem;">
-                            {% if post.Pic %}
-                                <img src="{{post.Pic}}" class="card-img" alt="Part Image">
+                            {% if part.Pic %}
+                                <img src="{{part.Pic}}" alt="Part Image">
                             {% else %}
                                 <img src="{{ url_for('static', filename='logo.jpg') }}">
                             {% endif %}
                             <div class="card-body">
-                                <h5 class="card-title">{{post.ProductName}}</h5>
-                                {% if post.Price %}
-                                    <h6 class="card-subtitle mb-2 text-orange">${{post.Price}}</h6>
+                                <h5 class="card-title">{{part.ProductName}}</h5>
+                                {% if part.Price %}
+                                    <h6 class="card-subtitle mb-2 text-orange">${{part.Price}}</h6>
                                 {% endif %}
-                                {% if post.Description %}
-                                    <h6>{{post.Description}}</h6>
+                                {% if part.Description %}
+                                    <h6>{{part.Description}}</h6>
                                 {% endif %}
                                 <p class="card-text">
-                                    {% if post.Brand %}
-                                        {{post.Brand}}
+                                    {% if part.Brand %}
+                                        {{part.Brand}}
                                     {% endif %}
-                                    {% if post.Model %}
-                                        {{post.Model}}
+                                    {% if part.Model %}
+                                        {{part.Model}}
                                     {% endif %}
-                                    <div class="rounded border border-secondary p-2" style="width: calc(100% - 1rem);"> <!-- Adjust width to fit the card -->
-                                        <span>{{ post.UserName }}</span> 
+                                    <div class="rounded bg-light p-2" style="width: calc(100% - 1rem);"> <!-- Adjust width to fit the card -->
+                                        <span>{{ part.UserName }}</span> 
                                     </div>
                                 </p>
                             </div>

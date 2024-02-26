@@ -70,6 +70,19 @@
             color: black;
             font-weight: 500;
         }
+
+        /* Limit the size of the carousel */
+        #carouselExampleCaptions {
+            max-width: 200px; /* Adjust the maximum width as needed */
+            max-height: auto; /* Adjust the maximum height as needed */
+            margin: auto; /* Center the carousel horizontally */
+        }
+
+        /* Limit the size of the carousel images */
+        .carousel-item img {
+            max-width: 100%; /* Make images responsive within the carousel */
+            max-height: 100%; /* Make images responsive within the carousel */
+        }
     </style>
 </head>
 
@@ -150,15 +163,15 @@
                 <div class="carousel-inner">
     
                     <div class="carousel-item active">
-                        <img src="image/steering wheel.jpg" class="d-block w-100" alt="...">
+                        <img src="{{post.Pic}}" class="d-block w-100" alt="...">
                     </div>
     
                     <div class="carousel-item">
-                        <img src="image/steering wheel.jpg" class="d-block w-100" alt="...">
+                        <img src="{{post.Pic}}" class="d-block w-100" alt="...">
                     </div>
     
                     <div class="carousel-item">
-                        <img src="image/steering wheel.jpg" class="d-block w-100" alt="...">
+                        <img src="{{post.Pic}}" class="d-block w-100" alt="...">
                     </div>
     
                 </div>
@@ -199,8 +212,27 @@
                         <input type="hidden" id="Price" name="Price" value="{{ post.Price }}">
                         <label for="quantity">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" min="1" max="{{post.QuantityAvailable}}">
-                        {{post.QuantityAvailable}} pieces available
-                        <button type="submit" class="button">Add to Cart</button>
+                        {{post.QuantityAvailable}} piece(s) available
+                        <button type="submit" class=" button">Add to Cart</button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                ...
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
                         
                     </form>
                 </div>

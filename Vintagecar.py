@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
 from datetime import datetime
 import firebase_admin
-import datetime as dt
 from firebase_admin import credentials, storage
+import datetime as dt
 from sqlalchemy import and_
 
 cred = credentials.Certificate("./serviceAccountKey.json")
@@ -18,9 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
-    'users': 'mysql+mysqlconnector://root@localhost:3306/users',
-    'listing': 'mysql+mysqlconnector://root@localhost:3306/listing',
-    'orders': 'mysql+mysqlconnector://root@localhost:3306/orders'
+    'users': 'mysql+mysqlconnector://root@localhost:3306/users'
 }
 
 db = SQLAlchemy(app)
@@ -30,6 +28,7 @@ class Parts(db.Model):
     __tablename__ = 'parts'
 
     PartID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UserID = db.Column(db.Integer)
     Name = db.Column(db.String(255), nullable=False)
     AuthenticationNum = db.Column(db.String(255))
     Category = db.Column(db.String(255), nullable=False)
@@ -40,8 +39,11 @@ class Parts(db.Model):
     Brand = db.Column(db.String(255))
     Model = db.Column(db.String(255))
     Status = db.Column(db.String(255))
+    Content = db.Column(db.String(255))
+    PostDate = db.Column(db.DateTime)
 
-    def __init__(self, Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, Status):
+    def __init__(self, UserID, Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, Status, Content, PostDate):
+        self.UserID = UserID
         self.Name = Name
         self.AuthenticationNum = AuthenticationNum
         self.Category = Category
@@ -52,11 +54,13 @@ class Parts(db.Model):
         self.Brand = Brand
         self.Model = Model
         self.Status = Status
+        self.Content = Content
+        self.PostDate = PostDate
 
     def json(self):
-        return {"PartID": self.PartID, "Name": self.Name, "AuthenticationNum": self. AuthenticationNum, "Category": self.Category, 
+        return {"PartID": self.PartID, "UserID": self.UserID, "Name": self.Name, "AuthenticationNum": self. AuthenticationNum, "Category": self.Category, 
                 "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
-                "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status}
+                "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status, "Content": self.Content, "PostDate": self.PostDate}
 
 class Users(db.Model):
     __bind_key__ = 'users'
@@ -78,62 +82,38 @@ class Users(db.Model):
     def json(self):
         return {"UserID": self.UserID, "Name": self.Name, "Phone": self.Phone, "Age": self.Age, "Country": self.Country}
     
-
-class Listing(db.Model):
-    __bind_key__ = 'listing'
-    __tablename__ = 'Listing'  # Ensure table name matches the one in your database
-
-    PostID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    PartID = db.Column(db.Integer)
-    UserID = db.Column(db.Integer)
-    Content = db.Column(db.String(255))
-    PostDate = db.Column(db.DateTime)
-
-    def __init__(self, PartID, UserID, Content, PostDate):
-        self.PartID = PartID
-        self.UserID = UserID
-        self.Content = Content
-        self.PostDate = PostDate
-
-    def json(self):
-        return {"PostID": self.PostID, "PartID": self.PartID, "UserID": self.UserID, "Content": self.Content, "PostDate": self.PostDate}
-
 class Comments(db.Model):
-    __bind_key__ = 'listing'
     __tablename__ = 'Comments'
 
     CommentID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    PostID = db.Column(db.Integer)
+    PartID = db.Column(db.Integer, nullable = False)
     UserID = db.Column(db.Integer)
     Content = db.Column(db.Text)
     CommentDate = db.Column(db.DateTime)
 
-
-    def __init__(self, PostID, UserID, Content, CommentDate):
-        self.PostID = PostID
+    def __init__(self, PartID, UserID, Content, CommentDate):
+        self.PartID = PartID
         self.UserID = UserID
         self.Content = Content
         self.CommentDate = CommentDate
 
     def json(self):
-        return {"CommentID": self.CommentID, "PostID": self.PostID, "UserID": self.UserID, "Content": self.Content, "CommentDate": self.CommentDate}
+        return {"CommentID": self.CommentID, "PartID": self.PartID, "UserID": self.UserID, "Content": self.Content, "CommentDate": self.CommentDate}
     
+
 @app.route("/")
-def get_all_posts():
-    posts_data = []  # List to hold data for each post
+def get_all_parts():
+    parts_data = []  # List to hold data for each part
 
-    # Fetch all posts
-    posts = db.session.query(Listing).all()
+    # Fetch all parts
+    parts = db.session.query(Parts).all()
 
-    for post in posts:
-        part_id = post.PartID
-        user_id = post.UserID
+    for part in parts:
+        part_id = part.PartID
+        user_id = part.UserID
 
-        # Fetch user name for the current post
+        # Fetch user name for the current part
         user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).scalar()
-
-        # Fetch part details for the current post
-        part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
 
         part_id_str = str(part_id)
 
@@ -160,48 +140,47 @@ def get_all_posts():
             print("No files found.")
 
     
-        if part_details:
-            # Create a dictionary to hold post data
-            post_data = {
-                "PartID": part_details.PartID,
-                "ProductName": part_details.Name,
-                "Description": part_details.Description,
-                "Price": part_details.Price,
-                "Brand": part_details.Brand,
-                "Model": part_details.Model,
+        if part:
+            # Create a dictionary to hold part data
+            part_data = {
+                "PartID": part.PartID,
+                "ProductName": part.Name,
+                "Description": part.Description,
+                "Price": part.Price,
+                "Brand": part.Brand,
+                "Model": part.Model,
                 "UserName": user_name,
                 "Pic": first_picture_url,  # Pass the download URL to the HTML template
-                "Status": part_details.Status
+                "Status": part.Status
             }
 
-            posts_data.append(post_data)  # Add post data to the list
+            parts_data.append(part_data)  # Add part data to the list
 
-    if posts_data:
-        # Return the list of post data as JSON response
-        return display_all_posts(posts_data)
+    if parts_data:
+        # Return the list of part data as JSON response
+        return display_all_parts(parts_data)
     
     else:
         return jsonify(
             {
                 "code": 404,
-                "message": "There are no posts."
+                "message": "There are no parts."
             }
         ), 404
 
-@app.route("/<int:PostID>")
-def find_by_postID(PostID):
-    post = db.session.scalars(db.select(Listing).filter_by(PostID=PostID).limit(1)).first()
+@app.route("/<int:PartID>")
+def find_by_partID(PartID):
+    part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
 
-    part_id = post.PartID
-    user_id = post.UserID
+    user_id = part.UserID
 
-    # Fetch user name for the current post
+    # Fetch user name for the current part
     user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).scalar()
 
-    # Fetch part details for the current post
-    part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
+    # Fetch part details for the current part
+    part_details = db.session.query(Parts).filter(Parts.PartID == PartID).first()
 
-    part_id_str = str(part_id)
+    part_id_str = str(PartID)
 
     # Get a reference to the folder
     folder_prefix = part_id_str + '/'
@@ -223,12 +202,12 @@ def find_by_postID(PostID):
     if first_picture_url is None:
         print("No files found.")
 
-    comments = db.session.scalars(db.select(Comments).filter_by(PostID=PostID)).all()
+    comments = db.session.scalars(db.select(Comments).filter_by(PartID=PartID)).all()
 
     if part_details:
-        # Create a dictionary to hold post data
-        post = {
-            "PartID": part_id,
+        # Create a dictionary to hold part data
+        part = {
+            "PartID": PartID,
             "UserID": user_id,
             "ProductName": part_details.Name,
             "Description": part_details.Description,
@@ -243,13 +222,13 @@ def find_by_postID(PostID):
             }
 
 
-    if post:
-        return display_post(post)
+    if part:
+        return display_part(part)
 
     return jsonify(
         {
             "code": 404,
-            "message": "Post not found."
+            "message": "Part not found."
         }
     ), 404
 
@@ -288,8 +267,9 @@ def create_part():
     if not name or not category or not price or not quantity_available:
         return 'Missing form data.', 400
 
-    part = Parts(Name=name, AuthenticationNum = auth_num, Category=category, Description=description, Price=price, 
-                 QuantityAvailable=quantity_available, Location=location, Brand = brand, Model = model, Status = status)
+    part = Parts(UserID= 3, Name=name, AuthenticationNum = auth_num, Category=category, Description=description, Price=price, 
+                 QuantityAvailable=quantity_available, Location=location, Brand = brand, Model = model, Status = status, 
+                 Content = add_info, PostDate = dt.datetime.now())
     
     try:
         db.session.add(part)
@@ -304,17 +284,6 @@ def create_part():
 
     part_id = part.PartID
     print(part_id)
-    listing = Listing(part_id, 3, add_info, dt.datetime.now())
-    
-    try:
-        db.session.add(listing)
-        db.session.commit()
-
-    except Exception as e:
-        return jsonify({
-            "code": 500,
-            "message": f"An error occurred creating the post: {str(e)}"
-        }), 500
 
     if request.method == "POST":
         # Get the uploaded photos from the HTML form
@@ -354,16 +323,13 @@ def create_part():
 
 @app.route("/listing")
 def seller_product_listing():
-    parts_data = []  # List to hold data for each post
+    parts_data = []  # List to hold data for each parts
 
-    # Fetch all posts
-    part_ids = db.session.query(Listing.PartID).filter(Listing.UserID == 3).all() # hard code userid first
+    # Fetch all parts
+    part_details = db.session.query(Parts).filter(Parts.UserID == 3).all()
 
-    for part_id in part_ids:
-        part_id = part_id[0]  # Extract PartID from tuple
-
-        # Fetch all part details for the part_id
-        part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
+    for part in part_details:
+        part_id = part.PartID
 
         part_id_str = str(part_id)
 
@@ -390,17 +356,24 @@ def seller_product_listing():
             print("No files found.")
 
     
-        if part_details:
-            # Create a dictionary to hold post data
+        if part:
+            # Create a dictionary to hold part data
             part_data = {
-                "PartID": part_details.PartID,
-                "Name": part_details.Name,
-                "Qty": part_details.QuantityAvailable,
+                "PartID": part.PartID,
+                "Name": part.Name,
+                # "ProductName": part.Name,
+                # "Description": part.Description,
+                "Price": part.Price,
+                "Quantity": part.QuantityAvailable,
+                # "Brand": part.Brand,
+                # "Model": part.Model,
+                # "UserName": user_name,
+                "Status": part.Status,
                 "Pic": first_picture_url  # Pass the download URL to the HTML template
             }
 
-            parts_data.append(part_data)  # Add post data to the list
-
+            parts_data.append(part_data)  # Add part data to the list
+            
     if parts_data:
         # Return the list of part data as JSON response
         return render_template('productlisting.html', parts = parts_data)
@@ -417,10 +390,9 @@ def seller_product_listing():
 def update_part_page():
     part_id = request.args.get('part_id')
     part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
-    AddInfo = db.session.query(Listing.Content).filter(Listing.PartID == part_id).first()[0]
 
     if part_details:
-        # Create a dictionary to hold post data
+        # Create a dictionary to hold part data
         part = {
             "PartID": part_details.PartID,
             "ProductName": part_details.Name,
@@ -432,7 +404,7 @@ def update_part_page():
             "Location": part_details.Location,
             "Brand": part_details.Brand,
             "Model": part_details.Model,
-            "AddInfo": AddInfo
+            "AddInfo": part_details.Content
             }
 
     if part:
@@ -461,30 +433,12 @@ def update_part(PartID):
             ), 400
 
         data = request.form.to_dict()
-        
+
         print(PartID)
         print(data)
 
-        # Remove keys that are not valid column names in the Parts table
-        valid_column_names = ['Name', 'AuthenticationNum', 'Category', 'Description', 'Price', 'QuantityAvailable', 'Location', 'Brand', 'Model']
-        update_parts_data = {key: value for key, value in data.items() if key in valid_column_names}
-
         try:
-            db.session.query(Parts).filter_by(PartID=PartID).update(update_parts_data)
-            db.session.commit()
-        except Exception as e:
-            return jsonify(
-                {
-                    "code": 500,
-                    "data": {
-                        "partID": PartID
-                    },
-                    "message": f"An error occurred while updating the part: {str(e)}"
-                }
-            ), 500
-
-        try:
-            db.session.query(Listing).filter_by(PartID=PartID).update({'Content': data['AddInfo']})
+            db.session.query(Parts).filter_by(PartID=PartID).update(data)
             db.session.commit()
         except Exception as e:
             return jsonify(
@@ -532,52 +486,15 @@ def update_part(PartID):
 
         return redirect(url_for('seller_product_listing'))
     
-    
-@app.route("/carparts/<int:PartID>", methods=['DELETE'])
-def delete_part(PartID):
-    if (not db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()):
-        return jsonify(
-            {
-                "code": 400,
-                "data": {
-                    "partID": PartID
-                },
-                "message": "Part does not exist."
-            }
-        ), 400
-
-    part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
-
-    try:
-        db.session.delete(part)
-        db.session.commit()
-
-    except Exception as e:
-        return jsonify(
-            {
-                "code": 500,
-                "data": {
-                    "partID": PartID
-                },
-                "message": f"An error occurred while deleting the part: {str(e)}"
-            }
-        ), 500
-
-    return jsonify(
-        {
-            "code": 201,
-            "message": f"Part with ID {PartID} has been successfully deleted."
-        }
-    ), 201
 
 # Display all carparts
-def display_all_posts(posts_data):
+def display_all_parts(parts_data):
     # Render the template and pass data to it
-    return render_template('template.html', posts=posts_data)
+    return render_template('template.html', parts=parts_data)
 
 # Display selected carpart
-def display_post(post):
-    return render_template('product.html', post=post)
+def display_part(part):
+    return render_template('product.html', part=part)
 
 @app.route('/store')
 def store_page():

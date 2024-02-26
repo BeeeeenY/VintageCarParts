@@ -5,6 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Vintage Car</title>
+
+    <style>
+        .label {
+            color: gray;
+        }
+
+        .itemtotal {
+            color: orangered;
+            text-align: right;
+            font-weight: bold;
+            font-size: large;
+        }
+
+        .button {
+            background-color: orangered;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 7px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .button:hover {
+            background-color: rgba(255, 68, 0, 0.575);
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -35,23 +69,38 @@
 
         <div class="row mb-4"></div>
     </div>
-    
+
     <div class="container">
         <div class="row">
-            <div style="font-weight: bolder; font-size: x-large;">Shopping Cart</div>
-        </div>
-        {% set counter = 1 %}
-        {% for key, value in cart.items() %}
-        <div class="row">
-            <div style="font-size: large;">Item {{ counter }}: {{ value['ProductName'] }}</div>
-            <div style="font-size: large;">{{ value['Description'] }}</div>
-            <div style="font-size: large;">Quantity: {{ value['Quantity'] }}</div>
-            <div style="font-size: large;">Single Price: ${{ value['Unit Price'] }}</div>
-            <div style="font-size: large;">Total Price: ${{ value['Total Price'] }}</div>
-            {% set counter = counter + 1 %}
+            <div style="font-weight: bolder; font-size: x-large; text-align: center;">Shopping Cart</div>
         </div>
         <div class="row mb-4"></div>
-        {% endfor %}
+        <div class="row">
+            {% for key, value in cart.items() %}
+                <div class="col-md-3 mb-4">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title pl-3">{{ value['ProductName'] }}</h5>
+                            <img src="{{ value['Pic'] }}" class="card-img-top" alt="...">
+                            <h6 class="card-subtitle mb-2"></h6>
+                            <h6></h6>
+                            <p class="card-text">
+                                {{ value['Description'] }}<br><br>
+                                <span class="label">Unit Price:</span>
+                                ${{ '%.2f'|format(value['Unit Price']) }}<br>
+                                <span class="label">Quantity: </span>
+                                {{ value['Quantity'] }}<br>
+                                <div class="itemtotal">
+                                    Total Price: ${{ '%.2f'|format(value['Total Price']) }}<br>
+                                    <button type="submit" class=" button">Remove</button>
+                                </div>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>

@@ -201,8 +201,29 @@ def find_by_postID(PostID):
     # Fetch part details for the current post
     part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
 
-    comments = db.session.scalars(db.select(Comments).filter_by(PostID=PostID)).all()
+    part_id_str = str(part_id)
 
+    # Get a reference to the folder
+    folder_prefix = part_id_str + '/'
+
+    # Retrieves all the files within the folder specified by folder_prefix.
+    blobs = bucket.list_blobs(prefix=folder_prefix)
+
+    # Initialize first_picture_url
+    first_picture_url = None
+
+    # Define a distant future timestamp
+    future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
+
+    for blob in blobs:
+        first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+        print("URL of the first picture:", first_picture_url)
+        break  # Stop after retrieving the first file's URL
+
+    if first_picture_url is None:
+        print("No files found.")
+
+    comments = db.session.scalars(db.select(Comments).filter_by(PostID=PostID)).all()
 
     if part_details:
         # Create a dictionary to hold post data
@@ -212,10 +233,12 @@ def find_by_postID(PostID):
             "ProductName": part_details.Name,
             "Description": part_details.Description,
             "Price": part_details.Price,
+            "QuantityAvailable": part_details.QuantityAvailable,
             "UserName": user_name,
             "Brand": part_details.Brand,
             "Model": part_details.Model,
             "Status": part_details.Status,
+            "Pic": first_picture_url,
             "Comments": comments
             }
 
@@ -229,8 +252,6 @@ def find_by_postID(PostID):
             "message": "Post not found."
         }
     ), 404
-
-
 
 @app.route("/create_part", methods=['POST'])
 def create_part():
@@ -611,8 +632,31 @@ def find_by_cartID(UserID):
         cart = {}
         for order_detail in order_details:
             part_details = db.session.query(Parts).filter_by(PartID=order_detail.PartID).first()
+            
+            part_id_str = str(part_details.PartID)
+
+            # Get a reference to the folder
+            folder_prefix = part_id_str + '/'
+
+            # Retrieves all the files within the folder specified by folder_prefix.
+            blobs = bucket.list_blobs(prefix=folder_prefix)
+
+            # Initialize first_picture_url
+            first_picture_url = None
+
+            # Define a distant future timestamp
+            future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
+
+            for blob in blobs:
+                first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+                break  # Stop after retrieving the first file's URL
+
+            if first_picture_url is None:
+                print("No files found.")
+
             if part_details:
                 cart_item = {
+                    "Pic": first_picture_url,
                     "ProductName": part_details.Name,
                     "Description": part_details.Description,
                     "Quantity": order_detail.Quantity,

@@ -18,7 +18,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
-    'users': 'mysql+mysqlconnector://root@localhost:3306/users'
+    'users': 'mysql+mysqlconnector://root@localhost:3306/users',
+    'orders': 'mysql+mysqlconnector://root@localhost:3306/orders'
 }
 
 db = SQLAlchemy(app)

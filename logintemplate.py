@@ -43,7 +43,7 @@ def login():
             # Update last login time
             user_auth.LastLogin = datetime.now()
             db.session.commit()
-            return invoke_http(url='http://localhost:5001/', method='POST', redirect_url='http://localhost:5001/')   # Correct usage of url_for with the endpoint name
+            return invoke_http(url='http://localhost:5000/', method='POST', redirect_url='http://localhost:5000/')   # Correct usage of url_for with the endpoint name
         else:
             return 'Invalid email/password'
     return render_template('login.html')

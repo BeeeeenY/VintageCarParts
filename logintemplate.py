@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, session, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from invokes import invoke_http
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -20,10 +21,6 @@ class UserAuth(db.Model):
     UserID = db.Column(db.Integer, nullable=False)
     Email = db.Column(db.String(255), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(255), nullable=False)
-    LastLogin = db.Column(db.DateTime)
-    FailedLoginAttempts = db.Column(db.Integer, default=0)
-    PasswordResetToken = db.Column(db.String(255))
-    TokenExpiryDate = db.Column(db.DateTime)
 
 class Users(db.Model):
     __tablename__ = 'Users'  # Ensure this matches the actual table name in your database
@@ -46,10 +43,11 @@ def login():
             # Update last login time
             user_auth.LastLogin = datetime.now()
             db.session.commit()
-            return redirect(url_for('store'))  # Redirect to the template route on successful login
+            return invoke_http(url='http://localhost:5001/', method='POST', redirect_url='http://localhost:5001/')   # Correct usage of url_for with the endpoint name
         else:
             return 'Invalid email/password'
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -62,12 +60,12 @@ def index():
         return f'Logged in as {session["email"]}<br><a href="/logout">Logout</a>'
     return 'You are not logged in<br><a href="/login">Login</a>'
 
-@app.route('/template', methods=['GET', 'POST'])  # Allow both GET and POST methods for /template
-def template():
-    if 'email' in session:
-        return render_template('template.html')
-    else:
-        return redirect(url_for('login'))
+# @app.route('/template', methods=['GET', 'POST'])  # Allow both GET and POST methods for /template
+# def template():
+#     if 'email' in session:
+#         return render_template('template.html')
+#     else:
+#         return redirect(url_for('login'))
     
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -88,5 +86,6 @@ def register():
         flash('Registration successful. Please log in.')
         return redirect(url_for('login'))
     return render_template('register.html')
+
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5001, debug=True)

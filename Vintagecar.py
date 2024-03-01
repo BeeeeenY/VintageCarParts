@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
 from datetime import datetime
@@ -11,15 +11,17 @@ cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
 bucket = storage.bucket()
 
-
 app = Flask(__name__)
+
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'mysql+mysqlconnector://root@localhost:3306/users',
-    'orders': 'mysql+mysqlconnector://root@localhost:3306/orders'
+    'orders': 'mysql+mysqlconnector://root@localhost:3306/orders',
+    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication'
 }
 
 db = SQLAlchemy(app)
@@ -101,10 +103,25 @@ class Comments(db.Model):
     def json(self):
         return {"CommentID": self.CommentID, "PartID": self.PartID, "UserID": self.UserID, "Content": self.Content, "CommentDate": self.CommentDate}
     
+class UserAuth(db.Model):
+    __bind_key__ = 'userauth'
+    __tablename__ = 'UserAuth'  # Specify the correct table name here
+
+    AuthID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UserID = db.Column(db.Integer, nullable=False)
+    Email = db.Column(db.String(255), unique=True, nullable=False)
+    PasswordHash = db.Column(db.String(255), nullable=False)
 
 @app.route("/")
 def get_all_parts():
     parts_data = []  # List to hold data for each part
+
+    email = session.get('email')
+    print(email)
+    
+    # Fetch user ID of user logged in
+    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
+    print(loggedin_user_id)
 
     # Fetch all parts
     parts = db.session.query(Parts).all()
@@ -113,49 +130,52 @@ def get_all_parts():
         part_id = part.PartID
         user_id = part.UserID
 
-        # Fetch user name for the current part
-        user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).scalar()
+        if loggedin_user_id != user_id:
+            print(user_id)
+            print(loggedin_user_id)
+            # Fetch user name for the current part
+            user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).scalar()
 
-        part_id_str = str(part_id)
+            part_id_str = str(part_id)
 
-        print(part_id_str)
+            # Get a reference to the folder
+            folder_prefix = part_id_str + '/'
 
-        # Get a reference to the folder
-        folder_prefix = part_id_str + '/'
+            # Retrieves all the files within the folder specified by folder_prefix.
+            blobs = bucket.list_blobs(prefix=folder_prefix)
 
-        # Retrieves all the files within the folder specified by folder_prefix.
-        blobs = bucket.list_blobs(prefix=folder_prefix)
+            # Initialize first_picture_url
+            first_picture_url = None
 
-        # Initialize first_picture_url
-        first_picture_url = None
+            # Define a distant future timestamp
+            future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
-        # Define a distant future timestamp
-        future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
+            for blob in blobs:
+                first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+                print("URL of the first picture:", first_picture_url)
+                break  # Stop after retrieving the first file's URL
 
-        for blob in blobs:
-            first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
-            print("URL of the first picture:", first_picture_url)
-            break  # Stop after retrieving the first file's URL
+            if first_picture_url is None:
+                print("No files found.")
 
-        if first_picture_url is None:
-            print("No files found.")
+        
+            if part:
+                # Create a dictionary to hold part data
+                part_data = {
+                    "PartID": part.PartID,
+                    "ProductName": part.Name,
+                    "Description": part.Description,
+                    "Price": part.Price,
+                    "Brand": part.Brand,
+                    "Model": part.Model,
+                    "UserName": user_name,
+                    "Pic": first_picture_url,  # Pass the download URL to the HTML template
+                    "Status": part.Status,
+                }
 
-    
-        if part:
-            # Create a dictionary to hold part data
-            part_data = {
-                "PartID": part.PartID,
-                "ProductName": part.Name,
-                "Description": part.Description,
-                "Price": part.Price,
-                "Brand": part.Brand,
-                "Model": part.Model,
-                "UserName": user_name,
-                "Pic": first_picture_url,  # Pass the download URL to the HTML template
-                "Status": part.Status
-            }
-
-            parts_data.append(part_data)  # Add part data to the list
+                parts_data.append(part_data)  # Add part data to the list
+        
+    print(parts_data)
 
     if parts_data:
         # Return the list of part data as JSON response
@@ -168,7 +188,7 @@ def get_all_parts():
                 "message": "There are no parts."
             }
         ), 404
-
+    
 @app.route("/<int:PartID>")
 def find_by_partID(PartID):
     part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
@@ -189,27 +209,26 @@ def find_by_partID(PartID):
     # Retrieves all the files within the folder specified by folder_prefix.
     blobs = bucket.list_blobs(prefix=folder_prefix)
 
-    # Initialize first_picture_url
-    first_picture_url = None
-
     # Define a distant future timestamp
     future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
-    for blob in blobs:
-        first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
-        print("URL of the first picture:", first_picture_url)
-        break  # Stop after retrieving the first file's URL
+    pic_arr = []
 
-    if first_picture_url is None:
+    for blob in blobs:
+        picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+        pic_arr.append(picture_url)
+
+    if len(pic_arr) == 0:
         print("No files found.")
 
-    comments = db.session.scalars(db.select(Comments).filter_by(PartID=PartID)).all()
+    print(pic_arr)
 
+    comments = db.session.scalars(db.select(Comments).filter_by(PartID=PartID)).all()
+    
     if part_details:
         # Create a dictionary to hold part data
         part = {
             "PartID": PartID,
-            "UserID": user_id,
             "ProductName": part_details.Name,
             "Description": part_details.Description,
             "Price": part_details.Price,
@@ -218,7 +237,7 @@ def find_by_partID(PartID):
             "Brand": part_details.Brand,
             "Model": part_details.Model,
             "Status": part_details.Status,
-            "Pic": first_picture_url,
+            "Pics": pic_arr,
             "Comments": comments
             }
 
@@ -232,6 +251,8 @@ def find_by_partID(PartID):
             "message": "Part not found."
         }
     ), 404
+
+
 
 @app.route("/create_part", methods=['POST'])
 def create_part():
@@ -268,7 +289,14 @@ def create_part():
     if not name or not category or not price or not quantity_available:
         return 'Missing form data.', 400
 
-    part = Parts(UserID= 3, Name=name, AuthenticationNum = auth_num, Category=category, Description=description, Price=price, 
+    email = session.get('email')
+    print(email)
+    
+    # Fetch user ID of user logged in
+    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
+    print(loggedin_user_id)
+
+    part = Parts(UserID= loggedin_user_id, Name=name, AuthenticationNum = auth_num, Category=category, Description=description, Price=price, 
                  QuantityAvailable=quantity_available, Location=location, Brand = brand, Model = model, Status = status, 
                  Content = add_info, PostDate = dt.datetime.now())
     
@@ -326,8 +354,15 @@ def create_part():
 def seller_product_listing():
     parts_data = []  # List to hold data for each parts
 
+    email = session.get('email')
+    print(email)
+    
+    # Fetch user ID of user logged in
+    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
+    print(loggedin_user_id)
+
     # Fetch all parts
-    part_details = db.session.query(Parts).filter(Parts.UserID == 3).all()
+    part_details = db.session.query(Parts).filter(Parts.UserID == loggedin_user_id).all()
 
     for part in part_details:
         part_id = part.PartID
@@ -362,13 +397,8 @@ def seller_product_listing():
             part_data = {
                 "PartID": part.PartID,
                 "Name": part.Name,
-                # "ProductName": part.Name,
-                # "Description": part.Description,
                 "Price": part.Price,
                 "Quantity": part.QuantityAvailable,
-                # "Brand": part.Brand,
-                # "Model": part.Model,
-                # "UserName": user_name,
                 "Status": part.Status,
                 "Pic": first_picture_url  # Pass the download URL to the HTML template
             }
@@ -497,9 +527,9 @@ def display_all_parts(parts_data):
 def display_part(part):
     return render_template('product.html', part=part)
 
-@app.route('/store')
+@app.route('/add')
 def store_page():
-    return render_template('store.html')
+    return render_template('add.html')
 
 class Cart(db.Model):
     __bind_key__ = 'orders'
@@ -649,4 +679,4 @@ def display_cart(cart):
     return render_template('cart.html', cart=cart)
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5002, debug=True)

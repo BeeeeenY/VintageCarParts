@@ -40,6 +40,7 @@ class Users(db.Model):
 # Routes for authentication
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -54,8 +55,12 @@ def login():
                 session['email'] = email
                 db.session.commit()
                 return invoke_http(url='http://127.0.0.1:5002/', method='GET', redirect_url='http://127.0.0.1:5002/')
-        return 'Invalid email/password'
-    return render_template('login.html')
+            else:
+                error = 'Invalid email/password'
+        else:
+            error = 'Invalid email/password'
+
+    return render_template('login.html', error=error)
 
 @app.route('/logout', methods=['POST'])
 def logout():

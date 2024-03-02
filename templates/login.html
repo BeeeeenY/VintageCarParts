@@ -33,6 +33,7 @@
             display: block;
             width: calc(100% - 40px); /* Adjust width to account for padding */
             margin-bottom: 10px;
+            text-align: center;
         }
         input[type="email"], input[type="password"] {
             width: 220px; /* Adjust if you want these fields smaller */
@@ -69,6 +70,10 @@
             color: #0000EE; /* Standard link color, adjust as needed */
             text-decoration: underline;
         }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +83,9 @@
             <img src="static/logo.jpg" alt="Car" />
         </div>
         <h2>Login</h2>
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
         <form method="POST" action="/">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email">

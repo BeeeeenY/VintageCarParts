@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
 from datetime import datetime
@@ -8,11 +8,14 @@ from sqlalchemy import and_
 
 app = Flask(__name__)
 
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
-    'products': 'mysql+mysqlconnector://root@localhost:3306/products'
+    'products': 'mysql+mysqlconnector://root@localhost:3306/products',
+    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication'
 }
 
 db = SQLAlchemy(app)
@@ -74,6 +77,15 @@ class Parts(db.Model):
                 "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
                 "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status}
 
+class UserAuth(db.Model):
+    __bind_key__ = 'userauth'
+    __tablename__ = 'UserAuth'  # Specify the correct table name here
+
+    AuthID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UserID = db.Column(db.Integer, nullable=False)
+    Email = db.Column(db.String(255), unique=True, nullable=False)
+    PasswordHash = db.Column(db.String(255), nullable=False)
+
 @app.route("/seller/<int:SellerID>")
 def find_by_SellerID(SellerID):
     order_details = db.session.query(Orderdetails).filter_by(SellerID=SellerID).all()
@@ -110,5 +122,33 @@ def find_by_SellerID(SellerID):
         }
     ), 404
 
+@app.route('/order')
+def buyer_orders():
+    email = session.get('email')
+    print(email)
+    
+    # Fetch user ID of user logged in
+    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
+    print(loggedin_user_id)
+
+    order_items = []
+
+    order_details = db.session.query(Orderdetails).filter_by(BuyerID = loggedin_user_id).all()
+    if order_details:
+        for order_detail in order_details:
+            part_details = db.session.query(Parts).filter_by(PartID=order_detail.PartID).first()
+            if part_details:
+                order_item = {
+                    "SellerID": order_detail.SellerID,
+                    "Purchaseddate": order_detail.Purchaseddate,
+                    "ProductName": part_details.Name,
+                    "Quantity": order_detail.Quantity,
+                    "UnitPrice": part_details.Price,
+                    "TotalPrice": order_detail.Price,
+                    "Satus": order_detail.Status
+                }
+            order_items.append(order_item)
+        return render_template('order.html', orders = order_items)
+    
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

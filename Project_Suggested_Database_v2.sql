@@ -61,34 +61,25 @@
 		City VARCHAR(255),
 		StateProvince VARCHAR(255),
 		PostalCode VARCHAR(20),
-		Country VARCHAR(2),
+		Country VARCHAR(255),
 		Phone VARCHAR(20),
 		AddressType ENUM('billing', 'shipping'),
-		FOREIGN KEY (UserID) REFERENCES `Users`.`Users`(UserID)
 	);
 
 	CREATE DATABASE IF NOT EXISTS `Orders` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 	USE `Orders`;
 
-	-- Create Orders and OrderDetails tables
-	CREATE TABLE Cart (
-		CartID INT AUTO_INCREMENT PRIMARY KEY,
-		UserID INT,
-		OrderDate DATETIME,
-		Status VARCHAR(255),
-		FOREIGN KEY (UserID) REFERENCES `Users`.`Users`(UserID)
-	);
-
+	-- Create OrderDetails tables
 	CREATE TABLE OrderDetails (
 		OrderDetailID INT AUTO_INCREMENT PRIMARY KEY,
-		CartID INT,
 		PartID INT,
 		Quantity INT,
-		Purchaseddate date,
+		Purchaseddate datetime,
 		Price DECIMAL(10, 2),
-		FOREIGN KEY (CartID) REFERENCES Cart(CartID),
-		FOREIGN KEY (PartID) REFERENCES `Products`.`Parts`(PartID)
+		SellerID INT,
+		Status VARCHAR(255),
+		BuyerID INT,
 	);
 
 	CREATE DATABASE IF NOT EXISTS `Payment` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -101,9 +92,7 @@
 		Provider VARCHAR(50),
 		AccountDetails TEXT,
 		ExpiryDate DATE,
-		BillingAddressID INT,
-		FOREIGN KEY (UserID) REFERENCES `Users`.`Users`(UserID),
-		FOREIGN KEY (BillingAddressID) REFERENCES `Authentication`.`Addresses`(AddressID)
+		BillingAddressID INT
 	);
 
 	CREATE TABLE PaymentTransactions (
@@ -116,9 +105,7 @@
 		Status VARCHAR(50),
 		TransactionDate DATETIME,
 		PaymentGatewayResponse TEXT,
-		FOREIGN KEY (UserID) REFERENCES `Users`.`Users`(UserID),
-		FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(PaymentMethodID),
-		FOREIGN KEY (OrderID) REFERENCES `Orders`.`Cart`(CartID)
+		FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(PaymentMethodID)
 	);
 
 	CREATE DATABASE IF NOT EXISTS `Forum` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -132,7 +119,6 @@
 		Content TEXT NOT NULL,
 		PostDate DATETIME,
 		LastUpdated DATETIME,
-		FOREIGN KEY (UserID) REFERENCES `Users`.`Users`(UserID)
 	);
 
 	-- Create Comments table
@@ -141,7 +127,6 @@
 		UserID INT,
 		Content TEXT NOT NULL,
 		CommentDate DATETIME,
-		FOREIGN KEY (UserID) REFERENCES `Users`.`Users`(UserID)
 	);
 
 	--  THE FOLLOWING COMMANDS ARE TO INSERT TO ROWS INTO THE RELEVANT DATABASE AND DATA TABLE
@@ -163,9 +148,9 @@
 
 	-- Insert into Users
 	INSERT INTO Users (Name, Phone, Age, Country) VALUES 
-	('John Doe', '123-456-7890', 30, 'US'),
-	('Jane Smith', '098-765-4321', 25, 'UK'),
-	('Bob Brown', '456-789-1230', 40, 'CA');
+	('John Doe', '123-456-7890', 30, 'Unitedstates'),
+	('Jane Smith', '098-765-4321', 25, 'Unitedkingdom'),
+	('Bob Brown', '456-789-1230', 40, 'Canada');
 
 	USE `Authentication`;
 
@@ -178,25 +163,18 @@
 
 	-- Insert into Addresses
 	INSERT INTO Addresses (UserID, FirstName, LastName, Company, StreetAddress1, StreetAddress2, City, StateProvince, PostalCode, Country, Phone, AddressType) VALUES 
-	(1, 'John', 'Doe', 'Company A', '123 Main St', 'Suite 100', 'CityA', 'StateA', '12345', 'US', '123-456-7890', 'shipping'),
-	(2, 'Jane', 'Smith', 'Company B', '456 Second St', NULL, 'CityB', 'StateB', '67890', 'UK', '098-765-4321', 'billing'),
-	(3, 'Bob', 'Brown', '', '789 Third St', NULL, 'CityC', 'StateC', '111213', 'CA', '456-789-1230', 'shipping');
+	(1, 'John', 'Doe', 'Company A', '123 Main St', 'Suite 100', 'CityA', 'StateA', '12345', 'UnitedStates', '123-456-7890', 'shipping'),
+	(2, 'Jane', 'Smith', 'Company B', '456 Second St', NULL, 'CityB', 'StateB', '67890', 'UnitedKingdom', '098-765-4321', 'billing'),
+	(3, 'Bob', 'Brown', '', '789 Third St', NULL, 'CityC', 'StateC', '111213', 'Canada', '456-789-1230', 'shipping');
 
 	USE `Orders`;
 
-	-- Assuming UserIDs from Users table: 1, 2, 3
-	-- Insert into Cart
-	INSERT INTO Cart (UserID, OrderDate, Status) VALUES 
-	(1, NOW(), 'Pending'),
-	(2, NOW(), 'Packing'),
-	(3, NOW(), 'Shipped');
-
 	-- Assuming CartIDs: 1, 2, 3 and PartIDs from Parts table: 1, 2, 3
 	-- Insert into OrderDetails
-	INSERT INTO OrderDetails (CartID, PartID, Quantity, Purchaseddate, Price) VALUES 
-	(1, 1, 2, CURDATE(), 99.99),
-	(2, 2, 1, CURDATE(), 199.99),
-	(3, 3, 3, CURDATE(), 9.99);
+    INSERT INTO OrderDetails (PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID) VALUES 
+    (1, 2, NOW(), 99.99, 1, 'Pending', 2),
+    (2, 1, NOW(), 199.99, 2, 'Packing', 3),
+    (3, 3, NOW(), 9.99, 3, 'Shipped', 1);
 
 	USE `Payment`;
 

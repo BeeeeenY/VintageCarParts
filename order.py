@@ -1,78 +1,189 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title>Vintage Car</title>
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import update
+from datetime import datetime
+from sqlalchemy import ForeignKey
+from sqlalchemy import and_
 
-    <style>
-        .category {
-            font-weight:bolder;
-            font-size: large;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Navigation Bar -->
-        <div class="row justify-content-between">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <span class="navbar-brand mb-0 h1">VintageCar</span>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                  <div class="navbar-nav">
-                    <a class="nav-item nav-link active" href="#">Home</a>
-                    <a class="nav-item nav-link" href="#">Car Parts</a>
-                    <a class="nav-item nav-link" href="#">Others</a>
-                  </div>
-                </div>
-                <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="#">Register</a>
-                    <a class="nav-item nav-link" href="#">Login</a>
-                </div>
-                <form class="form-inline">
-                    <button class="btn btn-outline-danger" type="button">Buy</button>
-                </form>
-            </nav>
-        </div>
 
-        <div class="row mb-4"></div>
-    </div>
+app = Flask(__name__)
 
-    <div class="container">
-        <div class="row">
-            <div style="font-weight: bolder; font-size: x-large; text-align: center;">Order Detail</div>
-        </div>
-    </div>
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    <div class="container">
-        <table class="table table-bordered">
-            <tr>
-                <th>OrderID</th>
-                <td>{{order.OrderID}}</td>
-            </tr>
-            <tr>
-                <th>BuyerID</th>
-                <td>{{order.BuyerID}}</td>
-            </tr>
-            <tr>
-                <th>Purchased Date</th>
-                <td>{{order.Purchaseddate}}</td>
-            </tr>
-            <tr>
-                <th>Quantity</th>
-                <td>{{order.Quantity}}</td>
-            </tr>
-            <tr>
-                <th>Total Price</th>
-                <td>{{order.TotalPrice}}</td>
-            </tr>
-        </table>
-    </div>
+app.config['SQLALCHEMY_BINDS'] = {
+    'products': 'mysql+mysqlconnector://root@localhost:3306/products'
+}
+
+db = SQLAlchemy(app)
+
+class Orderdetails(db.Model):
+    __tablename__ = 'orderdetails'
+
+    OrderDetailID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    PartID = db.Column(db.Integer)
+    Quantity = db.Column(db.Integer)
+    Purchaseddate = db.Column(db.DateTime)
+    Price = db.Column(db.Float)
+    SellerID = db.Column(db.Integer)
+    Status = db.Column(db.String(255))
+    BuyerID = db.Column(db.Integer)
+
+    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID):
+        self.PartID = PartID
+        self.Quantity = Quantity
+        self.Purchaseddate = Purchaseddate
+        self.Price = Price
+        self.SellerID = SellerID
+        self.Status = Status
+        self.BuyerID = BuyerID
+
+    def json(self):
+        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</body>
-</html>
+class Parts(db.Model):
+    __bind_key__ = 'products'
+    __tablename__ = 'parts'
+
+    PartID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Name = db.Column(db.String(255), nullable=False)
+    AuthenticationNum = db.Column(db.String(255))
+    Category = db.Column(db.String(255), nullable=False)
+    Description = db.Column(db.Text)
+    Price = db.Column(db.Float(precision=2), nullable = False)
+    QuantityAvailable = db.Column(db.Integer, nullable = False)
+    Location = db.Column(db.String(255))
+    Brand = db.Column(db.String(255))
+    Model = db.Column(db.String(255))
+    Status = db.Column(db.String(255))
+
+    def __init__(self, Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, Status):
+        self.Name = Name
+        self.AuthenticationNum = AuthenticationNum
+        self.Category = Category
+        self.Description = Description
+        self.Price = Price
+        self.QuantityAvailable = QuantityAvailable
+        self.Location = Location
+        self.Brand = Brand
+        self.Model = Model
+        self.Status = Status
+
+    def json(self):
+        return {"PartID": self.PartID, "Name": self.Name, "AuthenticationNum": self. AuthenticationNum, "Category": self.Category, 
+                "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
+                "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status}
+
+# http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
+@app.route("/seller/<int:SellerID>")
+def find_by_SellerID(SellerID):
+    order_details = db.session.query(Orderdetails).filter_by(SellerID=SellerID).all()
+
+    if order_details:
+        pending_orders = []
+        packing_orders = []
+        shipping_orders = []
+        for order_detail in order_details:
+            part_details = db.session.query(Parts).filter_by(PartID=order_detail.PartID).first()
+            if part_details:
+                order_item = {
+                    "OrderID": order_detail.OrderDetailID,
+                    "BuyerID": order_detail.BuyerID,
+                    "Purchaseddate": order_detail.Purchaseddate,
+                    "ProductName": part_details.Name,
+                    "Quantity": order_detail.Quantity,
+                    "UnitPrice": part_details.Price,
+                    "TotalPrice": order_detail.Price
+                }
+
+                if order_detail.Status == "Pending":
+                    pending_orders.append(order_item)
+                elif order_detail.Status == "Packing":
+                    packing_orders.append(order_item)
+                elif order_detail.Status == "Shipped":
+                    shipping_orders.append(order_item)
+
+        return render_template('seller.html', pending_orders=pending_orders, packing_orders=packing_orders, shipping_orders=shipping_orders)
+
+    return jsonify(
+        {
+            "code": 404,
+            "message": "Order not found."
+        }
+    ), 404
+
+# http://127.0.0.1:5000/order/<OrderDetailID> to render order.html to view order details.
+# Or click [view] hyperlink in seller.html.
+@app.route('/order/<int:OrderDetailID>')
+def order_detail(OrderDetailID):
+    order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderDetailID).limit(1)).first()
+    if order:
+        order_detail = {
+            "OrderID": order.OrderDetailID,
+            "BuyerID": order.BuyerID,
+            "Purchaseddate": order.Purchaseddate,
+            "Quantity": order.Quantity,
+            "TotalPrice": order.Price
+        }
+
+        return render_template('order.html', order=order_detail)
+    
+    return jsonify(
+        {
+            "code": 404,
+            "data": {
+                "OrderDetailID": OrderDetailID
+            },
+            "message": "Order not found."
+        }
+    ), 404
+
+@app.route('/update_status', methods=['PUT'])
+def update_status():
+    data = request.json
+    order_id = data.get('orderId')
+    status = data.get('status')
+
+    # Update the status in the database
+    order = db.session.query(Orderdetails).filter_by(OrderDetailID=order_id).first()
+    if order:
+        order.Status = status
+        db.session.commit()
+        return jsonify({'success': True}), 200
+    else:
+        return jsonify({'success': False, 'error': 'Order not found'}), 404
+
+# To integrate with cart page.    
+@app.route("/create_order", methods=['POST'])
+def create_order():
+    try:
+        # Get form data
+        UserID = request.form.get('UserID')
+        PartID = request.form.get('PartID')
+        Quantity = int(request.form.get('quantity'))  # Note: 'quantity' field, not 'Quantity'
+        Price = float(request.form.get('Price'))
+        print("Form Data:", request.form)
+        
+        # Get current date and time
+        current_datetime = datetime.now()
+
+        # Create a new Orderdetails instance
+        orderdetails = Orderdetails(PartID=PartID, Quantity=Quantity, Purchaseddate=current_datetime.date(), Price=Price, SellerID=UserID, Status="Pending", BuyerID=1) # To change buyer id.
+        db.session.add(orderdetails)
+        db.session.commit()
+
+        # Return success response
+        return jsonify({
+            "code": 201,
+            "message": "Order created successfully."
+        }), 201
+    
+    except Exception as e:
+        # Return error response
+        return jsonify({
+            "code": 500,
+            "message": "An error occurred while creating the order " + str(e)
+        }), 500
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)

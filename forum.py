@@ -23,7 +23,7 @@ app.config['SQLALCHEMY_BINDS'] = {
 db = SQLAlchemy(app)
 
 class Forum(db.Model):
-    __tablename__ = 'posts'
+    __tablename__ = 'Posts'
     PostID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     UserID = db.Column(db.Integer)
     Title = db.Column(db.String(255), nullable=False)
@@ -80,8 +80,11 @@ def create_post():
 
     if not title or not content:
         return 'Missing form data.', 400
+    
 
+    print(session)  # Add this line to check the session content
     email = session.get('email')
+
 
     # Check if the user is logged in
     if email is None:
@@ -106,6 +109,7 @@ def create_post():
         }), 500
     
     return render_template("createforum.html", posts=[post])
+
 
 
 @app.route('/get_posts', methods=['GET'])

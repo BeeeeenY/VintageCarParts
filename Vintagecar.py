@@ -21,7 +21,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'mysql+mysqlconnector://root@localhost:3306/users',
     'orders': 'mysql+mysqlconnector://root@localhost:3306/orders',
-    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication'
+    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication',
+    'forum': 'mysql+mysqlconnector://root@localhost:3306/forum'
+
 }
 
 db = SQLAlchemy(app)
@@ -111,6 +113,29 @@ class UserAuth(db.Model):
     UserID = db.Column(db.Integer, nullable=False)
     Email = db.Column(db.String(255), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(255), nullable=False)
+
+class Forum(db.Model):
+    __bind_key__ = 'forum'
+    __tablename__ = 'Posts'
+    PostID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UserID = db.Column(db.Integer)
+    Title = db.Column(db.String(255), nullable=False)
+    Content = db.Column(db.Text)
+    Postdate = db.Column(db.DateTime)
+    LastUpdated = db.Column(db.DateTime)
+
+    def __init__(self, PostID, UserID, Title, Content, Postdate, LastUpdated):
+            self.PostID = PostID
+            self.UserID = UserID
+            self.Title = Title
+            self.Content = Content
+            self.Postdate = Postdate
+            self.LastUpdated = LastUpdated
+
+    def json(self):
+            return {"PostID": self.PostID, "UserID": self.UserID, "Title": self.Title, "Content": self.Content, "PostDate": self.Postdate, 
+                    "LastUpdated": self.Lastupdate}
+
 
 @app.route("/")
 def get_all_parts():
@@ -350,7 +375,19 @@ def update_part_page():
             "message": "Part not found."
         }
     ), 404
-    
+
+@app.route("/forum")
+def forum():
+        # Fetch all posts from the database
+        posts = Forum.query.all()
+
+        # Render the forum.html template with the posts data
+        # return render_template("createforum.html", posts=posts)
+
+    # @app.route('/forum')
+    # def redirect_to_forum():
+        # Redirect to the forum application (change the URL as needed)
+        return redirect('http://localhost:5004/')
 
 @app.route("/update_part/<int:PartID>", methods=['POST'])
 def update_part(PartID):

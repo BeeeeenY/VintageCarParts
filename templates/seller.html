@@ -24,14 +24,14 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                   <div class="navbar-nav">
-                    <a class="nav-item nav-link active" href="index.html">Home</a>
+                    <a class="nav-item nav-link active" href="#">Home</a>
                     <a class="nav-item nav-link" href="#">Car Parts</a>
                     <a class="nav-item nav-link" href="#">Others</a>
                   </div>
                 </div>
                 <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="register.html">Register</a>
-                    <a class="nav-item nav-link" href="login.html">Login</a>
+                    <a class="nav-item nav-link" href="#">Register</a>
+                    <a class="nav-item nav-link" href="#">Login</a>
                 </div>
                 <form class="form-inline">
                     <button class="btn btn-outline-danger" type="button">Buy</button>
@@ -50,8 +50,9 @@
         
     <div class="container">
         <span class="category">Pending Orders</span>
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="pending-orders">
             <tr>
+                <th>Order ID</th>
                 <th>Buyer ID</th>
                 <th>Order Date</th>
                 <th>Product Name</th>
@@ -62,22 +63,23 @@
             </tr>
             {% for order in pending_orders %}
             <tr style="vertical-align: middle;">
+                <td>{{order.OrderID}} <a href="{{ url_for('order_detail', OrderDetailID=order.OrderID) }}">[View]</a></td>
                 <td>{{ order.BuyerID }}</td>
                 <td>{{ order.Purchaseddate }}</td>
                 <td>{{ order.ProductName }}</td>
                 <td>{{ order.Quantity }}</td>
                 <td>{{ order.UnitPrice }}</td>
                 <td>{{ order.TotalPrice }}</td>
-                <td><button type="button" class="btn btn-primary">Packed</button></td>
+                <td><button type="button" class="btn btn-primary processed-btn">Processed</button></td>
             </tr>
             {% endfor %}
         </table>
     </div>
-    
     <div class="container">
-        <span class="category">Packed Orders</span>
-        <table class="table table-bordered">
+        <span class="category">Packing Orders</span>
+        <table class="table table-bordered" id="packing-orders">
             <tr>
+                <th>Order ID</th>
                 <th>Buyer ID</th>
                 <th>Order Date</th>
                 <th>Product Name</th>
@@ -86,24 +88,26 @@
                 <th>Total Price</th>
                 <th>Manage</th>
             </tr>
-            {% for order in packed_orders %}
+            {% for order in packing_orders %}
             <tr style="vertical-align: middle;">
+                <td>{{order.OrderID}} <a href="{{ url_for('order_detail', OrderDetailID=order.OrderID) }}">[View]</a></td>
                 <td>{{ order.BuyerID }}</td>
                 <td>{{ order.Purchaseddate }}</td>
                 <td>{{ order.ProductName }}</td>
                 <td>{{ order.Quantity }}</td>
                 <td>{{ order.UnitPrice }}</td>
                 <td>{{ order.TotalPrice }}</td>
-                <td><button type="button" class="btn btn-primary">Shipped</button></td>
+                <td><button type="button" class="btn btn-primary packed-btn">Packed</button></td>
             </tr>
             {% endfor %}
         </table>
     </div>
     
     <div class="container">
-        <span class="category">Shipped Orders</span>
-        <table class="table table-bordered">
+        <span class="category">Shipping Orders</span>
+        <table class="table table-bordered" id="shipping-orders">
             <tr>
+                <th>Order ID</th>
                 <th>Buyer ID</th>
                 <th>Order Date</th>
                 <th>Product Name</th>
@@ -112,20 +116,63 @@
                 <th>Total Price</th>
                 <th>Manage</th>
             </tr>
-            {% for order in shipped_orders %}
+            {% for order in shipping_orders %}
             <tr style="vertical-align: middle;">
+                <td>{{order.OrderID}} <a href="{{ url_for('order_detail', OrderDetailID=order.OrderID) }}">[View]</a></td>
                 <td>{{ order.BuyerID }}</td>
                 <td>{{ order.Purchaseddate }}</td>
                 <td>{{ order.ProductName }}</td>
                 <td>{{ order.Quantity }}</td>
                 <td>{{ order.UnitPrice }}</td>
                 <td>{{ order.TotalPrice }}</td>
-                <td><button type="button" class="btn btn-primary">Completed</button></td>
+                <td><button type="button" class="btn btn-primary shipped-btn">Shipped</button></td>
             </tr>
             {% endfor %}
         </table>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#pending-orders').on('click', '.processed-btn', function() {
+                var row = $(this).closest('tr');
+                var orderId = row.find('td:first').text();
+                $('#packing-orders tbody').append(row);
+                $(this).text('Packed').removeClass('processed-btn').addClass('packed-btn');
+                updateOrderStatus(orderId, 'Packing');
+            });
+
+            $('#packing-orders').on('click', '.packed-btn', function() {
+                var row = $(this).closest('tr');
+                var orderId = row.find('td:first').text();
+                $('#shipping-orders tbody').append(row);
+                $(this).text('Shipped').removeClass('packed-btn').addClass('shipped-btn');
+                updateOrderStatus(orderId, 'Shipped');
+            });
     
-    
+            // Event handler for the "Shipped" button
+            $('#shipping-orders').on('click', '.shipped-btn', function() {
+                var row = $(this).closest('tr');
+                var orderId = row.find('td:first').text();
+                row.remove(); // Remove the row from the table
+                updateOrderStatus(orderId, 'Completed');
+            });
+
+            function updateOrderStatus(orderId, status) {
+                $.ajax({
+                    url: '/update_status',
+                    type: 'PUT',  // Use PUT method
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 'orderId': orderId, 'status': status }),
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

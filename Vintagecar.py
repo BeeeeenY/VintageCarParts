@@ -213,7 +213,8 @@ def get_all_parts():
                 "message": "There are no parts."
             }
         ), 404
-    
+
+# http://127.0.0.1:5002/<PartID> to render product.html to view product details.    
 @app.route("/<int:PartID>")
 def find_by_partID(PartID):
     part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()

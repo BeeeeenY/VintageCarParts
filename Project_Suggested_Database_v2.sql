@@ -1,10 +1,11 @@
 	CREATE DATABASE IF NOT EXISTS `Products` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 	USE `Products`;
 
+
 	-- Create Parts table
 	CREATE TABLE Parts (
 		PartID INT AUTO_INCREMENT PRIMARY KEY,
-		UserID INT NOT NULL
+		UserID INT NOT NULL,
 		Name VARCHAR(255) NOT NULL,
 		AuthenticationNum VARCHAR(255) NULL,
 		Category VARCHAR(255) NOT NULL,
@@ -63,7 +64,7 @@
 		PostalCode VARCHAR(20),
 		Country VARCHAR(255),
 		Phone VARCHAR(20),
-		AddressType ENUM('billing', 'shipping'),
+		AddressType ENUM('billing', 'shipping')
 	);
 
 	CREATE DATABASE IF NOT EXISTS `Orders` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -79,7 +80,7 @@
 		Price DECIMAL(10, 2),
 		SellerID INT,
 		Status VARCHAR(255),
-		BuyerID INT,
+		BuyerID INT
 	);
 
 	CREATE DATABASE IF NOT EXISTS `Payment` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -118,7 +119,7 @@
 		Title VARCHAR(255) NOT NULL,
 		Content TEXT NOT NULL,
 		PostDate DATETIME,
-		LastUpdated DATETIME,
+		LastUpdated DATETIME
 	);
 
 	-- Create Comments table
@@ -126,7 +127,7 @@
 		CommentID INT AUTO_INCREMENT PRIMARY KEY,
 		UserID INT,
 		Content TEXT NOT NULL,
-		CommentDate DATETIME,
+		CommentDate DATETIME
 	);
 
 	--  THE FOLLOWING COMMANDS ARE TO INSERT TO ROWS INTO THE RELEVANT DATABASE AND DATA TABLE

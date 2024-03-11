@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, url_for, session, render_template, f
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from invokes import invoke_http
+from os import environ
 import bcrypt
 
 app = Flask(__name__)
@@ -9,8 +10,8 @@ app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/Authentication'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/Authentication'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 
 app.config['SQLALCHEMY_BINDS'] = {
     'users': 'mysql+mysqlconnector://root@localhost:3306/Users'

@@ -3,9 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
-from invokes import invoke_http
+# from invokes import invoke_http
+from os import environ
 
-cred = credentials.Certificate("./serviceAccountKey.json")
+cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
 bucket = storage.bucket()
 
@@ -13,7 +14,8 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
@@ -129,4 +131,4 @@ def get_posts():
     return jsonify({'posts': posts})
 
 if __name__ == '__main__':
-    app.run(port=5004, debug=True)
+    app.run(host='0.0.0.0', port=5004, debug=True)

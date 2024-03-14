@@ -122,10 +122,10 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-item nav-link active" href="#">Home</a>
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5002/">Home</a>
                         <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
-                    </div>
-                        <a class="nav-item nav-link" href="http://127.0.0.1:5004/">Community Forum</a>
+                        <a class="nav-item nav-link" href="#">Community Forum</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5005/order">Orders</a>
                     </div>
                 </div>
                 <div class="navbar-nav ml-auto">
@@ -155,57 +155,65 @@
                 </form>
             </nav>
         </div>
-
-        <!-- Search Bar-->
-        <div class="row mt-4 mb-4">
-            <form class="form-inline">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search" aria-label="Search">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="row">
-            {% for part in parts %}
-                {% if part.Status == 'Available' %}
-                    <div class="col-md-3 mb-4">
-                        <div class="card custom-card box" onclick="redirectToUrl('/{{part.PartID}}')" style="cursor: pointer;">
-                            {% if part.Pic %}
-                                <img src="{{part.Pic}}" alt="Part Image">
-                            {% else %}
-                                <img src="{{ url_for('static', filename='logo.jpg') }}">
-                            {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{part.ProductName}}</h5>
-                                {% if part.Price %}
-                                    <h6 class="card-subtitle mb-2 text-orange">${{part.Price}}</h6>
-                                {% endif %}
-                                {% if part.Description %}
-                                    <h6>{{part.Description}}</h6>
-                                {% endif %}
-                                <p class="card-text">
-                                    {% if part.Brand %}
-                                        {{part.Brand}}
-                                    {% endif %}
-                                    {% if part.Model %}
-                                        {{part.Model}}
-                                    {% endif %}
-                                    <div class="rounded bg-light p-2" style="width: calc(100% - 1rem);"> <!-- Adjust width to fit the card -->
-                                        <span>{{ part.UserName }}</span> 
-                                    </div>
-                                </p>
-                            </div>
+        {% if not data %}
+            <!-- Search Bar-->
+            <div class="row mt-4 mb-4">
+                <form class="form-inline" action="/">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
                         </div>
                     </div>
-                {% endif %}
-            {% endfor %}
-        </div>
+                </form>
+            </div>
+        {% endif %}
+
     </div>
+
+    {% if data %}
+        <div class="row mt-5 mb-4 justify-content-center">
+            {{data}}
+        </div>
+    {% else %}
+        <div class="container">
+            <div class="row">
+                {% for part in parts %}
+                    {% if part.Status == 'Available' %}
+                        <div class="col-md-3 mb-4">
+                            <div class="card custom-card box" onclick="redirectToUrl('http://127.0.0.1:5002/{{part.PartID}}')" style="cursor: pointer;">
+                                {% if part.Pic %}
+                                    <img src="{{part.Pic}}" alt="Part Image">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='logo.jpg') }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{part.ProductName}}</h5>
+                                    {% if part.Price %}
+                                        <h6 class="card-subtitle mb-2 text-orange">${{part.Price}}</h6>
+                                    {% endif %}
+                                    {% if part.Description %}
+                                        <h6>{{part.Description}}</h6>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        {% if part.Brand %}
+                                            {{part.Brand}}
+                                        {% endif %}
+                                        {% if part.Model %}
+                                            {{part.Model}}
+                                        {% endif %}
+                                        <div class="rounded bg-light p-2" style="width: calc(100% - 1rem);"> <!-- Adjust width to fit the card -->
+                                            <span>{{ part.UserName }}</span> 
+                                        </div>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 
     <!-- Pop-up Box -->
     <div id="popup" class="popup-container">

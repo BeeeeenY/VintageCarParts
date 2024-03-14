@@ -1,9 +1,8 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
-from invokes import invoke_http
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -16,12 +15,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_BINDS'] = {
-    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication'
-}
-
 db = SQLAlchemy(app)
-
 
 class Parts(db.Model):
     __tablename__ = 'parts'
@@ -60,15 +54,6 @@ class Parts(db.Model):
         return {"PartID": self.PartID, "UserID": self.UserID, "Name": self.Name, "AuthenticationNum": self. AuthenticationNum, "Category": self.Category, 
                 "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
                 "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status, "Content": self.Content, "PostDate": self.PostDate}
-    
-class UserAuth(db.Model):
-    __bind_key__ = 'userauth'
-    __tablename__ = 'UserAuth'  # Specify the correct table name here
-
-    AuthID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UserID = db.Column(db.Integer, nullable=False)
-    Email = db.Column(db.String(255), unique=True, nullable=False)
-    PasswordHash = db.Column(db.String(255), nullable=False)
 
 @app.route("/create_part", methods=['POST'])
 def create_part():
@@ -105,12 +90,7 @@ def create_part():
     if not name or not category or not price or not quantity_available:
         return 'Missing form data.', 400
 
-    email = session.get('email')
-    print(email)
-    
-    # Fetch user ID of user logged in
-    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
-    print(loggedin_user_id)
+    loggedin_user_id = session.get('loggedin_user_id')
 
     part = Parts(UserID= loggedin_user_id, Name=name, AuthenticationNum = auth_num, Category=category, Description=description, Price=price, 
                  QuantityAvailable=quantity_available, Location=location, Brand = brand, Model = model, Status = status, 
@@ -162,8 +142,11 @@ def create_part():
                 print("Photos uploaded successfully!")
             except Exception as e:
                 print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
-
-        return invoke_http(url='http://127.0.0.1:5002/listing', method='POST', redirect_url='http://127.0.0.1:5002/listing')
+        
+        redirect_url = 'http://127.0.0.1:5002/listing'
+    
+        # Redirect to the constructed URL
+        return redirect(redirect_url)
 
 if __name__ == '__main__':
     app.run(port=5003, debug=True)

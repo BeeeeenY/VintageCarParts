@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import update
-from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
-from sqlalchemy import and_
+import requests
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -18,16 +16,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_BINDS'] = {
-    'users': 'mysql+mysqlconnector://root@localhost:3306/users',
-    'orders': 'mysql+mysqlconnector://root@localhost:3306/orders',
-    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication',
-    'forum': 'mysql+mysqlconnector://root@localhost:3306/forum'
-
-}
-
 db = SQLAlchemy(app)
-
 
 class Parts(db.Model):
     __tablename__ = 'parts'
@@ -67,25 +56,6 @@ class Parts(db.Model):
                 "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
                 "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status, "Content": self.Content, "PostDate": self.PostDate}
 
-class Users(db.Model):
-    __bind_key__ = 'users'
-    __tablename__ = 'users'
-
-    UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Name = db.Column(db.String(255), nullable=False)
-    Phone = db.Column(db.String(20))
-    Age = db.Column(db.Integer)
-    Country = db.Column(db.String(255))
-
-
-    def __init__(self, Name, Phone, Age, Country):
-        self.Name = Name
-        self.Phone = Phone
-        self.Age = Age
-        self.Country = Country
-
-    def json(self):
-        return {"UserID": self.UserID, "Name": self.Name, "Phone": self.Phone, "Age": self.Age, "Country": self.Country}
     
 class Comments(db.Model):
     __tablename__ = 'Comments'
@@ -104,48 +74,19 @@ class Comments(db.Model):
 
     def json(self):
         return {"CommentID": self.CommentID, "PartID": self.PartID, "UserID": self.UserID, "Content": self.Content, "CommentDate": self.CommentDate}
-    
-class UserAuth(db.Model):
-    __bind_key__ = 'userauth'
-    __tablename__ = 'UserAuth'  # Specify the correct table name here
 
-    AuthID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UserID = db.Column(db.Integer, nullable=False)
-    Email = db.Column(db.String(255), unique=True, nullable=False)
-    PasswordHash = db.Column(db.String(255), nullable=False)
-
-class Forum(db.Model):
-    __bind_key__ = 'forum'
-    __tablename__ = 'Posts'
-    PostID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UserID = db.Column(db.Integer)
-    Title = db.Column(db.String(255), nullable=False)
-    Content = db.Column(db.Text)
-    Postdate = db.Column(db.DateTime)
-    LastUpdated = db.Column(db.DateTime)
-
-    def __init__(self, PostID, UserID, Title, Content, Postdate, LastUpdated):
-            self.PostID = PostID
-            self.UserID = UserID
-            self.Title = Title
-            self.Content = Content
-            self.Postdate = Postdate
-            self.LastUpdated = LastUpdated
-
-    def json(self):
-            return {"PostID": self.PostID, "UserID": self.UserID, "Title": self.Title, "Content": self.Content, "PostDate": self.Postdate, 
-                    "LastUpdated": self.Lastupdate}
-
-
-@app.route("/")
+@app.route("/", methods=["GET","POST"])
 def get_all_parts():
-    parts_data = []  # List to hold data for each part
+    search_query = request.args.get('search')
+    if search_query == None:
+        search_query = ""
+    print(search_query)
 
-    email = session.get('email')
-    print(email)
-    
+    parts_data = []  # List to hold data for each part
+    search_data = []
+
     # Fetch user ID of user logged in
-    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
+    loggedin_user_id = session.get('loggedin_user_id')
     print(loggedin_user_id)
 
     # Fetch all parts
@@ -154,12 +95,18 @@ def get_all_parts():
     for part in parts:
         part_id = part.PartID
         user_id = part.UserID
-
-        if loggedin_user_id != user_id:
+        
+        if int(loggedin_user_id) != user_id:
             print(user_id)
-            print(loggedin_user_id)
-            # Fetch user name for the current part
-            user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).scalar()
+
+            get_username_url = 'http://127.0.0.1:5004/get_username'
+            get_username_params = {'user_id': user_id}
+            get_username_response = requests.get(get_username_url, params=get_username_params)
+
+            if get_username_response.status_code == 200:
+                # Get the username from the response if needed
+                username = get_username_response.json().get('username')
+                print("Username:", username)
 
             part_id_str = str(part_id)
 
@@ -183,7 +130,6 @@ def get_all_parts():
             if first_picture_url is None:
                 print("No files found.")
 
-        
             if part:
                 # Create a dictionary to hold part data
                 part_data = {
@@ -193,16 +139,27 @@ def get_all_parts():
                     "Price": part.Price,
                     "Brand": part.Brand,
                     "Model": part.Model,
-                    "UserName": user_name,
+                    "UserName": username,
                     "Pic": first_picture_url,  # Pass the download URL to the HTML template
                     "Status": part.Status,
                 }
+                
+                if search_query in part.Name or search_query in part.Model or search_query in part.Brand:
+                    print(search_query)
+                    search_data.append(part_data)  # Add part data to the list
+                else:
+                    parts_data.append(part_data)
 
-                parts_data.append(part_data)  # Add part data to the list
-        
     print(parts_data)
+    print(search_data)
 
-    if parts_data:
+    if search_data:
+        return display_all_parts(search_data)
+    
+    elif search_data == [] and parts_data != []:
+        return render_template("template.html", data="There are no search results.")
+    
+    elif parts_data:
         # Return the list of part data as JSON response
         return display_all_parts(parts_data)
     
@@ -222,7 +179,14 @@ def find_by_partID(PartID):
     user_id = part.UserID
 
     # Fetch user name for the current part
-    user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).scalar()
+    get_username_url = 'http://127.0.0.1:5004/get_username'
+    get_username_params = {'user_id': user_id}
+    get_username_response = requests.get(get_username_url, params=get_username_params)
+
+    if get_username_response.status_code == 200:
+        # Get the username from the response if needed
+        username = get_username_response.json().get('username')
+        print("Username:", username)
 
     # Fetch part details for the current part
     part_details = db.session.query(Parts).filter(Parts.PartID == PartID).first()
@@ -259,7 +223,7 @@ def find_by_partID(PartID):
             "Description": part_details.Description,
             "Price": part_details.Price,
             "QuantityAvailable": part_details.QuantityAvailable,
-            "UserName": user_name,
+            "UserName": username,
             "Brand": part_details.Brand,
             "Model": part_details.Model,
             "Status": part_details.Status,
@@ -278,18 +242,39 @@ def find_by_partID(PartID):
         }
     ), 404
 
+@app.route("/part")
+def find_part_details():
+    partid = request.args.get('partid')
+    part = db.session.scalars(db.select(Parts).filter_by(PartID=partid).limit(1)).first()
+    
+    if part:
+        # Create a dictionary to hold part data
+        part = {
+            "PartID": partid,
+            "ProductName": part.Name,
+            "Description": part.Description,
+            "Price": part.Price,
+            "QuantityAvailable": part.QuantityAvailable,
+            "Brand": part.Brand,
+            "Model": part.Model,
+            "Status": part.Status
+            }
+        
+    return jsonify(part_details=part)
 
 @app.route("/listing")
 def seller_product_listing():
+    search_query = request.args.get('search')
+    if search_query == None:
+        search_query = ""
+    print(search_query)
+
     parts_data = []  # List to hold data for each parts
+    search_data = []
 
-    email = session.get('email')
-    print(email)
-    
     # Fetch user ID of user logged in
-    loggedin_user_id = db.session.query(UserAuth.UserID).filter(UserAuth.Email == email).scalar()
-    print(loggedin_user_id)
-
+    loggedin_user_id = session.get('loggedin_user_id')
+    
     # Fetch all parts
     part_details = db.session.query(Parts).filter(Parts.UserID == loggedin_user_id).all()
 
@@ -332,19 +317,23 @@ def seller_product_listing():
                 "Pic": first_picture_url  # Pass the download URL to the HTML template
             }
 
-            parts_data.append(part_data)  # Add part data to the list
-            
-    if parts_data:
+            if search_query in part.Name:
+                search_data.append(part_data)  # Add part data to the list
+            else:
+                parts_data.append(part_data)
+
+    if search_data:
+        return render_template('productlisting.html', parts = search_data)
+
+    elif search_data == [] and parts_data != []:
+        return render_template("productlisting.html", data="There are no search results.")
+    
+    elif parts_data:
         # Return the list of part data as JSON response
         return render_template('productlisting.html', parts = parts_data)
     
     else:
-        return jsonify(
-            {
-                "code": 404,
-                "message": "There are no parts posted."
-            }
-        ), 404
+        return render_template('productlisting.html', data="Looks like you haven't posted any car parts yet. Click on the yellow button below to add car parts for sale to potential buyers!")
 
 @app.route("/update")
 def update_part_page():
@@ -376,19 +365,7 @@ def update_part_page():
             "message": "Part not found."
         }
     ), 404
-
-@app.route("/forum")
-def forum():
-        # Fetch all posts from the database
-        posts = Forum.query.all()
-
-        # Render the forum.html template with the posts data
-        # return render_template("createforum.html", posts=posts)
-
-    # @app.route('/forum')
-    # def redirect_to_forum():
-        # Redirect to the forum application (change the URL as needed)
-        return redirect('http://localhost:5004/')
+    
 
 @app.route("/update_part/<int:PartID>", methods=['POST'])
 def update_part(PartID):

@@ -117,7 +117,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
-                    <a class="nav-item nav-link active" href="#">Home</a>
+                    <a class="nav-item nav-link active" href="http://127.0.0.1:5002/listing">Home</a>
                     <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
                 </div>
             </div>
@@ -145,43 +145,50 @@
         </nav>
     </div>
 
-
-    <!-- Search Bar-->
-    <div class="row mt-4 mb-4">
-        <form class="form-inline">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search" aria-label="Search">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <div class="container">
-        <div class="row">
-            {% for part in parts %}
-            <div class="col-md-3 mb-4">
-                <div class="card">
-                    {% if part.Pic %}
-                    <img src="{{ part.Pic }}" class="{% if part.Status == 'Sold' %}greyed-out{% endif %}" alt="Part Image">
-                    {% else %}
-                    <img src="{{ url_for('static', filename='logo.jpg') }}" class="{% if part.Status == 'Sold' %}greyed-out{% endif %}">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title {% if part.Status == 'Sold' %}greyed-out{% endif %}">{{ part.Name }}</h5>
-                        <span class="{% if part.Status == 'Sold' %}greyed-out{% endif %}">Quantity: {{ part.Quantity }}</span><br/>
-                        <span class="{% if part.Status == 'Sold' %}greyed-out{% endif %}">Price: ${{ part.Price }}</span>
+    {% if not data %}
+        <!-- Search Bar-->
+        <div class="row mt-4 mb-4">
+            <form class="form-inline" action="/listing">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search" aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
                     </div>
-                    <!-- Edit icon -->
-                    <a href="/update?part_id={{ part.PartID }}" class="edit-icon">
-                        <img src="{{ url_for('static', filename='edit.jpg') }}" class="edit-icon {% if part.Status == 'Sold' %}greyed-out{% endif %}" alt="Edit">
-                    </a>
                 </div>
-            </div>
-            {% endfor %}
+            </form>
         </div>
-    </div>
+    {% endif %}
+    
+    {% if data %}
+        <div class="row mt-5 mb-4 justify-content-center">
+            {{data}}
+        </div>
+    {% else %}
+        <div class="container">
+            <div class="row">
+                {% for part in parts %}
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        {% if part.Pic %}
+                        <img src="{{ part.Pic }}" class="{% if part.Status == 'Sold' %}greyed-out{% endif %}" alt="Part Image">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='logo.jpg') }}" class="{% if part.Status == 'Sold' %}greyed-out{% endif %}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title {% if part.Status == 'Sold' %}greyed-out{% endif %}">{{ part.Name }}</h5>
+                            <span class="{% if part.Status == 'Sold' %}greyed-out{% endif %}">Quantity: {{ part.Quantity }}</span><br/>
+                            <span class="{% if part.Status == 'Sold' %}greyed-out{% endif %}">Price: ${{ part.Price }}</span>
+                        </div>
+                        <!-- Edit icon -->
+                        <a href="/update?part_id={{ part.PartID }}" class="edit-icon">
+                            <img src="{{ url_for('static', filename='edit.jpg') }}" class="edit-icon {% if part.Status == 'Sold' %}greyed-out{% endif %}" alt="Edit">
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 </div>
 
     <!-- Pop-up Box -->

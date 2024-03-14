@@ -1,12 +1,11 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import update
+import requests
 from datetime import datetime
-from sqlalchemy import ForeignKey
-from sqlalchemy import and_
-
 
 app = Flask(__name__)
+
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -185,5 +184,53 @@ def create_order():
             "message": "An error occurred while creating the order " + str(e)
         }), 500
 
+@app.route('/order')
+def buyer_orders():
+    loggedin_user_id = session.get('loggedin_user_id')
+    print("------------")
+    print(loggedin_user_id)
+    print("------------")
+
+    order_items = []
+
+    order_details = db.session.query(Orderdetails).filter_by(BuyerID = loggedin_user_id).all()
+    print(order_details)
+    if order_details:
+        for order_detail in order_details:
+            partid = order_detail.PartID
+
+            get_part_url = 'http://127.0.0.1:5002/part'
+            get_part_params = {'partid': partid}
+            get_part_response = requests.get(get_part_url, params=get_part_params)
+
+            if get_part_response.status_code == 200:
+                # Get the username from the response if needed
+                part_details = get_part_response.json().get('part_details')
+
+            print(part_details)
+            
+            if part_details:
+                formatted_datetime = order_detail.Purchaseddate.strftime("%Y-%m-%d %H:%M:%S")
+                total_price = order_detail.Quantity * part_details['Price']
+                order_item = {
+                    "SellerID": order_detail.SellerID,
+                    "Purchaseddate": formatted_datetime,
+                    "ProductName": part_details['ProductName'],
+                    "Quantity": order_detail.Quantity,
+                    "UnitPrice": part_details['Price'],
+                    "TotalPrice": total_price,
+                    "Status": order_detail.Status
+                }
+                order_items.append(order_item)
+                print(order_item)
+
+    if order_items != []:
+        return render_template('buyerorders.html', orders = order_items)
+    else:
+        return render_template('buyerorders.html', data = "There are no items ordered.")  # Render a template indicating no orders
+    
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5005, debug=True)
+
+
+

@@ -111,7 +111,7 @@ def get_all_parts():
             part_id_str = str(part_id)
 
             # Get a reference to the folder
-            folder_prefix = part_id_str + '/'
+            folder_prefix = 'parts/' + part_id_str + '/'
 
             # Retrieves all the files within the folder specified by folder_prefix.
             blobs = bucket.list_blobs(prefix=folder_prefix)
@@ -286,7 +286,7 @@ def seller_product_listing():
         print(part_id_str)
 
         # Get a reference to the folder
-        folder_prefix = part_id_str + '/'
+        folder_prefix = 'parts/' + part_id_str + '/'
 
         # Retrieves all the files within the folder specified by folder_prefix.
         blobs = bucket.list_blobs(prefix=folder_prefix)

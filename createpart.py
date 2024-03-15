@@ -126,7 +126,7 @@ def create_part():
             # Upload each photo to Firebase Storage
             for photo in photos:
                 # Specify a unique path for each photo in Firebase Storage
-                photo_blob = bucket.blob(f"{part_id}/{photo.filename}")
+                photo_blob = bucket.blob(f"parts/{part_id}/{photo.filename}")
                 
                 # Upload the photo
                 try:

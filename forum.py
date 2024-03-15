@@ -14,8 +14,7 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL', 'mysql+mysqlconnector://root@localhost:3306/forum')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
@@ -131,4 +130,4 @@ def get_posts():
     return jsonify({'posts': posts})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5004, debug=True)
+    app.run(port=5006, debug=True)

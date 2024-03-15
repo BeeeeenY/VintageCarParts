@@ -184,12 +184,10 @@ def create_order():
             "message": "An error occurred while creating the order " + str(e)
         }), 500
 
-@app.route('/order')
+@app.route('/buyer_order')
 def buyer_orders():
     loggedin_user_id = session.get('loggedin_user_id')
-    print("------------")
     print(loggedin_user_id)
-    print("------------")
 
     order_items = []
 

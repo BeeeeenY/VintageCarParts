@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Vintage Car</title>
+    <style>
+        .box {
+            width: 300px;
+            height: auto;
+        }
+        .navbar .navbar-nav .nav-link .icon {
+            display: inline-block;
+            width: 20px; /* Adjust the size as needed */
+            height: 20px; /* Adjust the size as needed */
+            margin-right: 10px;
+        }
+        #plus-button-container {
+            position: fixed;
+            bottom: 80px;
+            right: 80px;
+        }
+
+        #yellow-button {
+            background-color: orange;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            position: relative;
+        }
+
+        .post {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .post h3 {
+            color: orange; /* Orange color for post titles */
+        }
+
+        .post p {
+            line-height: 1.6;
+        }
+
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            height:200px;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Change padding for smaller pop-up */
+            z-index: 9999;
+            border-radius: 10px; /* Add rounded corners to pop-up box */
+        }
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative; /* Set position relative for close button positioning */
+            height: 100%;
+        }
+        .close-btn {
+            cursor: pointer;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+        .comment {
+            background-color: #f3f3f3;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .comment p.username {
+            font-weight: bold;
+        }
+        .icon {
+            width: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4 mb-4">
+        <!-- Navigation Bar -->
+        <div class="row">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+                <span class="navbar-brand mb-0 h1">VintageCar</span>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5002/">Home</a>
+                        <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5006/forum">Community Forum</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5005/buyer_order">Orders</a>
+                    </div>
+                </div>
+                <div class="navbar-nav ml-auto">
+                    <a class="nav-item nav-link" href="#">
+                        <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
+                        Cart
+                    </a>
+                    <a class="nav-item nav-link" href="#">
+                        <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
+                        Messages
+                    </a>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                            <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
+                            Profile
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Account Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="http://127.0.0.1:5001/logout">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                <form class="form-inline">
+                    <button id="sellBtn" class="btn btn-outline-danger" type="button" onclick="toggleButton()">Sell</button>
+                </form>
+            </nav>
+        </div>
+        {% if not data %}
+            <!-- Search Bar-->
+            <div class="row mt-4 mb-4">
+                <form class="form-inline" action="/">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+
+    </div>
+
+    {% if data %}
+        <div class="row mt-5 mb-4 justify-content-center">
+            {{data}}
+        </div>
+    {% else %}
+        <div class="container">
+            {% for post in posts %}
+                <div class="post">
+                    <h3>{{post.Title}}</h3>
+                    <p>{{post.Content}}</p>
+                    <p>Posted by <strong>{{post.Username}}</strong> on <em>{{post.PostDate}}</em></p>
+                    
+                    <a class="nav-item nav-link comment-icon" href="#" data-post-id="{{ post.id }}">
+                        <img src="{{ url_for('static', filename='comment.svg') }}" class="icon">
+                        Comment
+                    </a>
+        
+                    <!-- Comment form -->
+                    <form class="comment-form" action= '/create_comment' method= 'POST' style="display: none;" data-post-id="{{ post.id }}">
+                        <input type="hidden" name="post_id" value="{{post.PostID}}">
+                        <div class="form-group">
+                            <label for="comment">Your Comment:</label>
+                            <textarea class="form-control" id="comment" rows="3" name="comment"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary">Submit</button>
+                    </form>
+
+                    <div class="comments">
+                        {% for comment in post.Comments %}
+                            <div class="comment">
+                                <p><strong>{{ comment.username }}</strong> commented:</p>
+                                <p>{{ comment.content }}</p>
+                                <!-- <p><em>{{ comment.CommentDate }}</em></p> -->
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Pop-up Box -->
+    <div id="popup" class="popup-container">
+        <div class="popup-content">
+            <span id="popup-text">Welcome to XXX, where opulence meets automotive excellence.
+
+                Introducing a bespoke platform tailored exclusively for discerning connoisseurs of vintage automobiles, addressing the distinct challenges faced by owners of luxury classics. Our singular platform offers three distinct experiences:
+                </span>
+            <span class="close-btn" onclick="closePopup()">X</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <form id="sellForm" action="http://127.0.0.1:5002/listing" method="get" style="display: none;">
+        <!-- Add any necessary input fields here -->
+    </form>
+
+    <div id="plus-button-container">
+        <button id="yellow-button" onclick="submitForm()">+</button>
+    </div>
+
+    <form id="addForm" action="/create_post_page" method="get" style="display: none;">
+        <!-- Add any necessary input fields here -->
+    </form>
+
+    <script>
+        document.querySelectorAll('.comment-icon').forEach(function (icon) {
+            icon.addEventListener('click', function (event) {
+                event.preventDefault();
+                var postId = icon.getAttribute('data-post-id');
+                var commentForm = document.querySelector('.comment-form[data-post-id="' + postId + '"]');
+                commentForm.style.display = commentForm.style.display === 'none' ? 'block' : 'none'; // Toggle the display
+            });
+        });
+
+        let isSell = true;
+
+        function submitForm() {
+            document.getElementById("addForm").submit();
+        }
+
+        function toggleButton() {
+            const button = document.getElementById('sellBtn');
+            const plusButtonContainer = document.getElementById('plus-button-container');
+            const sellForm = document.getElementById('sellForm');
+
+            if (isSell) {
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-success');
+                button.textContent = 'Buy';
+                // Submit the form to redirect to /listing
+                sellForm.submit();
+            } else {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-danger');
+                button.textContent = 'Sell';
+                plusButtonContainer.style.display = 'none'; // Hide the plus button container
+            }
+            isSell = !isSell;
+        }
+
+        document.getElementById('about-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('popup').style.display = 'block';
+        });
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        function redirectToUrl(url) {
+            window.location.href = url;
+        }
+
+    </script>
+</body>
+</html>

@@ -176,13 +176,13 @@
                     <p>{{post.Content}}</p>
                     <p>Posted by <strong>{{post.Username}}</strong> on <em>{{post.PostDate}}</em></p>
                     
-                    <a class="nav-item nav-link comment-icon" href="#" data-post-id="{{ post.id }}">
+                    <a class="nav-item nav-link comment-icon" href="#" data-post-id="{{ post.PostID }}">
                         <img src="{{ url_for('static', filename='comment.svg') }}" class="icon">
                         Comment
                     </a>
         
                     <!-- Comment form -->
-                    <form class="comment-form" action= '/create_comment' method= 'POST' style="display: none;" data-post-id="{{ post.id }}">
+                    <form class="comment-form" action= '/create_comment' method= 'POST' style="display: none;" data-post-id="{{ post.PostID }}">
                         <input type="hidden" name="post_id" value="{{post.PostID}}">
                         <div class="form-group">
                             <label for="comment">Your Comment:</label>
@@ -233,14 +233,22 @@
     </form>
 
     <script>
-        document.querySelectorAll('.comment-icon').forEach(function (icon) {
-            icon.addEventListener('click', function (event) {
+        document.querySelectorAll('.comment-icon').forEach(function(icon) {
+            icon.addEventListener('click', function(event) {
                 event.preventDefault();
                 var postId = icon.getAttribute('data-post-id');
-                var commentForm = document.querySelector('.comment-form[data-post-id="' + postId + '"]');
-                commentForm.style.display = commentForm.style.display === 'none' ? 'block' : 'none'; // Toggle the display
+                var commentForms = document.querySelectorAll('.comment-form[data-post-id="' + postId + '"]');
+                commentForms.forEach(function(commentForm) {
+                    if (commentForm.style.display === 'none') {
+                        commentForm.style.display = 'block'; // Show the comment form
+                    } else {
+                        commentForm.style.display = 'none'; // Hide the comment form
+                    }
+                });
             });
         });
+
+
 
         let isSell = true;
 

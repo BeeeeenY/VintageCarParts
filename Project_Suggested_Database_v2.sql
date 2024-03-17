@@ -125,6 +125,7 @@
 	-- Create Comments table
 	CREATE TABLE Comments (
 		CommentID INT AUTO_INCREMENT PRIMARY KEY,
+		PostID INT NOT NULL,
 		UserID INT,
 		Content TEXT NOT NULL,
 		CommentDate DATETIME
@@ -204,8 +205,8 @@
 
 	-- Assuming PostIDs from Posts table: 1, 2, 3
 	-- Insert into Comments
-	INSERT INTO Comments (CommentID, UserID, Content, CommentDate) VALUES 
-	(1, 2, 'Try checking the manual', NOW()),
-	(2, 3, 'Part B is very durable, no worries', NOW()),
-	(3, 1, 'Bulk deals are usually available end of year', NOW());
+	INSERT INTO Comments (CommentID, PostID, UserID, Content, CommentDate) VALUES 
+	(1, 1, 2, 'Try checking the manual', NOW()),
+	(2, 2, 3, 'Part B is very durable, no worries', NOW()),
+	(3, 3, 1, 'Bulk deals are usually available end of year', NOW());
 

@@ -2,12 +2,17 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from flask_sqlalchemy import SQLAlchemy
 import requests
 from datetime import datetime
+from os import environ
 
 app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
+# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/orders"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_BINDS'] = {
@@ -40,38 +45,58 @@ class Orderdetails(db.Model):
     def json(self):
         return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
     
-# http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
-@app.route("/seller")
-def find_by_SellerID():
-    loggedin_user_id = session.get('loggedin_user_id')
+class Parts(db.Model):
+    __bind_key__ = 'products'
+    __tablename__ = 'parts'
 
-    order_details = db.session.query(Orderdetails).filter_by(SellerID=loggedin_user_id).all()
+    PartID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Name = db.Column(db.String(255), nullable=False)
+    AuthenticationNum = db.Column(db.String(255))
+    Category = db.Column(db.String(255), nullable=False)
+    Description = db.Column(db.Text)
+    Price = db.Column(db.Float(precision=2), nullable = False)
+    QuantityAvailable = db.Column(db.Integer, nullable = False)
+    Location = db.Column(db.String(255))
+    Brand = db.Column(db.String(255))
+    Model = db.Column(db.String(255))
+    Status = db.Column(db.String(255))
+
+    def __init__(self, Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, Status):
+        self.Name = Name
+        self.AuthenticationNum = AuthenticationNum
+        self.Category = Category
+        self.Description = Description
+        self.Price = Price
+        self.QuantityAvailable = QuantityAvailable
+        self.Location = Location
+        self.Brand = Brand
+        self.Model = Model
+        self.Status = Status
+
+    def json(self):
+        return {"PartID": self.PartID, "Name": self.Name, "AuthenticationNum": self. AuthenticationNum, "Category": self.Category, 
+                "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
+                "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status}
+
+# http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
+@app.route("/seller/<int:SellerID>")
+def find_by_SellerID(SellerID):
+    order_details = db.session.query(Orderdetails).filter_by(SellerID=SellerID).all()
 
     if order_details:
         pending_orders = []
         packing_orders = []
         shipping_orders = []
         for order_detail in order_details:
-            partid = order_detail.PartID
-
-            get_part_url = 'http://127.0.0.1:5002/part'
-            get_part_params = {'partid': partid}
-            get_part_response = requests.get(get_part_url, params=get_part_params)
-
-            if get_part_response.status_code == 200:
-                # Get the username from the response if needed
-                part_details = get_part_response.json().get('part_details')
-
-            print(part_details)
-                
+            part_details = db.session.query(Parts).filter_by(PartID=order_detail.PartID).first()
             if part_details:
                 order_item = {
                     "OrderID": order_detail.OrderDetailID,
                     "BuyerID": order_detail.BuyerID,
                     "Purchaseddate": order_detail.Purchaseddate,
-                    "ProductName": part_details['ProductName'],
+                    "ProductName": part_details.Name,
                     "Quantity": order_detail.Quantity,
-                    "UnitPrice": part_details['Price'],
+                    "UnitPrice": part_details.Price,
                     "TotalPrice": order_detail.Price
                 }
 
@@ -164,10 +189,12 @@ def create_order():
             "message": "An error occurred while creating the order " + str(e)
         }), 500
 
-@app.route('/buyer_order')
+@app.route('/order')
 def buyer_orders():
     loggedin_user_id = session.get('loggedin_user_id')
+    print("------------")
     print(loggedin_user_id)
+    print("------------")
 
     order_items = []
 
@@ -177,7 +204,7 @@ def buyer_orders():
         for order_detail in order_details:
             partid = order_detail.PartID
 
-            get_part_url = 'http://127.0.0.1:5002/part'
+            get_part_url = 'http://host.docker.internal:5002/part'
             get_part_params = {'partid': partid}
             get_part_response = requests.get(get_part_url, params=get_part_params)
 
@@ -208,7 +235,7 @@ def buyer_orders():
         return render_template('buyerorders.html', data = "There are no items ordered.")  # Render a template indicating no orders
     
 if __name__ == '__main__':
-    app.run(port=5005, debug=True)
+    app.run(host='0.0.0.0',port=5005, debug=True)
 
 
 

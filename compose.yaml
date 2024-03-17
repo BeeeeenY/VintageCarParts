@@ -1,0 +1,83 @@
+version: "3.8"
+
+volumes:
+  service_account_key_volume:
+    driver: local
+
+services:
+ 
+  ###################################
+  # The Vintagecar microservice
+  ###################################
+  vintagecar:
+    build:
+      context: ./
+      dockerfile: Vintagecar.Dockerfile
+    image: matildagoh/vintagecar:esd
+    restart: always
+    depends_on:
+      - logintemplate
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/products
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5002:5002"
+ 
+  #######################################################
+  # The users microservice
+  #######################################################
+  users:
+    build:
+      context: ./
+      dockerfile: users.Dockerfile
+    image: matildagoh/users:esd
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/users
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5004:5004"
+      
+  #################################################
+  # The logintemplate microservice
+  #################################################
+  logintemplate:
+    build:
+      context: ./
+      dockerfile: logintemplate.Dockerfile
+    image: matildagoh/logintemplate:esd
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/Authentication
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5001:5001"
+
+  ##################################
+  # Book: The order microservice
+  ##################################
+  order:
+    build:
+      context: ./
+      dockerfile: order.Dockerfile
+    image: matildagoh/order:esd
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/orders
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5005:5005"
+  ##################################
+  # Book: The createpart microservice
+  ##################################
+  createpart:
+    build:
+      context: ./
+      dockerfile: createpart.Dockerfile
+    image: matildagoh/createpart:esd
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/products
+      PYTHONUNBUFFERED: 1
+    ports:
+        - "5003:5003"

@@ -15,10 +15,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_BINDS'] = {
-    'products': 'mysql+mysqlconnector://root@localhost:3306/products'
-}
-
 db = SQLAlchemy(app)
 
 class Orderdetails(db.Model):

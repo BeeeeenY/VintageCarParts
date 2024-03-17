@@ -421,7 +421,7 @@ def update_part(PartID):
                 # Upload each photo to Firebase Storage
                 for photo in photos:
                     # Specify a unique path for each photo in Firebase Storage
-                    photo_blob = bucket.blob(f"{PartID}/{photo.filename}")
+                    photo_blob = bucket.blob(f"parts/{PartID}/{photo.filename}")
                     
                     # Upload the photo
                     try:

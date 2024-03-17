@@ -44,59 +44,39 @@ class Orderdetails(db.Model):
 
     def json(self):
         return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
-    
-class Parts(db.Model):
-    __bind_key__ = 'products'
-    __tablename__ = 'parts'
-
-    PartID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Name = db.Column(db.String(255), nullable=False)
-    AuthenticationNum = db.Column(db.String(255))
-    Category = db.Column(db.String(255), nullable=False)
-    Description = db.Column(db.Text)
-    Price = db.Column(db.Float(precision=2), nullable = False)
-    QuantityAvailable = db.Column(db.Integer, nullable = False)
-    Location = db.Column(db.String(255))
-    Brand = db.Column(db.String(255))
-    Model = db.Column(db.String(255))
-    Status = db.Column(db.String(255))
-
-    def __init__(self, Name, AuthenticationNum, Category, Description, Price, QuantityAvailable, Location, Brand, Model, Status):
-        self.Name = Name
-        self.AuthenticationNum = AuthenticationNum
-        self.Category = Category
-        self.Description = Description
-        self.Price = Price
-        self.QuantityAvailable = QuantityAvailable
-        self.Location = Location
-        self.Brand = Brand
-        self.Model = Model
-        self.Status = Status
-
-    def json(self):
-        return {"PartID": self.PartID, "Name": self.Name, "AuthenticationNum": self. AuthenticationNum, "Category": self.Category, 
-                "Description": self.Description, "Price": self.Price, "QuantityAvailable": self.QuantityAvailable, "Location": self.Location, 
-                "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status}
 
 # http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
-@app.route("/seller/<int:SellerID>")
-def find_by_SellerID(SellerID):
-    order_details = db.session.query(Orderdetails).filter_by(SellerID=SellerID).all()
+@app.route("/seller")
+def find_by_SellerID():
+    loggedin_user_id = session.get('loggedin_user_id')
+
+    order_details = db.session.query(Orderdetails).filter_by(SellerID=loggedin_user_id).all()
 
     if order_details:
         pending_orders = []
         packing_orders = []
         shipping_orders = []
         for order_detail in order_details:
-            part_details = db.session.query(Parts).filter_by(PartID=order_detail.PartID).first()
+            partid = order_detail.PartID
+
+            get_part_url = 'http://127.0.0.1:5002/part'
+            get_part_params = {'partid': partid}
+            get_part_response = requests.get(get_part_url, params=get_part_params)
+
+            if get_part_response.status_code == 200:
+                # Get the username from the response if needed
+                part_details = get_part_response.json().get('part_details')
+
+            print(part_details)
+
             if part_details:
                 order_item = {
                     "OrderID": order_detail.OrderDetailID,
                     "BuyerID": order_detail.BuyerID,
                     "Purchaseddate": order_detail.Purchaseddate,
-                    "ProductName": part_details.Name,
+                    "ProductName": part_details['ProductName'],
                     "Quantity": order_detail.Quantity,
-                    "UnitPrice": part_details.Price,
+                    "UnitPrice": part_details['Price'],
                     "TotalPrice": order_detail.Price
                 }
 

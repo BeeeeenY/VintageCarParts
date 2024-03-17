@@ -99,7 +99,7 @@ def register():
             flash('Email already registered.')
             return redirect(url_for('register'))
         
-        add_user_url = 'http://127.0.0.1:5004/add_user'
+        add_user_url = 'http://host.docker.internal:5004/add_user'
         add_user_params = {'name': name, 'phone' : phone, 'age' : age, 'country' : country}
         add_user_response = requests.get(add_user_url, params=add_user_params)
 

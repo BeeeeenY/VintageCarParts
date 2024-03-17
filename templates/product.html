@@ -231,15 +231,14 @@
                 <div class="row">
                     
                     <!-- Add to Cart, To Add Action-->
-                    <form id="cartForm" method="POST" style="color:gray">
-                        <input type="hidden" id="UserID" name="UserID" value="{{ part.UserID }}">
+                    <form id="cartForm" action="http://localhost:3000/add-to-cart" method="POST" style="color:gray">
+                        <!-- <input type="hidden" id="UserID" name="UserID" value="{{ part.UserID }}"> -->
                         <input type="hidden" id="PartID" name="PartID" value="{{ part.PartID }}">
                         <input type="hidden" id="Price" name="Price" value="{{ part.Price }}">
                         <label for="quantity">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" min="1" max="{{part.QuantityAvailable}}">
                         {{part.QuantityAvailable}} piece(s) available
-                        <button type="submit" class=" button">Add to Cart</button>
-                        
+                        <button type="submit" class="button">Add to Cart</button>
                     </form>
                 </div>
             </div>

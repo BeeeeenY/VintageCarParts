@@ -1,19 +1,12 @@
 import requests
-from flask import redirect  # Import redirect from Flask
+from flask import redirect,url_for  # Import redirect from Flask
 
 SUPPORTED_HTTP_METHODS = set([
     "GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"
 ])
 
 def invoke_http(url, method='GET', json=None, redirect_url='/', **kwargs):
-    """A simple wrapper for requests methods.
-       url: the url of the http service;
-       method: the http method;
-       json: the JSON input when needed by the http method;
-       redirect_url: the URL to redirect to if the call succeeds;
-       return: a redirect response if the call succeeds;
-            otherwise, return a JSON object with a "code" name-value pair.
-    """
+
     code = 200
     result = {}
 
@@ -34,6 +27,7 @@ def invoke_http(url, method='GET', json=None, redirect_url='/', **kwargs):
         response_json = r.json()
     except ValueError:
         # Response is not JSON, return a redirect response
+        redirect_url = url_for("/",param=json)
         return redirect(redirect_url)
 
     # Return the JSON response if successful

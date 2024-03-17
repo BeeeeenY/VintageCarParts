@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
+from os import environ
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -12,7 +13,11 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
+# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -126,7 +131,7 @@ def create_part():
             # Upload each photo to Firebase Storage
             for photo in photos:
                 # Specify a unique path for each photo in Firebase Storage
-                photo_blob = bucket.blob(f"parts/{part_id}/{photo.filename}")
+                photo_blob = bucket.blob(f"{part_id}/{photo.filename}")
                 
                 # Upload the photo
                 try:
@@ -149,4 +154,4 @@ def create_part():
         return redirect(redirect_url)
 
 if __name__ == '__main__':
-    app.run(port=5003, debug=True)
+    app.run(host='0.0.0.0',port=5003, debug=True)

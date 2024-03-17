@@ -1,16 +1,20 @@
 from flask import Flask, request, redirect, url_for, session, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from invokes import invoke_http
+# from invokes import invoke_http
 import bcrypt
 import requests
+from os import environ
 
 app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # Configure SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/Authentication'
+# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL', 'mysql+mysqlconnector://root@localhost:3306/Authentication')
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/Authentication"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -113,5 +117,8 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+# if __name__ == '__main__':
+#     app.run(port=5001, debug=True)
+
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
 import requests
+from os import environ
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -13,7 +14,11 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
+# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -99,7 +104,7 @@ def get_all_parts():
         if int(loggedin_user_id) != user_id:
             print(user_id)
 
-            get_username_url = 'http://127.0.0.1:5004/get_username'
+            get_username_url = 'http://host.docker.internal:5004/get_username'
             get_username_params = {'user_id': user_id}
             get_username_response = requests.get(get_username_url, params=get_username_params)
 
@@ -111,7 +116,7 @@ def get_all_parts():
             part_id_str = str(part_id)
 
             # Get a reference to the folder
-            folder_prefix = 'parts/' + part_id_str + '/'
+            folder_prefix = part_id_str + '/'
 
             # Retrieves all the files within the folder specified by folder_prefix.
             blobs = bucket.list_blobs(prefix=folder_prefix)
@@ -179,7 +184,7 @@ def find_by_partID(PartID):
     user_id = part.UserID
 
     # Fetch user name for the current part
-    get_username_url = 'http://127.0.0.1:5004/get_username'
+    get_username_url = 'http://host.docker.internal:5004/get_username'
     get_username_params = {'user_id': user_id}
     get_username_response = requests.get(get_username_url, params=get_username_params)
 
@@ -286,7 +291,7 @@ def seller_product_listing():
         print(part_id_str)
 
         # Get a reference to the folder
-        folder_prefix = 'parts/' + part_id_str + '/'
+        folder_prefix = part_id_str + '/'
 
         # Retrieves all the files within the folder specified by folder_prefix.
         blobs = bucket.list_blobs(prefix=folder_prefix)
@@ -449,5 +454,7 @@ def display_part(part):
 def store_page():
     return render_template('add.html')
 
+# if __name__ == '__main__':
+#     app.run(port=5002, debug=True)
 if __name__ == '__main__':
-    app.run(port=5002, debug=True)
+    app.run(host='0.0.0.0',port=5002, debug=True)

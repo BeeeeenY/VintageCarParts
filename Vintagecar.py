@@ -199,7 +199,7 @@ def find_by_partID(PartID):
     part_id_str = str(PartID)
 
     # Get a reference to the folder
-    folder_prefix = part_id_str + '/'
+    folder_prefix = "parts/" + part_id_str + '/'
     
     # Retrieves all the files within the folder specified by folder_prefix.
     blobs = bucket.list_blobs(prefix=folder_prefix)

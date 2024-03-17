@@ -46,7 +46,7 @@ class Orderdetails(db.Model):
 def find_by_SellerID():
     loggedin_user_id = session.get('loggedin_user_id')
 
-    order_details = db.session.query(Orderdetails).filter_by(SellerID=loggedin_user_id).all()
+    order_details = db.session.scalars(db.select(Orderdetails).filter_by(SellerID=loggedin_user_id)).all()
 
     if order_details:
         pending_orders = []
@@ -55,7 +55,7 @@ def find_by_SellerID():
         for order_detail in order_details:
             partid = order_detail.PartID
 
-            get_part_url = 'http://127.0.0.1:5002/part'
+            get_part_url = 'http://host.docker.internal:5002/part'
             get_part_params = {'partid': partid}
             get_part_response = requests.get(get_part_url, params=get_part_params)
 
@@ -165,12 +165,10 @@ def create_order():
             "message": "An error occurred while creating the order " + str(e)
         }), 500
 
-@app.route('/order')
+@app.route('/buyer_order')
 def buyer_orders():
     loggedin_user_id = session.get('loggedin_user_id')
-    print("------------")
     print(loggedin_user_id)
-    print("------------")
 
     order_items = []
 

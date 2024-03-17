@@ -11,33 +11,142 @@
             font-weight:bolder;
             font-size: large;
         }
+        .box {
+            width: 300px;
+            height: auto;
+        }
+        .greyed-out {
+            opacity: 0.5; /* Set opacity to make image appear greyed out */
+        }
+        .navbar .navbar-nav .nav-link .icon {
+            display: inline-block;
+            width: 20px; /* Adjust the size as needed */
+            height: 20px; /* Adjust the size as needed */
+            margin-right: 10px;
+        }
+        .card {
+            width: 300px;
+            height: 350px; /* Increased height to accommodate the edit button */
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border-bottom: 15px solid orange; /* Set thicker orange border at the bottom */
+        }
+    
+        .card img {
+            width: 100%; /* Make the image fill the entire width of the card */
+            height: 50%; /* Set height to 50% of the card height */
+            object-fit: cover; /* Ensure the image covers the entire space */
+            object-position: top center; /* Position the image at the top center */
+        }
+    
+        .card-body {
+            padding: 10px;
+            height: calc(50% - 20px); /* Set height to 50% of the card height minus padding */
+            box-sizing: border-box; /* Include padding and border in height calculation */
+            overflow: auto; /* Add overflow for scrolling if needed */
+        }
+        .edit-icon {
+            position: absolute;
+            bottom: 5px; /* Adjust vertical position */
+            right: 10px; /* Adjust horizontal position */
+            width: 20px;
+            height: 40px;
+            z-index: 999; /* Ensure edit icon appears on top of other content */
+        }
+
+        #plus-button-container {
+            position: fixed;
+            bottom: 80px;
+            right: 80px;
+        }
+
+        #yellow-button {
+            background-color: orange;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            height:200px;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Change padding for smaller pop-up */
+            z-index: 9999;
+            border-radius: 10px; /* Add rounded corners to pop-up box */
+        }
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative; /* Set position relative for close button positioning */
+            height: 100%;
+        }
+        .close-btn {
+            cursor: pointer;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Navigation Bar -->
-        <div class="row justify-content-between">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <span class="navbar-brand mb-0 h1">VintageCar</span>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                  <div class="navbar-nav">
-                    <a class="nav-item nav-link active" href="#">Home</a>
-                    <a class="nav-item nav-link" href="#">Car Parts</a>
-                    <a class="nav-item nav-link" href="#">Others</a>
-                  </div>
-                </div>
+<div class="container mt-4 mb-4">
+    <!-- Navigation Bar -->
+    <div class="row">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+            <span class="navbar-brand mb-0 h1">VintageCar</span>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="#">Register</a>
-                    <a class="nav-item nav-link" href="#">Login</a>
+                    <a class="nav-item nav-link" href="http://127.0.0.1:5002/listing">Home</a>
+                    <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
+                    <a class="nav-item nav-link active" href="http://127.0.0.1:5005/seller">Orders</a>
                 </div>
-                <form class="form-inline">
-                    <button class="btn btn-outline-danger" type="button">Buy</button>
-                </form>
-            </nav>
-        </div>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a class="nav-item nav-link" href="#">
+                    <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
+                    Messages
+                </a>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
+                        Profile
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Account Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="http://127.0.0.1:5001/logout">Logout</a>
+                    </div>
+                </div>
+            </div>
+            <form class="form-inline">
+                <button class="btn btn-success" type="button">Buy</button>
+            </form>
+        </nav>
+    </div>
 
         <div class="row mb-4"></div>
     </div>
@@ -72,7 +181,60 @@
             </tr>
         </table>
     </div>
-    
+</div>
+    <!-- Pop-up Box -->
+    <div id="popup" class="popup-container">
+        <div class="popup-content">
+            <span id="popup-text">Welcome to XXX, where opulence meets automotive excellence.
+
+                Introducing a bespoke platform tailored exclusively for discerning connoisseurs of vintage automobiles, addressing the distinct challenges faced by owners of luxury classics. Our singular platform offers three distinct experiences:
+                </span>
+            <span class="close-btn" onclick="closePopup()">X</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function toggleButton() {
+            const button = document.getElementById('sellBtn');
+            const plusButtonContainer = document.getElementById('plus-button-container');
+            const sellForm = document.getElementById('sellForm');
+
+            if (isSell) {
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-success');
+                button.textContent = 'Buy';
+                plusButtonContainer.style.display = 'block'; // Show the plus button container
+                // Submit the form to redirect to /listing
+                sellForm.submit();
+            } else {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-danger');
+                button.textContent = 'Sell';
+                plusButtonContainer.style.display = 'none'; // Hide the plus button container
+                // Redirect to another URL
+                window.location.href = "/another-url";
+            }
+            isSell = !isSell;
+        }
+
+        // Add event listener to the Buy button
+        document.querySelector('button.btn-success').addEventListener('click', function() {
+            window.location.href = "http://127.0.0.1:5002/";
+        });
+
+        document.getElementById('about-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('popup').style.display = 'block';
+        });
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+    </script>
 </body>
 </html>

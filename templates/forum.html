@@ -100,6 +100,7 @@
         .icon {
             width: 30px;
         }
+
     </style>
 </head>
 
@@ -172,17 +173,30 @@
         <div class="container">
             {% for post in posts %}
                 <div class="post">
-                    <h3>{{post.Title}}</h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3>{{post.Title}}</h3>
+
+                        {% if post.OwnPost == True %}
+                            <div class="d-flex">
+                                <a class="nav-item nav-link me-2" href="/update_post_page/{{post.PostID}}">
+                                    <img src="{{ url_for('static', filename='edit.png') }}" class="icon">
+                                </a>
+                                <a class="nav-item nav-link" href="/delete_post/{{post.PostID}}">
+                                    <img src="{{ url_for('static', filename='delete.svg') }}" class="icon">
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
                     <p>{{post.Content}}</p>
                     <p>Posted by <strong>{{post.Username}}</strong> on <em>{{post.PostDate}}</em></p>
                     
-                    <a class="nav-item nav-link comment-icon" href="#" data-post-id="{{ post.PostID }}">
+                    <a class="nav-item nav-link comment-icon" href="#" data-post-id="{{post.PostID}}">
                         <img src="{{ url_for('static', filename='comment.svg') }}" class="icon">
                         Comment
                     </a>
         
                     <!-- Comment form -->
-                    <form class="comment-form" action= '/create_comment' method= 'POST' style="display: none;" data-post-id="{{ post.PostID }}">
+                    <form class="comment-form" action= '/create_comment' method= 'POST' style="display: none;" data-post-id="{{post.PostID}}">
                         <input type="hidden" name="post_id" value="{{post.PostID}}">
                         <div class="form-group">
                             <label for="comment">Your Comment:</label>
@@ -194,8 +208,29 @@
                     <div class="comments">
                         {% for comment in post.Comments %}
                             <div class="comment">
-                                <p><strong>{{ comment.username }}</strong> commented:</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p><strong>{{ comment.username }}</strong> commented:</p>
+    
+                                    {% if comment.OwnComment == True %}
+                                        <div class="d-flex">
+                                            <a class="nav-item nav-link me-2 edit-comment" href="#" data-comment-id="{{ comment.CommentID }}">
+                                                <img src="{{ url_for('static', filename='edit.png') }}" class="icon">
+                                            </a>
+                                            <a class="nav-item nav-link" href="/delete_comment/{{comment.CommentID}}">
+                                                <img src="{{ url_for('static', filename='delete.svg') }}" class="icon">
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
                                 <p>{{ comment.content }}</p>
+                                <form class="comment-form-edit" action="/update_comment/{{ comment.CommentID }}" method="POST" style="display: none;" data-comment-id="{{ comment.CommentID }}">
+                                    <div class="form-group">
+                                        <label for="edit-comment">Edit Your Comment:</label>
+                                        <textarea class="form-control" id="edit-comment" rows="3" name="edited_comment">{{ comment.Content }}</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-primary">Update</button>
+                                    <button type="button" class="btn btn-outline-secondary cancel-edit">Cancel</button>
+                                </form>
                                 <!-- <p><em>{{ comment.CommentDate }}</em></p> -->
                             </div>
                         {% endfor %}
@@ -233,6 +268,21 @@
     </form>
 
     <script>
+        document.querySelectorAll('.edit-comment').forEach(function(editIcon) {
+            editIcon.addEventListener('click', function(event) {
+                event.preventDefault();
+                var commentID = editIcon.getAttribute('data-comment-id');
+                var commentForms = document.querySelectorAll('.comment-form-edit[data-comment-id="' + commentID + '"]');
+                commentForms.forEach(function(commentForm) {
+                    if (commentForm.style.display === 'none') {
+                        commentForm.style.display = 'block'; // Show the comment form
+                    } else {
+                        commentForm.style.display = 'none'; // Hide the comment form
+                    }
+                });
+            });
+        });
+
         document.querySelectorAll('.comment-icon').forEach(function(icon) {
             icon.addEventListener('click', function(event) {
                 event.preventDefault();
@@ -247,8 +297,6 @@
                 });
             });
         });
-
-
 
         let isSell = true;
 

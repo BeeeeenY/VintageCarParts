@@ -208,12 +208,15 @@ def update_post_page(PostID):
 
 @app.route("/update_post/<int:PostID>", methods=['POST'])
 def update_post(PostID):
-    data = request.form.to_dict()
+    Title = request.form.get('Title')
+    Content = request.form.get('Content')
 
-    print(data)
+    post = db.session.query(Forum).filter_by(PostID = PostID).first()
+    post.Title = Title
+    post.Content = Content
+    post.LastUpdated = dt.datetime.now()
 
     try:
-        db.session.query(Forum).filter_by(PostID = PostID).update(data)
         db.session.commit()
     except Exception as e:
         return jsonify(
@@ -222,7 +225,7 @@ def update_post(PostID):
                 "data": {
                     "partID": PostID
                 },
-                "message": f"An error occurred while updating the part: {str(e)}"
+                "message": f"An error occurred while updating the post: {str(e)}"
             }
         ), 500
         
@@ -232,10 +235,11 @@ def update_post(PostID):
 def update_comment(CommentID):
     edited_comment = request.form.get('edited_comment')
 
+    comment = db.session.query(Comments).filter_by(CommentID = CommentID).first()
+    comment.Content = edited_comment
+    comment.CommentDate = dt.datetime.now()
+
     try:
-        comment = db.session.query(Comments).filter_by(CommentID = CommentID).first()
-        comment.Content = edited_comment
-        comment.CommentDate = dt.datetime.now()
         db.session.commit()
     except Exception as e:
         return jsonify(

@@ -54,7 +54,7 @@ services:
       - "5001:5001"
 
   ##################################
-  # Book: The order microservice
+  # The order microservice
   ##################################
   order:
     build:
@@ -68,7 +68,7 @@ services:
     ports:
       - "5005:5005"
   ##################################
-  # Book: The createpart microservice
+  # The createpart microservice
   ##################################
   createpart:
     build:
@@ -81,3 +81,18 @@ services:
       PYTHONUNBUFFERED: 1
     ports:
         - "5003:5003"
+
+  ##################################
+  # The forum microservice
+  ##################################
+  forum:
+    build:
+      context: ./
+      dockerfile: forum.Dockerfile
+    image: matildagoh/forum:esd
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/forum
+      PYTHONUNBUFFERED: 1
+    ports:
+        - "5006:5006"

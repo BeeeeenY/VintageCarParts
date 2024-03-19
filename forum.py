@@ -14,12 +14,12 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_BINDS'] = {
-    'Userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication'
-}
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/forum"
+)
 
 db = SQLAlchemy(app)
 
@@ -43,24 +43,6 @@ class Forum(db.Model):
             return {"PostID": self.PostID, "UserID": self.UserID, "Title": self.Title, "Content": self.Content, "PostDate": self.Postdate, 
                     "LastUpdated": self.LastUpdated}
 
-
-class UserAuth(db.Model):
-    __tablename__ = 'UserAuth'  # Specify the correct table name here
-    __bind_key__ = 'Userauth'
-
-    AuthID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UserID = db.Column(db.Integer, nullable=False)
-    Email = db.Column(db.String(255), unique=True, nullable=False)
-    PasswordHash = db.Column(db.String(255), nullable=False)
-
-class Users(db.Model):
-    __tablename__ = 'Users'
-    UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Name = db.Column(db.String(255), nullable=False)
-    Phone = db.Column(db.String(20))
-    Age = db.Column(db.Integer)
-    Country = db.Column(db.String(255))
-
         
 class Comments(db.Model):
     __tablename__ = 'Comments'  # Specify the correct table name here
@@ -82,9 +64,14 @@ def get_forum_posts():
         
         comments_arr = []
         for comment in comments:
+            loggedin_user_id = session.get('loggedin_user_id')
             user_id = comment.UserID
 
-            get_username_url = 'http://127.0.0.1:5004/get_username'
+            own_comment = False
+            if user_id == loggedin_user_id:
+                own_comment = True
+
+            get_username_url = 'http://host.docker.internal:5004/get_username'
             get_username_params = {'user_id': user_id}
             get_username_response = requests.get(get_username_url, params=get_username_params)
 
@@ -97,12 +84,14 @@ def get_forum_posts():
                 comment_details = {
                     'username': username,
                     'content': comment.Content,
-                    'CommentDate': comment.CommentDate.strftime('%Y-%m-%d %H:%M:%S')
+                    'CommentDate': comment.CommentDate.strftime('%Y-%m-%d %H:%M:%S'),
+                    'OwnComment': own_comment,
+                    'CommentID': comment.CommentID
                 }
             comments_arr.append(comment_details)
 
         
-        get_username_url = 'http://127.0.0.1:5004/get_username'
+        get_username_url = 'http://host.docker.internal:5004/get_username'
         get_username_params = {'user_id': post.UserID}
         get_username_response = requests.get(get_username_url, params=get_username_params)
 
@@ -111,6 +100,10 @@ def get_forum_posts():
             username = get_username_response.json().get('username')
             print("Username:", username)
 
+        own_post = False
+        if post.UserID == loggedin_user_id:
+            own_post = True
+        
         if post:
             # Convert posts to a list of dictionaries
             post_details = {
@@ -119,7 +112,8 @@ def get_forum_posts():
                 'Content': post.Content,
                 'PostDate': post.Postdate.strftime('%Y-%m-%d %H:%M:%S'),
                 'Username': username,
-                'Comments': comments_arr
+                'Comments': comments_arr,
+                'OwnPost': own_post
             }
         posts_arr.append(post_details)
 
@@ -132,7 +126,7 @@ def get_forum_posts():
 
 @app.route('/create_post_page')
 def create_post_page():
-    return render_template('createforum.html')
+    return render_template('createforum.html', data = 'Add Forum Content')
 
 @app.route("/create_post", methods=['POST'])
 def create_post():
@@ -187,5 +181,74 @@ def create_comment():
      # Redirect to the constructed URL
     return redirect(redirect_url)
 
+@app.route("/delete_post/<int:PostID>")
+def delete_post(PostID):
+    db.session.query(Forum).filter_by(PostID=PostID).delete()
+    db.session.commit()
+
+    return redirect('/forum')
+
+@app.route("/delete_comment/<int:CommentID>")
+def delete_comment(CommentID):
+    db.session.query(Comments).filter_by(CommentID=CommentID).delete()
+    db.session.commit()
+
+    return redirect('/forum')
+
+@app.route("/update_post_page/<int:PostID>")
+def update_post_page(PostID):
+    post_details = db.session.query(Forum).filter(Forum.PostID == PostID).first()
+    if post_details:
+        post = {
+            "PostID": PostID,
+            "Title": post_details.Title,
+            "Content": post_details.Content
+        }
+    return render_template('createforum.html', data = 'Update Forum Content', post = post)
+
+@app.route("/update_post/<int:PostID>", methods=['POST'])
+def update_post(PostID):
+    data = request.form.to_dict()
+
+    print(data)
+
+    try:
+        db.session.query(Forum).filter_by(PostID = PostID).update(data)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "data": {
+                    "partID": PostID
+                },
+                "message": f"An error occurred while updating the part: {str(e)}"
+            }
+        ), 500
+        
+    return redirect("/forum")
+
+@app.route("/update_comment/<int:CommentID>", methods=['POST'])
+def update_comment(CommentID):
+    edited_comment = request.form.get('edited_comment')
+
+    try:
+        comment = db.session.query(Comments).filter_by(CommentID = CommentID).first()
+        comment.Content = edited_comment
+        comment.CommentDate = dt.datetime.now()
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 500,
+                "data": {
+                    "partID": CommentID
+                },
+                "message": f"An error occurred while updating the comment: {str(e)}"
+            }
+        ), 500
+        
+    return redirect("/forum")
+
 if __name__ == '__main__':
-    app.run(port=5006, debug=True)
+    app.run(host='0.0.0.0', port=5006, debug=True)

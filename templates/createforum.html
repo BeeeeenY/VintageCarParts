@@ -138,17 +138,17 @@
     </div>
 
     <div class="container mt-4 mb-4">
-        <h1 class="text-center mt-5 mb-4">Add Forum Content</h1>
+        <h1 class="text-center mt-5 mb-4">{{data}}</h1>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form action="/create_post" method="POST">
+                <form action="{% if post %} /update_post/{{post.PostID}} {% else %} /create_post {% endif %}" method="POST">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title:</label>
-                        <input type="text" class="form-control" id="title" name="Title" required>
+                        <input type="text" class="form-control" id="title" name="Title" {% if post %} value="{{ post.Title }}" {% endif %} required>
                     </div>
                     <div class="mb-3">
                         <label for="content" class="form-label">Content:</label>
-                        <textarea class="form-control" id="content" name="Content" rows="5" required></textarea>
+                        <textarea class="form-control" id="content" name="Content" rows="5" required>{% if post %} {{post.Content}} {% endif %}</textarea>
                     </div>
                     <button type="submit" class="btn btn-outline-primary">Submit</button>
                 </form>

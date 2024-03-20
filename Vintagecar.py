@@ -5,6 +5,7 @@ from firebase_admin import credentials, storage
 import datetime as dt
 import requests
 from os import environ
+from flasgger import Swagger
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -21,7 +22,17 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'vintagecar microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows creating, retrieving, updating, and deleting car parts'
+}
+swagger = Swagger(app)
+
 db = SQLAlchemy(app)
+
 
 class Parts(db.Model):
     __tablename__ = 'parts'
@@ -82,6 +93,16 @@ class Comments(db.Model):
 
 @app.route("/", methods=["GET","POST"])
 def get_all_parts():
+    """
+    Get all car parts
+    ---
+    responses:
+        200:
+            description: Return all car parts
+        404:
+            description: No car parts 
+
+    """
     search_query = request.args.get('search')
     if search_query == None:
         search_query = ""
@@ -179,6 +200,20 @@ def get_all_parts():
 # http://127.0.0.1:5002/<PartID> to render product.html to view product details.    
 @app.route("/<int:PartID>")
 def find_by_partID(PartID):
+    # """
+    # Get a car part by its PartID
+    # ---
+    # parameters:
+    #     -   in: path
+    #         name: PartID
+    #         required: true
+    # responses:
+    #     200:
+    #         description: Return the car part with the specified PartID
+    #     404:
+    #         description: No car part with the specified PartID found
+    # """
+
     part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
 
     user_id = part.UserID

@@ -200,19 +200,19 @@ def get_all_parts():
 # http://127.0.0.1:5002/<PartID> to render product.html to view product details.    
 @app.route("/<int:PartID>")
 def find_by_partID(PartID):
-    # """
-    # Get a car part by its PartID
-    # ---
-    # parameters:
-    #     -   in: path
-    #         name: PartID
-    #         required: true
-    # responses:
-    #     200:
-    #         description: Return the car part with the specified PartID
-    #     404:
-    #         description: No car part with the specified PartID found
-    # """
+    """
+    Get a car part by its PartID
+    ---
+    parameters:
+        -   in: path
+            name: PartID
+            required: true
+    responses:
+        200:
+            description: Return the car part with the specified PartID
+        404:
+            description: No car part with the specified PartID found
+    """
 
     part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
 

@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
 from os import environ
+from flasgger import Swagger
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -16,9 +17,18 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'createpart microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create of carparts'
+}
+swagger = Swagger(app)
 
 db = SQLAlchemy(app)
 
@@ -62,6 +72,75 @@ class Parts(db.Model):
 
 @app.route("/create_part", methods=['POST'])
 def create_part():
+    """
+    Create Part
+    ---
+    parameters:
+        -   in: formData
+            name: Name
+            required: true
+            type: string
+            description: Name of the part.
+        -   in: formData
+            name: AuthenticationNum
+            required: false
+            type: string
+            description: Authentication number of the part.
+        -   in: formData
+            name: Category
+            required: true
+            type: string
+            description: Category of the part.
+        -   in: formData
+            name: Description
+            required: false
+            type: string
+            description: Description of the part.
+        -   in: formData
+            name: Price
+            required: true
+            type: number
+            description: Price of the part.
+        -   in: formData
+            name: QuantityAvailable
+            required: true
+            type: integer
+            description: Quantity available of the part.
+        -   in: formData
+            name: Location
+            required: false
+            type: string
+            description: Location of the part.
+        -   in: formData
+            name: Brand
+            required: false
+            type: string
+            description: Brand of the part.
+        -   in: formData
+            name: Model
+            required: false
+            type: string
+            description: Model of the part.
+        -   in: formData
+            name: AddInfo
+            required: false
+            type: string
+            description: Additional information about the part.
+    responses:
+        302:
+            description: Part created successfully.
+            headers:
+            Location:
+                description: URL of the created part.
+                schema:
+                type: string
+                example: "http://127.0.0.1:5002/listing"
+        400:
+            description: Missing form data or invalid request.
+        500:
+            description: An error occurred while creating the part.
+
+    """
     name = request.form.get('Name')
     if request.form.get('AuthenticationNum'):
         auth_num = request.form.get('AuthenticationNum')

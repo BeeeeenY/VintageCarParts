@@ -18,7 +18,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -284,6 +284,15 @@ def find_by_partID(PartID):
 
 @app.route("/part")
 def find_part_details():
+    """
+    Get car part details
+    ---
+    responses:
+        200:
+            description: Return car part details
+        404:
+            description: No car part details found
+    """
     partid = request.args.get('partid')
     part = db.session.scalars(db.select(Parts).filter_by(PartID=partid).limit(1)).first()
     
@@ -304,6 +313,15 @@ def find_part_details():
 
 @app.route("/listing")
 def seller_product_listing():
+    """
+    Get listings
+    ---
+    responses:
+        200:
+            description: Return listings
+        404:
+            description: No listings found
+    """
     search_query = request.args.get('search')
     if search_query == None:
         search_query = ""
@@ -377,6 +395,15 @@ def seller_product_listing():
 
 @app.route("/update")
 def update_part_page():
+    """
+    Update part 
+    ---
+    responses:
+        200:
+            description: Part updated
+        404:
+            description: Part not found
+    """
     part_id = request.args.get('part_id')
     part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
 
@@ -409,6 +436,19 @@ def update_part_page():
 
 @app.route("/update_part/<int:PartID>", methods=['POST'])
 def update_part(PartID):
+    """
+    Update a car part by its PartID
+    ---
+    parameters:
+        -   in: path
+            name: PartID
+            required: true
+    responses:
+        200:
+            description: Car part with the specified PartID updated
+        404:
+            description: No car part with the specified PartID found
+    """
     if request.method == 'POST':
         if (not db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()):
             return jsonify(

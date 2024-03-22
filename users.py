@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from flask_sqlalchemy import SQLAlchemy
 from invokes import invoke_http
 from os import environ
+from flasgger import Swagger
+
 
 app = Flask(__name__)
 
@@ -10,11 +12,23 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/users'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root@host.docker.internal:3306/users"
+    # environ.get("dbURL") or "mysql+mysqlconnector://root@host.docker.internal:3306/users"
+    # for swagger use the one below:-
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/users"
+
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'users microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows retrieval of username and creating users'
+}
+swagger = Swagger(app)
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -36,6 +50,34 @@ class Users(db.Model):
 
 @app.route("/get_username")
 def get_username():
+    """
+    Get the username associated with the provided user ID.
+
+    ---
+        parameters:
+            -   name: user_id
+                in: query
+                description: The ID of the user whose username is to be retrieved.
+                required: true
+                schema:
+                type: string
+        responses:
+            200:
+                description: OK. The username was retrieved successfully.
+                content:
+                application/json:
+                    schema:
+                    type: object
+                    properties:
+                        username:
+                        type: string
+                        description: The username associated with the provided user ID.
+            400:
+                description: Bad Request. The request is missing the user ID parameter.
+            404:
+                description: Not Found. The provided user ID does not exist in the database.
+"""
+
     user_id = request.args.get('user_id')
     print(user_id)
     user_name = db.session.query(Users.Name).filter(Users.UserID == user_id).first()
@@ -47,6 +89,50 @@ def get_username():
 
 @app.route("/add_user")
 def add_user():
+    """
+        Add a new user to the database.
+
+        ---
+        parameters:
+            -   name: name
+                in: query
+                description: The name of the user to be added.
+                required: true
+                schema:
+                type: string
+            -   name: phone
+                in: query
+                description: The phone number of the user to be added.
+                required: true
+                schema:
+                type: string
+            -   name: age
+                in: query
+                description: The age of the user to be added.
+                required: true
+                schema:
+                type: integer
+            -   name: country
+                in: query
+                description: The country of the user to be added.
+                required: true
+                schema:
+                type: string
+        responses:
+            200:
+                description: OK. The user was added successfully.
+                content:
+                application/json:
+                    schema:
+                    type: object
+                    properties:
+                        user_id:
+                        type: integer
+                        description: The ID of the newly added user.
+            400:
+                description: Bad Request. The request is missing required parameters or contains invalid data.
+"""
+
     name = request.args.get('name')
     phone = request.args.get('phone')
     age = request.args.get('age')

@@ -213,6 +213,8 @@ def find_by_partID(PartID):
         404:
             description: No car part with the specified PartID found
     """
+    buyer_id = session.get('loggedin_user_id')
+    print(buyer_id)
 
     part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
 
@@ -268,7 +270,9 @@ def find_by_partID(PartID):
             "Model": part_details.Model,
             "Status": part_details.Status,
             "Pics": pic_arr,
-            "Comments": comments
+            "Comments": comments,
+            "BuyerID": buyer_id,
+            "SellerID":user_id
             }
 
 

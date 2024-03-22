@@ -1,22 +1,24 @@
 require("dotenv").config()
 
-const express = require("express")
-const app = express()
-const cors = require("cors")
-app.use(express.json())
+const express = require("express");
+const app = express();
+const cors = require("cors");
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(
   cors({
     origin: "http://localhost:8888",
   })
-)
+);
 
 const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY)
 
-const storeItems = new Map([
-  [1, { priceInCents: 100000, name: "Aston Martin DB7 I6 engine parts" }],
-  [2, { priceInCents: 20000, name: "Get an A for ESD" }],
-  [3, { priceInCents: 20000, name: "Get an A for ESM" }],
-])
+// const storeItems = new Map([
+//   [1, { priceInCents: 100000, name: "Aston Martin DB7 I6 engine parts" }],
+//   [2, { priceInCents: 20000, name: "Get an A for ESD" }],
+//   [3, { priceInCents: 20000, name: "Get an A for ESM" }],
+// ])
+const storeItems = new Map([])
 
 // this endpoint to serve the items' data
 app.get("/items", (req, res) => {
@@ -27,6 +29,21 @@ app.get("/items", (req, res) => {
   res.json(itemsArray);
 });
 
+// To add in user
+app.post("/add-to-cart", (req, res) => {
+  console.log("Received data:", req.body);
+  const {  PartID, Price, quantity, BuyerID, SellerID } = req.body;
+  
+  // Assuming PartID is unique, directly add it to the storeItems
+  storeItems.set(parseInt(PartID), {
+    priceInCents: parseInt(Price),
+    quantity: parseInt(quantity),
+    BuyerID: parseInt(BuyerID),
+    SellerID: parseInt(SellerID)
+  });
+  console.log(storeItems)
+  res.sendStatus(200);
+});
 
 app.post("/create-checkout-session", async (req, res) => {
   try {

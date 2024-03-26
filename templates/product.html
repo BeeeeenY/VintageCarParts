@@ -17,7 +17,7 @@
             margin-right: 10px;
         }
         .button {
-            background-color: orangered;
+            background-color: orange;
             border: none;
             color: white;
             font-weight: bold;
@@ -34,7 +34,7 @@
         }
 
         .button:hover {
-            background-color: rgba(255, 68, 0, 0.575);
+            background-color: rgba(255, 166, 0, 0.61);
             color: white;
         }
 
@@ -43,15 +43,14 @@
         }
 
         .infoheader {
-            color: orangered;
+            color: orange;
             font-weight: bolder; 
             font-size: x-large;
         }
 
         .comment {
-            background-color: orangered;         
+            background-color: #f3f3f3;         
             border: none;
-            color: white;
             padding: 10px;
             text-align: left;
             text-decoration: none;
@@ -224,7 +223,7 @@
                 <span style="font-weight: bold; font-size: x-large;">{{part.Description}}</span>
 
                 <!-- Price -->
-                <div class="row mx-0" style="font-weight: bold; font-size: xx-large; color:orangered;">
+                <div class="row mx-0" style="font-weight: bold; font-size: xx-large; color:orange;">
                     ${{ '%.2f'|format(part.Price) }}
                 </div>
                 <div class="row mb-3"></div>
@@ -232,8 +231,7 @@
                     
                     <!-- Add to Cart, To Add Action-->
                     <form id="cartForm" action="http://localhost:3000/add-to-cart" method="POST" style="color:gray">
-                        <input type="hidden" id="BuyerID" name="BuyerID" value="{{ part.BuyerID }}">
-                        <input type="hidden" id="SellerID" name="SellerID" value="{{ part.SellerID }}">
+                        <!-- <input type="hidden" id="UserID" name="UserID" value="{{ part.UserID }}"> -->
                         <input type="hidden" id="PartID" name="PartID" value="{{ part.PartID }}">
                         <input type="hidden" id="Price" name="Price" value="{{ part.Price }}">
                         <label for="quantity">Quantity:</label>

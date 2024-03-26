@@ -14,9 +14,6 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/forum"
 )
@@ -43,7 +40,6 @@ class Forum(db.Model):
     def json(self):
             return {"PostID": self.PostID, "UserID": self.UserID, "Title": self.Title, "Content": self.Content, "PostDate": self.Postdate, 
                     "LastUpdated": self.LastUpdated}
-
         
 class Comments(db.Model):
     __tablename__ = 'Comments'  # Specify the correct table name here

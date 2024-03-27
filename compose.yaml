@@ -96,3 +96,17 @@ services:
       PYTHONUNBUFFERED: 1
     ports:
         - "5006:5006"
+
+  ##################################
+  # The chat microservice
+  ##################################
+  chat:
+    build:
+      context: ./
+      dockerfile: chat.Dockerfile
+    image: matildagoh/chat:esd
+    restart: always
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+        - "5007:5007"

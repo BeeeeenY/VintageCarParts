@@ -179,7 +179,7 @@
         <!-- Add any necessary input fields here -->
     </form>
 
-    
+
     <script>
         let isSell = true;
 
@@ -215,33 +215,6 @@
         function redirectToUrl(url) {
             window.location.href = url;
         }
-
-        function updateForumPosts() {
-            // Make an AJAX request to fetch the latest posts
-            fetch('/get_posts')
-                .then(response => response.json())
-                .then(data => {
-                    // Append new posts below the old ones
-                    const forumPosts = document.getElementById('forum-posts');
-                    if (data.posts.length > 0) {
-                        const posts = data.posts.map(post => `
-                            <div class="post-card">
-                                <h3>${post.Title}</h3>
-                                <p>${post.Content}</p>
-                                <p>Posted by User ID ${post.UserID} on ${post.PostDate}</p>
-                            </div>
-                        `).join('');
-    
-                        forumPosts.insertAdjacentHTML('beforeend', '<h2>Forum Posts:</h2>' + posts);
-                    } else {
-                        forumPosts.innerHTML = '<p>No posts available.</p>';
-                    }
-                })
-                .catch(error => console.error('Error fetching posts:', error));
-        }
-    
-        // Call the updateForumPosts function initially
-        updateForumPosts();
 
     </script>
 </body>

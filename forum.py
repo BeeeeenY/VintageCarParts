@@ -15,12 +15,10 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/forum'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/forum"
 )
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 # Initialize flasgger
@@ -51,7 +49,6 @@ class Forum(db.Model):
     def json(self):
             return {"PostID": self.PostID, "UserID": self.UserID, "Title": self.Title, "Content": self.Content, "PostDate": self.Postdate, 
                     "LastUpdated": self.LastUpdated}
-
         
 class Comments(db.Model):
     __tablename__ = 'Comments'  # Specify the correct table name here
@@ -64,16 +61,12 @@ class Comments(db.Model):
 
 @app.route('/forum', methods=['GET'])
 def get_forum_posts():
-    """
-    Retrieve all forum posts.
-    ---
-        responses:
-            200:
-                description: A list of forum posts.
-            404:
-                description: No forum posts found.
-    ---
-    """
+    search_query = request.args.get('search')
+    if search_query == None:
+        search_query = ""
+    print(search_query)
+    search_data = []
+
     posts = db.session.query(Forum).all()
     posts_arr = []
 
@@ -123,6 +116,26 @@ def get_forum_posts():
         if post.UserID == loggedin_user_id:
             own_post = True
         
+        post_id_str = str(post_id)
+
+        # Get a reference to the folder
+        folder_prefix = "forum/" + post_id_str + '/'
+        
+        # Retrieves all the files within the folder specified by folder_prefix.
+        blobs = bucket.list_blobs(prefix=folder_prefix)
+
+        # Define a distant future timestamp
+        future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
+
+        pic_arr = []
+
+        for blob in blobs:
+            picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+            pic_arr.append(picture_url)
+
+        if len(pic_arr) == 0:
+            print("No files found.")
+
         if post:
             # Convert posts to a list of dictionaries
             post_details = {
@@ -132,29 +145,28 @@ def get_forum_posts():
                 'PostDate': post.Postdate.strftime('%Y-%m-%d %H:%M:%S'),
                 'Username': username,
                 'Comments': comments_arr,
-                'OwnPost': own_post
+                'OwnPost': own_post,
+                "Pics": pic_arr
             }
         posts_arr.append(post_details)
 
+        if search_query in post.Title:
+            search_data.append(post_details)
+
     print(posts_arr)
 
-    if posts_arr:
+    if search_data:
+        return render_template('forum.html', posts = search_data)
+    elif search_data == []:
+        return render_template('forum.html', data = "There are no search results.")
+    elif posts_arr:
         return render_template('forum.html', posts = posts_arr)
     else:
         return render_template('forum.html', data = "There are no posts.")
 
 @app.route('/create_post_page')
 def create_post_page():
-    # """
-    # Render a page to create a new forum post.
-    # ---
-    #     responses:
-    #         200:
-    #             description: Page rendered successfully.
-    #         404:
-    #             description: Page not found.
-    # """
-    return render_template('createforum.html', data = 'Add Forum Content')
+    return render_template('createforum.html', data = 'Add Forum Content', button = 'Submit')
 
 @app.route("/create_post", methods=['POST'])
 def create_post():
@@ -196,6 +208,41 @@ def create_post():
             "message": f"An error occurred creating the post: {str(e)}"
         }), 500
     
+    post_id = post.PostID
+
+    if request.method == "POST":
+        # Get the uploaded photos from the HTML form
+        photos = request.files.getlist("file")
+
+        # Filter out empty FileStorage objects
+        photos = [photo for photo in photos if photo.filename]
+        
+        if photos:
+            print("User uploaded photos, proceeding with upload")
+            # User uploaded photos, proceed with upload
+            # List to store upload results
+            upload_results = []
+
+            # Upload each photo to Firebase Storage
+            for photo in photos:
+                # Specify a unique path for each photo in Firebase Storage
+                photo_blob = bucket.blob(f"forum/{post_id}/{photo.filename}")
+                
+                # Upload the photo
+                try:
+                    photo_blob.upload_from_file(photo)
+                    upload_results.append(True)  # Successful upload
+                except Exception as e:
+                    upload_results.append(False)  # Failed upload
+                    print(f"Error uploading photo: {e}")
+
+            # Check if all uploads were successful
+            try:
+                all(upload_results)
+                print("Photos uploaded successfully!")
+            except Exception as e:
+                print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
+
     redirect_url = '/forum'
     
      # Redirect to the constructed URL
@@ -249,7 +296,7 @@ def update_post_page(PostID):
             "Title": post_details.Title,
             "Content": post_details.Content
         }
-    return render_template('createforum.html', data = 'Update Forum Content', post = post)
+    return render_template('createforum.html', data = 'Update Forum Content', post = post, button = 'Update')
 
 @app.route("/update_post/<int:PostID>", methods=['POST'])
 def update_post(PostID):
@@ -273,7 +320,45 @@ def update_post(PostID):
                 "message": f"An error occurred while updating the post: {str(e)}"
             }
         ), 500
+    
+    post_id = post.PostID
+    print(post_id)
+
+    if request.method == "POST":
+        # Get the uploaded photos from the HTML form
+        photos = request.files.getlist("file")
+
+        print(photos)
+
+        # Filter out empty FileStorage objects
+        photos = [photo for photo in photos if photo.filename]
         
+        if photos:
+            print("User uploaded photos, proceeding with upload")
+            # User uploaded photos, proceed with upload
+            # List to store upload results
+            upload_results = []
+
+            # Upload each photo to Firebase Storage
+            for photo in photos:
+                # Specify a unique path for each photo in Firebase Storage
+                photo_blob = bucket.blob(f"forum/{post_id}/{photo.filename}")
+                
+                # Upload the photo
+                try:
+                    photo_blob.upload_from_file(photo)
+                    upload_results.append(True)  # Successful upload
+                except Exception as e:
+                    upload_results.append(False)  # Failed upload
+                    print(f"Error uploading photo: {e}")
+
+            # Check if all uploads were successful
+            try:
+                all(upload_results)
+                print("Photos uploaded successfully!")
+            except Exception as e:
+                print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
+
     return redirect("/forum")
 
 @app.route("/update_comment/<int:CommentID>", methods=['POST'])

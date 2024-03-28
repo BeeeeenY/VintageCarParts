@@ -141,7 +141,7 @@
         <h1 class="text-center mt-5 mb-4">{{data}}</h1>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form action="{% if post %} /update_post/{{post.PostID}} {% else %} /create_post {% endif %}" method="POST">
+                <form action="{% if post %} /update_post/{{post.PostID}} {% else %} /create_post {% endif %}" method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title:</label>
                         <input type="text" class="form-control" id="title" name="Title" {% if post %} value="{{ post.Title }}" {% endif %} required>
@@ -150,7 +150,11 @@
                         <label for="content" class="form-label">Content:</label>
                         <textarea class="form-control" id="content" name="Content" rows="5" required>{% if post %} {{post.Content}} {% endif %}</textarea>
                     </div>
-                    <button type="submit" class="btn btn-outline-primary">Submit</button>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Image:</label>
+                        <input type="file" id="image" name="file" class="form-control" accept="image/*"  multiple>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">{{button}}</button>
                 </form>
             </div>
         </div>
@@ -175,7 +179,7 @@
         <!-- Add any necessary input fields here -->
     </form>
 
-
+    
     <script>
         let isSell = true;
 

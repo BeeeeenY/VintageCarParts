@@ -227,6 +227,12 @@ responses:
         return redirect(url_for('login'))
     return render_template('register.html')
 
+# To pass loggedin user id to car rental
+@app.route('/loggedin_user_id', methods=['GET'])
+def get_loggedin_user_id():
+    loggedin_user_id = session.get('loggedin_user_id')
+    return render_template("rentcar.html", loggedin_user_id=loggedin_user_id)
+
 # if __name__ == '__main__':
 #     app.run(port=5001, debug=True)
 

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, session, redirect
+from flask_cors import CORS, cross_origin  # Import Flask-CORS
 from flask_sqlalchemy import SQLAlchemy
 import firebase_admin
 from firebase_admin import credentials, storage
@@ -11,14 +12,15 @@ firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot
 bucket = storage.bucket()
 
 app = Flask(__name__)
+CORS(app)  # Initialize Flask-CORS
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
+# app.config["SQLALCHEMY_DATABASE_URI"] = (
+#     environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
+# )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize flasgger 
@@ -71,88 +73,95 @@ class Parts(db.Model):
                 "Brand": self.Brand, "Model": self.Model, "Brand": self.Model, "Status": self.Status, "Content": self.Content, "PostDate": self.PostDate}
 
 @app.route("/create_part", methods=['POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+
 def create_part():
+
     """
     Create Part
     ---
-    parameters:
-        -   in: formData
-            name: Name
-            required: true
-            type: string
-            description: Name of the part.
-        -   in: formData
-            name: AuthenticationNum
-            required: false
-            type: string
-            description: Authentication number of the part.
-        -   in: formData
-            name: Category
-            required: true
-            type: string
-            description: Category of the part.
-        -   in: formData
-            name: Description
-            required: false
-            type: string
-            description: Description of the part.
-        -   in: formData
-            name: Price
-            required: true
-            type: number
-            description: Price of the part.
-        -   in: formData
-            name: QuantityAvailable
-            required: true
-            type: integer
-            description: Quantity available of the part.
-        -   in: formData
-            name: Location
-            required: false
-            type: string
-            description: Location of the part.
-        -   in: formData
-            name: Brand
-            required: false
-            type: string
-            description: Brand of the part.
-        -   in: formData
-            name: Model
-            required: false
-            type: string
-            description: Model of the part.
-        -   in: formData
-            name: AddInfo
-            required: false
-            type: string
-            description: Additional information about the part.
+    tags:
+        - carpart
+    parameters: []
+    requestBody:
+        required: true
+        content:
+            application/x-www-form-urlencoded:
+                schema:
+                    type: object
+                    properties:
+                        Name:
+                            type: string
+                            description: The Name of the part
+                        AuthenticationNum:
+                            type: string                
+                            description: The Authentication number of the part
+                        Category:
+                            type: string
+                            description: The Category of the part   
+                        Description:
+                            type: string    
+                            description: The Description of the part
+                        Price:      
+                            type: number
+                            description: The Price of the part
+                        QuantityAvailable:
+                            type: integer
+                            description: The Quantity available of the part
+                        Location:
+                            type: string
+                            description: The Location of the part
+                        Brand:
+                            type: string
+                            description: The Brand of the part
+                        Model:
+                            type: string
+                            description: The Model of the part
+                        AddInfo:
+                            type: string
+                            description: Additional information about the part
+                        Status:
+                            type: string            
+                            description: The Status of the part 
     responses:
         302:
             description: Part created successfully.
             headers:
-            Location:
-                description: URL of the created part.
-                schema:
-                type: string
-                example: "http://127.0.0.1:5002/listing"
+                Location:
+                    description: URL of the created part.
+                    schema:
+                        type: string
+                        example: "http://127.0.0.1:5002/listing"
         400:
             description: Missing form data or invalid request.
         500:
             description: An error occurred while creating the part.
-
     """
-    name = request.form.get('Name')
+
+    if request.form.get('Name'):
+        name = request.form.get('Name')
+    else:
+        name= ""
     if request.form.get('AuthenticationNum'):
         auth_num = request.form.get('AuthenticationNum')
     else:
         auth_num = ""  
-    category = request.form.get('Category')
+    if request.form.get('Category'):
+        category = request.form.get('Category')
+    else:
+        category = ""
     if request.form.get('Description'):
         description = request.form.get('Description') 
     else:
         description = ""  
-    price = float(request.form.get('Price'))
-    quantity_available = int(request.form.get('QuantityAvailable'))
+    if request.form.get('Price'):
+        price = float(request.form.get('Price'))
+    else:
+        price = ''
+    if request.form.get('QuantityAvailable'):
+        quantity_available = int(request.form.get('QuantityAvailable'))
+    else:
+        quantity_available = ''
     if request.form.get('Location'):
         location = request.form.get('Location') 
     else:
@@ -169,7 +178,10 @@ def create_part():
         add_info = request.form.get('AddInfo')
     else:
         add_info = "" 
-    status = "Available"
+    if request.form.get('Status'):
+        status = request.form.get('Status')
+    else:
+        status = "Available"
 
     if not name or not category or not price or not quantity_available:
         return 'Missing form data.', 400
@@ -230,7 +242,9 @@ def create_part():
         redirect_url = 'http://127.0.0.1:5002/listing'
     
         # Redirect to the constructed URL
-        return redirect(redirect_url)
+        return redirect(redirect_url, code=302)
+    
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5003, debug=True)

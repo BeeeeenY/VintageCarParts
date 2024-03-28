@@ -125,7 +125,9 @@ def get_all_parts():
         if int(loggedin_user_id) != user_id:
             print(user_id)
 
-            get_username_url = 'http://host.docker.internal:5004/get_username'
+            # get_username_url = 'http://host.docker.internal:5004/get_username'
+            get_username_url = 'http://127.0.0.1:5004/get_username'
+
             get_username_params = {'user_id': user_id}
             get_username_response = requests.get(get_username_url, params=get_username_params)
 
@@ -400,13 +402,19 @@ def seller_product_listing():
 @app.route("/update")
 def update_part_page():
     """
-    Update part 
+    Update Part
     ---
+    parameters:
+        -   name: part_id
+            in: query
+            type: integer
+            required: true
+            description: ID of the part to update.
     responses:
         200:
-            description: Part updated
+            description: Part updated successfully.
         404:
-            description: Part not found
+            description: Part not found.
     """
     part_id = request.args.get('part_id')
     part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
@@ -427,7 +435,7 @@ def update_part_page():
             "AddInfo": part_details.Content
             }
 
-    if part:
+    if part_details:
         return render_template('update.html', part = part)
 
     return jsonify(

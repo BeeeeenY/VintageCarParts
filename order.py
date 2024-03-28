@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import requests
 from datetime import datetime
 from os import environ
+from flasgger import Swagger
 
 app = Flask(__name__)
 
@@ -11,11 +12,22 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/orders"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/orders"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'order microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows retrieval of orders, update order status and creating orders'
+}
+swagger = Swagger(app)
+
 
 class Orderdetails(db.Model):
     __tablename__ = 'orderdetails'
@@ -44,6 +56,24 @@ class Orderdetails(db.Model):
 # http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
 @app.route("/seller")
 def find_by_SellerID():
+    """
+    Retrieve orders by SellerID.
+    ---
+    tags:
+        -   Seller
+    parameters:
+        -   name: SellerID
+            in: query
+            description: ID of the seller
+            required: true
+            schema:
+                type: integer
+    responses:
+            200:
+                description: Returns orders for the logged-in seller.
+            404:
+                description: No orders found for the logged-in seller.
+    """
     loggedin_user_id = session.get('loggedin_user_id')
 
     order_details = db.session.scalars(db.select(Orderdetails).filter_by(SellerID=loggedin_user_id)).all()
@@ -96,6 +126,24 @@ def find_by_SellerID():
 # Or click [view] hyperlink in seller.html.
 @app.route('/order/<int:OrderDetailID>')
 def order_detail(OrderDetailID):
+    """
+    Retrieve order details by OrderDetailID.
+    ---
+    tags:
+        -   Order
+    parameters:
+        -   name: OrderDetailID
+            in: path
+            description: ID of the order detail to retrieve
+            required: true
+            schema:
+                type: integer
+    responses:
+            200:
+                description: Returns order details for the specified OrderDetailID.
+            404:
+                description: No order detail found for the specified OrderDetailID.
+    """
     order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderDetailID).limit(1)).first()
     if order:
         order_detail = {
@@ -120,6 +168,30 @@ def order_detail(OrderDetailID):
 
 @app.route('/update_status', methods=['PUT'])
 def update_status():
+    """
+    Update the status of an order.
+    ---
+    tags:
+      - Order
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              orderId:
+                type: integer
+                description: ID of the order to update.
+              status:
+                type: string
+                description: New status of the order.
+    responses:
+      200:
+        description: Order status updated successfully.
+      404:
+        description: Order not found.
+    """
     data = request.json
     order_id = data.get('orderId')
     status = data.get('status')
@@ -136,6 +208,37 @@ def update_status():
 # To integrate with cart page.    
 @app.route("/create_order", methods=['POST'])
 def create_order():
+
+    """
+    Create a new order.
+    ---
+    tags:
+      - Order
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              UserID:
+                type: integer
+                description: ID of the user placing the order.
+              PartID:
+                type: integer
+                description: ID of the part being ordered.
+              quantity:
+                type: integer
+                description: Quantity of the part being ordered.
+              Price:
+                type: number
+                description: Price of the part being ordered.
+    responses:
+      201:
+        description: Order created successfully.
+      500:
+        description: An error occurred while creating the order.
+    """
     try:
         # Get form data
         UserID = request.form.get('UserID')
@@ -167,6 +270,17 @@ def create_order():
 
 @app.route('/buyer_order')
 def buyer_orders():
+    """
+    Retrieve orders placed by the logged-in buyer.
+    ---
+    tags:
+        - Order
+    responses:
+        200:
+            description: Orders retrieved successfully.
+        404:
+            description: No orders found for the logged-in buyer.
+    """
     loggedin_user_id = session.get('loggedin_user_id')
     print(loggedin_user_id)
 

@@ -6,6 +6,9 @@ import bcrypt
 import requests
 from os import environ
 
+from flasgger import Swagger
+from flask import jsonify
+
 app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -13,11 +16,20 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # Configure SQLAlchemy
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL', 'mysql+mysqlconnector://root@localhost:3306/Authentication')
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/Authentication"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/Authentication"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'logintemplate microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows authentication of users'
+}
+swagger = Swagger(app)
 
 class UserAuth(db.Model):
     __tablename__ = 'UserAuth'
@@ -30,6 +42,34 @@ class UserAuth(db.Model):
 # Routes for authentication
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    """
+    User Login
+    ---
+        tags:
+            - Authentication
+        parameters:
+            -   name: email
+                in: formData
+                type: string
+                required: true
+                description: The email of the user.
+            -   name: password
+                in: formData
+                type: string
+                required: true
+                description: The password of the user.
+        responses:
+            302:
+                description: Redirects to the home page on successful login.
+                headers:
+                    Location:
+                        description: URL of the home page.
+                        schema:
+                            type: string
+                            example: "http://127.0.0.1:5002/"
+            200:
+                description: Render the login page with an error message.
+        """
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -70,11 +110,78 @@ def login():
 
 @app.route('/logout', methods=['POST','GET'])
 def logout():
+    """
+        User Logout
+        ---
+        tags:
+            - Authentication
+        parameters: []
+        responses:
+            200:
+                description: Redirects to the login page on successful logout.
+                headers:
+                Location:
+                    description: URL of the login page.
+                    schema:
+                        type: string
+                        example: "http://127.0.0.1:5002/login"
+
+    """
     session.pop('email', None)
     return redirect(url_for('login'))
-    
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+
+    """
+User Registration
+---
+tags:
+    - Authentication
+parameters: []
+requestBody:
+    required: true
+    content:
+        application/x-www-form-urlencoded:
+            schema:
+                type: object
+                properties:
+                    email:
+                        type: string
+                        description: The email of the user.
+                    password:
+                        type: string
+                        description: The password of the user.
+                    name:
+                        type: string
+                        description: The name of the user.
+                    phone:
+                        type: string
+                        description: The phone number of the user.
+                    age:
+                        type: integer
+                        description: The age of the user.
+                    country:
+                        type: string
+                        description: The country of the user.
+responses:
+    302:
+        description: Redirects to the login page on successful registration.
+        headers:
+            Location:
+                description: URL of the login page.
+                schema:
+                    type: string
+                    example: "http://127.0.0.1:5001"
+    400:
+        description: Bad request. Registration failed.
+    409:
+        description: Conflict. Email already registered.
+    200:
+        description: Successful registration.
+"""
+    
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -100,6 +207,9 @@ def register():
             return redirect(url_for('register'))
         
         add_user_url = 'http://host.docker.internal:5004/add_user'
+        # for swagger:-
+        #add_user_url = 'http://127.0.0.1:5004/add_user'
+
         add_user_params = {'name': name, 'phone' : phone, 'age' : age, 'country' : country}
         add_user_response = requests.get(add_user_url, params=add_user_params)
 

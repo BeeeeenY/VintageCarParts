@@ -5,6 +5,7 @@ from firebase_admin import credentials, storage
 import datetime as dt
 import requests
 from os import environ
+from flasgger import Swagger
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -18,10 +19,18 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/forum"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/forum"
 )
 
 db = SQLAlchemy(app)
+# Initialize flasgger
+app.config['SWAGGER'] = {
+    'title': 'Forum microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create, retrieve, update, and delete of forum posts'
+}
+swagger = Swagger(app)
 
 class Forum(db.Model):
     __tablename__ = 'Posts'
@@ -55,6 +64,16 @@ class Comments(db.Model):
 
 @app.route('/forum', methods=['GET'])
 def get_forum_posts():
+    """
+    Retrieve all forum posts.
+    ---
+        responses:
+            200:
+                description: A list of forum posts.
+            404:
+                description: No forum posts found.
+    ---
+    """
     posts = db.session.query(Forum).all()
     posts_arr = []
 
@@ -126,10 +145,36 @@ def get_forum_posts():
 
 @app.route('/create_post_page')
 def create_post_page():
+    # """
+    # Render a page to create a new forum post.
+    # ---
+    #     responses:
+    #         200:
+    #             description: Page rendered successfully.
+    #         404:
+    #             description: Page not found.
+    # """
     return render_template('createforum.html', data = 'Add Forum Content')
 
 @app.route("/create_post", methods=['POST'])
 def create_post():
+    # """
+    # Create a post in the forum.
+    # ---
+    #     responses:
+    #         302:
+    #             description: Post created successfully.
+    #             headers:
+    #             Location:
+    #                 description: URL of the created post.
+    #                 schema:
+    #                     type: string
+    #                     example: "/forum"
+    #         400:
+    #             description: Missing form data or invalid request.
+    #         500:
+    #             description: An error occurred while creating the post.
+    # """
     title = request.form.get('Title')
     content = request.form.get('Content')
 

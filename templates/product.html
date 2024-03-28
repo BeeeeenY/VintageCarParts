@@ -231,8 +231,10 @@
                     
                     <!-- Add to Cart, To Add Action-->
                     <form id="cartForm" action="http://localhost:3000/add-to-cart" method="POST" style="color:gray">
-                        <!-- <input type="hidden" id="UserID" name="UserID" value="{{ part.UserID }}"> -->
+                        <input type="hidden" id="BuyerID" name="BuyerID" value="{{ part.BuyerID }}">
+                        <input type="hidden" id="SellerID" name="SellerID" value="{{ part.SellerID }}">
                         <input type="hidden" id="PartID" name="PartID" value="{{ part.PartID }}">
+                        <input type="hidden" id="Description" name="Description" value="{{ part.Description }}">
                         <input type="hidden" id="Price" name="Price" value="{{ part.Price }}">
                         <label for="quantity">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" min="1" max="{{part.QuantityAvailable}}">

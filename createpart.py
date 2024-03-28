@@ -17,10 +17,10 @@ CORS(app)  # Initialize Flask-CORS
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
-# app.config["SQLALCHEMY_DATABASE_URI"] = (
-#     environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
-# )
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize flasgger 
@@ -178,10 +178,7 @@ def create_part():
         add_info = request.form.get('AddInfo')
     else:
         add_info = "" 
-    if request.form.get('Status'):
-        status = request.form.get('Status')
-    else:
-        status = "Available"
+    status = "Available"
 
     if not name or not category or not price or not quantity_available:
         return 'Missing form data.', 400

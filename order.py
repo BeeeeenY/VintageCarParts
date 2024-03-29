@@ -93,8 +93,6 @@ def find_by_SellerID():
                 # Get the username from the response if needed
                 part_details = get_part_response.json().get('part_details')
 
-            print(part_details)
-
             if part_details:
                 order_item = {
                     "OrderID": order_detail.OrderDetailID,

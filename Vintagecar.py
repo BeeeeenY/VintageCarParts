@@ -125,8 +125,8 @@ def get_all_parts():
         if int(loggedin_user_id) != user_id:
             print(user_id)
 
-            # get_username_url = 'http://host.docker.internal:5004/get_username'
-            get_username_url = 'http://127.0.0.1:5004/get_username'
+            get_username_url = 'http://host.docker.internal:5004/get_username'
+            # get_username_url = 'http://127.0.0.1:5004/get_username'
 
             get_username_params = {'user_id': user_id}
             get_username_response = requests.get(get_username_url, params=get_username_params)
@@ -435,7 +435,7 @@ def update_part_page():
             "AddInfo": part_details.Content
             }
 
-    if part_details:
+    if part:
         return render_template('update.html', part = part)
 
     return jsonify(

@@ -100,6 +100,22 @@
         .icon {
             width: 30px;
         }
+        
+        .picture-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Display three pictures in each row */
+            grid-gap: 10px; /* Adjust the gap between pictures */
+        }
+
+        .post-picture {
+            width: 100%;
+            height: auto;
+            max-height: 200px; /* Set a maximum height for each picture */
+            object-fit: cover; /* Ensure the entire picture is visible, cropping as needed */
+            border-radius: 5px; /* Add border-radius for rounded corners */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Add shadow for each picture */
+        }
+
 
     </style>
 </head>
@@ -188,6 +204,13 @@
                         {% endif %}
                     </div>
                     <p>{{post.Content}}</p>
+                    
+                    <div class="picture-grid">
+                        {% for pic in post.Pics %}
+                            <img src="{{ pic }}" alt="Picture" class="post-picture">
+                        {% endfor %}
+                    </div>
+
                     <p>Posted by <strong>{{post.Username}}</strong> on <em>{{post.PostDate}}</em></p>
                     
                     <a class="nav-item nav-link comment-icon" href="#" data-post-id="{{post.PostID}}">

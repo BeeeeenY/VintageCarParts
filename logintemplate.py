@@ -228,7 +228,7 @@ responses:
     return render_template('register.html')
 
 # To pass loggedin user id to car rental
-@app.route('/loggedin_user_id', methods=['GET'])
+@app.route('/rentcar', methods=['GET'])
 def get_loggedin_user_id():
     loggedin_user_id = session.get('loggedin_user_id')
     return render_template("rentcar.html", loggedin_user_id=loggedin_user_id)

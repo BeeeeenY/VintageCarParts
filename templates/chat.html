@@ -85,66 +85,8 @@
             <input placeholder="Type your message..." id="messageInput" />
             <button id="sendButton">Send</button>
         </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
-        integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
-        crossorigin="anonymous"></script>
-    <script>
-        const socket = io();
-        const messageContainer = document.getElementById("messageContainer");
-        const messageInput = document.getElementById("messageInput");
-        const sendButton = document.getElementById("sendButton");
-        const user = "user1"; // Example user (you can dynamically set this based on user login)
-
-        socket.on("connect", () => {
-            appendMessage("Chat with XX", "system");
-        });
-
-        sendButton.addEventListener("click", () => {
-            sendMessage();
-        });
-
-        messageInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                sendMessage();
-            }
-        });
-
-        // Listen for incoming messages
-        socket.on('message', (data) => {
-            console.log(data)
-            // Only append the message if the sender is not the current user
-            if (data.sender !== user) {
-                appendMessage(data.message, data.sender);
-            }
-
-        });
-
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message !== "") {
-                socket.emit("message", { message, sender: user });
-                messageInput.value = "";
-                // appendMessage(message, "from-me");
-            }
-        }
-
-        function appendMessage(message, messageType) {
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message");
-            if (messageType === user) {
-                messageElement.classList.add("from-me");
-            } else if (messageType === "system") {
-                messageElement.classList.add("system");
-            } else {
-                messageElement.classList.add("from-other");
-            }
-            messageElement.innerText = message;
-            messageContainer.appendChild(messageElement);
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-    </script>
-</body>
-
+        <input type="text" id="username" placeholder="Username">
+        <input type="text" id="message" placeholder="Message">
+        <button id="sendBtn">Send</button>
+    </body>
 </html>

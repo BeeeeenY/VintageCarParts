@@ -141,7 +141,7 @@
         <h1 class="text-center mt-5 mb-4">{{data}}</h1>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form action="{% if post %} /update_post/{{post.PostID}} {% else %} /create_post {% endif %}" method="POST">
+                <form action="{% if post %} /update_post/{{post.PostID}} {% else %} /create_post {% endif %}" method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title:</label>
                         <input type="text" class="form-control" id="title" name="Title" {% if post %} value="{{ post.Title }}" {% endif %} required>
@@ -150,7 +150,11 @@
                         <label for="content" class="form-label">Content:</label>
                         <textarea class="form-control" id="content" name="Content" rows="5" required>{% if post %} {{post.Content}} {% endif %}</textarea>
                     </div>
-                    <button type="submit" class="btn btn-outline-primary">Submit</button>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Image:</label>
+                        <input type="file" id="image" name="file" class="form-control" accept="image/*"  multiple>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">{{button}}</button>
                 </form>
             </div>
         </div>
@@ -211,33 +215,6 @@
         function redirectToUrl(url) {
             window.location.href = url;
         }
-
-        function updateForumPosts() {
-            // Make an AJAX request to fetch the latest posts
-            fetch('/get_posts')
-                .then(response => response.json())
-                .then(data => {
-                    // Append new posts below the old ones
-                    const forumPosts = document.getElementById('forum-posts');
-                    if (data.posts.length > 0) {
-                        const posts = data.posts.map(post => `
-                            <div class="post-card">
-                                <h3>${post.Title}</h3>
-                                <p>${post.Content}</p>
-                                <p>Posted by User ID ${post.UserID} on ${post.PostDate}</p>
-                            </div>
-                        `).join('');
-    
-                        forumPosts.insertAdjacentHTML('beforeend', '<h2>Forum Posts:</h2>' + posts);
-                    } else {
-                        forumPosts.innerHTML = '<p>No posts available.</p>';
-                    }
-                })
-                .catch(error => console.error('Error fetching posts:', error));
-        }
-    
-        // Call the updateForumPosts function initially
-        updateForumPosts();
 
     </script>
 </body>

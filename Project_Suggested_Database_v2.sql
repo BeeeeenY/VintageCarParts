@@ -209,4 +209,3 @@
 	(1, 1, 2, 'Try checking the manual', NOW()),
 	(2, 2, 3, 'Part B is very durable, no worries', NOW()),
 	(3, 3, 1, 'Bulk deals are usually available end of year', NOW());
-

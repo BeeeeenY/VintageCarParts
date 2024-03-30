@@ -4,6 +4,11 @@ volumes:
   service_account_key_volume:
     driver: local
 
+networks:
+  my_network:
+    driver: bridge
+
+
 services:
  
   ###################################
@@ -13,15 +18,17 @@ services:
     build:
       context: ./
       dockerfile: Vintagecar.Dockerfile
-    image: matildagoh/vintagecar:esd
+    image: qiuhaoyin/vintagecar:esd
     restart: always
     depends_on:
       - logintemplate
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/products
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/products
       PYTHONUNBUFFERED: 1
     ports:
       - "5002:5002"
+    networks:
+      - my_network
  
   #######################################################
   # The users microservice
@@ -30,10 +37,10 @@ services:
     build:
       context: ./
       dockerfile: users.Dockerfile
-    image: matildagoh/users:esd
+    image: qiuhaoyin/users:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/users
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/users
       PYTHONUNBUFFERED: 1
     ports:
       - "5004:5004"
@@ -45,13 +52,15 @@ services:
     build:
       context: ./
       dockerfile: logintemplate.Dockerfile
-    image: matildagoh/logintemplate:esd
+    image: qiuhaoyin/logintemplate:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/Authentication
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/Authentication
       PYTHONUNBUFFERED: 1
     ports:
       - "5001:5001"
+    networks:
+      - my_network
 
   ##################################
   # The order microservice
@@ -60,10 +69,10 @@ services:
     build:
       context: ./
       dockerfile: order.Dockerfile
-    image: matildagoh/order:esd
+    image: qiuhaoyin/order:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/orders
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/orders
       PYTHONUNBUFFERED: 1
     ports:
       - "5005:5005"
@@ -74,10 +83,10 @@ services:
     build:
       context: ./
       dockerfile: createpart.Dockerfile
-    image: matildagoh/createpart:esd
+    image: qiuhaoyin/createpart:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/products
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/products
       PYTHONUNBUFFERED: 1
     ports:
         - "5003:5003"
@@ -89,10 +98,24 @@ services:
     build:
       context: ./
       dockerfile: forum.Dockerfile
-    image: matildagoh/forum:esd
+    image: qiuhaoyin/forum:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/forum
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/forum
       PYTHONUNBUFFERED: 1
     ports:
         - "5006:5006"
+
+  ##################################
+  # The chat microservice
+  ##################################
+  chat:
+    build:
+      context: ./
+      dockerfile: chat.Dockerfile
+    image: qiuhaoyin/chat:esd
+    restart: always
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+        - "5007:5007"

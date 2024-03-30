@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h3 style="margin-top: 0;">Success</h3>
+  <p>Your order has been successfully placed.</p>
+  <p>Thank you for shopping with us!</p>
+
+
+  <script>
+    function createOrder() {
+
+    fetch("http://localhost:3000/items")
+        .then(response => response.json())
+        .then(items => {
+            // Prepare the payload expected by the Flask `/create_order` endpoint
+            const payload = {
+                orders: items.map(item => ({
+                    PartID: item.id,
+                    Quantity: item.quantity,
+                    Price: item.priceInCents / 100, // Convert back to dollars
+                    BuyerID: item.BuyerID,
+                    SellerID: item.SellerID,
+                    name: item.name, // Optional
+                }))
+            };
+            console.log("Order creation payload:", payload);
+
+            // Now send this payload to the Flask `/create_order` endpoint
+            return fetch("http://127.0.0.1:5005/create_order", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("Order creation result:", result);
+            window.location.href = 'http://127.0.0.1:5005/buyer_order';
+            // Handle success, redirecting
+        })
+        .catch(error => {
+            console.error("Error creating order:", error);
+            // Handle error, showing an error message to the user
+        });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+    createOrder();
+    });
+  </script>
+</body>
+</html>

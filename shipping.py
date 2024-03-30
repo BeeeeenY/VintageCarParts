@@ -9,6 +9,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
+from flasgger import Swagger
 
 app = Flask(__name__)
 
@@ -23,6 +24,17 @@ app.config['SQLALCHEMY_BINDS'] = {
 }
 
 db = SQLAlchemy(app)
+
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'shipping microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows retrieval of shipping rates'
+}
+swagger = Swagger(app)
+
 
 class Users(db.Model):
     __bind_key__ = 'users'
@@ -46,6 +58,30 @@ class UserAuth(db.Model):
 
 @app.route('/shipping', methods=['GET', 'POST'])
 def get_shipping_rate():
+
+    """
+    Retrieve shipping rates.
+
+    ---
+    tags:
+        -   Shipping
+    parameters:
+        -   name: origin_country
+            in: query
+            required: true
+            type: string
+            description: The origin country for shipping.
+        -   name: destination_country
+            in: query
+            required: true
+            type: string
+            description: The destination country for shipping.
+    responses:
+            200:
+                description: Shipping rates retrieved successfully.
+            400:
+                description: Invalid request.
+    """
 
     origin_country = db.session.query(Users.Country).filter(Users.UserID == 3).scalar()
     destination_country = db.session.query(UserAuth.Country).filter(UserAuth.UserID == 1).scalar()

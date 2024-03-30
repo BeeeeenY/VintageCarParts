@@ -7,3 +7,4 @@ bcrypt
 flasgger
 flask_socketio
 flask_cors
+pytz

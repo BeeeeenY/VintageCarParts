@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 from os import environ
 from flasgger import Swagger
+import pytz
 
 app = Flask(__name__)
 
@@ -254,7 +255,9 @@ def create_order():
             SellerID = order_data.get('SellerID')
             ProductName = order_data.get('name')  # opetional
             
-            current_datetime = datetime.now()
+            my_timezone = pytz.timezone('Asia/Singapore')
+
+            current_datetime = datetime.now(my_timezone)
             
             
             order = Orderdetails(

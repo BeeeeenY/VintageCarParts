@@ -347,6 +347,7 @@ def buyer_orders():
                     "SellerID": order_detail.SellerID,
                     "Purchaseddate": formatted_datetime,
                     "ProductName": part_details['ProductName'],
+                    "PartID": order_detail.PartID,
                     "Quantity": order_detail.Quantity,
                     "UnitPrice": part_details['Price'],
                     "TotalPrice": total_price,

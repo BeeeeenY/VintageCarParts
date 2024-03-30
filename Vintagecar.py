@@ -288,6 +288,10 @@ def find_by_partID(PartID):
         }
     ), 404
 
+@app.route('/cart')
+def cart():
+    return render_template('cart.html')
+
 @app.route("/part")
 def find_part_details():
     """

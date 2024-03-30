@@ -16,7 +16,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # Configure SQLAlchemy
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL', 'mysql+mysqlconnector://root@localhost:3306/Authentication')
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/Authentication"
+    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:8889/Authentication"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

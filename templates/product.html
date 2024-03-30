@@ -134,7 +134,7 @@
                     </div>
                 </div>
                 <div class="navbar-nav ml-auto">
-                    <a class="nav-item nav-link" href="#">
+                    <a class="nav-item nav-link" href="http://127.0.0.1:5002/cart">
                         <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
                         Cart
                     </a>
@@ -231,14 +231,19 @@
                     
                     <!-- Add to Cart, To Add Action-->
                     <form id="cartForm" action="http://localhost:3000/add-to-cart" method="POST" style="color:gray">
-                        <!-- <input type="hidden" id="UserID" name="UserID" value="{{ part.UserID }}"> -->
+                        <input type="hidden" id="BuyerID" name="BuyerID" value="{{ part.BuyerID }}">
+                        <input type="hidden" id="ProductName" name="ProductName" value="{{ part.ProductName }}">
+                        <input type="hidden" id="SellerID" name="SellerID" value="{{ part.SellerID }}">
                         <input type="hidden" id="PartID" name="PartID" value="{{ part.PartID }}">
+                        <input type="hidden" id="Description" name="Description" value="{{ part.Description }}">
                         <input type="hidden" id="Price" name="Price" value="{{ part.Price }}">
                         <label for="quantity">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" min="1" max="{{part.QuantityAvailable}}">
                         {{part.QuantityAvailable}} piece(s) available
                         <button type="submit" class="button">Add to Cart</button>
                     </form>
+                    <button id="proceed-to-checkout" class="button">Checkout</button>
+
                 </div>
             </div>
         </div>
@@ -321,7 +326,7 @@
     <form id="sellForm" action="/listing" method="get" style="display: none;">
         <!-- Add any necessary input fields here -->
     </form>
-
+    <script src="script.js" defer></script>
 </body>
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script> -->

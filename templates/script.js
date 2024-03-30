@@ -86,4 +86,8 @@ document.getElementById('checkout').addEventListener('click', (event) => {
   renderCart();
 });
 
-
+document.getElementById('proceed-to-checkout').addEventListener('click', (event) => {
+    event.preventDefault();
+    // Redirect to a checkout page or create a Stripe Checkout session here
+    redirectToCheckout(); // Implement this function based on your checkout logic
+});

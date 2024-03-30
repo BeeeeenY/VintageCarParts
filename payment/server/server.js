@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(
   cors({
-    origin: "http://localhost:8888",
+    origin: ["http://localhost:8888", "http://127.0.0.1:5002","http://127.0.0.1:5005"],
   })
 );
 
@@ -32,17 +32,20 @@ app.get("/items", (req, res) => {
 // To add in user
 app.post("/add-to-cart", (req, res) => {
   console.log("Received data:", req.body);
-  const {  PartID, Price, quantity, BuyerID, SellerID } = req.body;
+  const {  PartID, Price, quantity, BuyerID, SellerID, ProductName } = req.body;
   
   // Assuming PartID is unique, directly add it to the storeItems
   storeItems.set(parseInt(PartID), {
-    priceInCents: parseInt(Price),
+    priceInCents: Math.round(parseFloat(Price)*100),
     quantity: parseInt(quantity),
     BuyerID: parseInt(BuyerID),
-    SellerID: parseInt(SellerID)
+    SellerID: parseInt(SellerID),
+    name: ProductName,
   });
   console.log(storeItems)
-  res.sendStatus(200);
+  // Redirect to cart.html after adding the item to the cart
+  res.redirect('http://127.0.0.1:5002/cart');
+  
 });
 
 app.post("/create-checkout-session", async (req, res) => {
@@ -63,8 +66,8 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: item.quantity,
         }
       }),
-      success_url: `${process.env.CLIENT_URL}/success.html`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel.html`,
+      success_url: `http://127.0.0.1:5005/create_order_new`,
+      cancel_url: `http://127.0.0.1:5002`,
     })
     res.json({ url: session.url })
   } catch (e) {

@@ -203,6 +203,10 @@ def update_status():
     else:
         return jsonify({'success': False, 'error': 'Order not found'}), 404
 
+@app.route("/create_order_new")
+def cart():
+    return render_template('success.html')
+
 # To integrate with cart page.    
 @app.route("/create_order", methods=['POST'])
 def create_order():
@@ -238,33 +242,66 @@ def create_order():
         description: An error occurred while creating the order.
     """
     try:
-        # Get form data
-        UserID = request.form.get('UserID')
-        PartID = request.form.get('PartID')
-        Quantity = int(request.form.get('quantity'))  # Note: 'quantity' field, not 'Quantity'
-        Price = float(request.form.get('Price'))
-        print("Form Data:", request.form)
+        orders_data = request.json.get('orders')  # Expecting a JSON array of orders
+        if not orders_data:
+            return jsonify({"code": 400, "message": "No order data provided"}), 400
+
+        for order_data in orders_data:
+            PartID = order_data.get('PartID')
+            Quantity = order_data.get('Quantity')
+            Price = order_data.get('Price')  # Assuming this is in dollars
+            BuyerID = order_data.get('BuyerID')
+            SellerID = order_data.get('SellerID')
+            ProductName = order_data.get('name')  # opetional
+            
+            current_datetime = datetime.now()
+            
+            
+            order = Orderdetails(
+                PartID=PartID,
+                Quantity=Quantity,
+                Purchaseddate=current_datetime,
+                Price=Price,
+                SellerID=SellerID,
+                Status="Pending",
+                BuyerID=BuyerID
+            )
+            db.session.add(order)
         
-        # Get current date and time
-        current_datetime = datetime.now()
+        db.session.commit()  # Commit once after all orders are added
 
-        # Create a new Orderdetails instance
-        orderdetails = Orderdetails(PartID=PartID, Quantity=Quantity, Purchaseddate=current_datetime.date(), Price=Price, SellerID=UserID, Status="Pending", BuyerID=1) # To change buyer id.
-        db.session.add(orderdetails)
-        db.session.commit()
-
-        # Return success response
-        return jsonify({
-            "code": 201,
-            "message": "Order created successfully."
-        }), 201
-    
+        return jsonify({"code": 201, "message": "Orders created successfully"}), 201
     except Exception as e:
-        # Return error response
-        return jsonify({
-            "code": 500,
-            "message": "An error occurred while creating the order " + str(e)
-        }), 500
+        db.session.rollback()  # Rollback in case of error
+        return jsonify({"code": 500, "message": "An error occurred while creating the orders: " + str(e)}), 500
+    # try:
+    #     # Get form data
+    #     UserID = request.form.get('UserID')
+    #     PartID = request.form.get('PartID')
+    #     Quantity = int(request.form.get('quantity'))  # Note: 'quantity' field, not 'Quantity'
+    #     Price = float(request.form.get('Price'))
+    #     print("Form Data:", request.form)
+        
+    #     # Get current date and time
+    #     current_datetime = datetime.now()
+
+    #     # Create a new Orderdetails instance
+    #     orderdetails = Orderdetails(PartID=PartID, Quantity=Quantity, Purchaseddate=current_datetime.date(), Price=Price, SellerID=UserID, Status="Pending", BuyerID=1) # To change buyer id.
+    #     db.session.add(orderdetails)
+    #     db.session.commit()
+
+    #     # Return success response
+    #     return jsonify({
+    #         "code": 201,
+    #         "message": "Order created successfully."
+    #     }), 201
+    
+    # except Exception as e:
+    #     # Return error response
+    #     return jsonify({
+    #         "code": 500,
+    #         "message": "An error occurred while creating the order " + str(e)
+    #     }), 500
 
 @app.route('/buyer_order')
 def buyer_orders():

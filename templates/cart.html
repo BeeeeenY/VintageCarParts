@@ -7,23 +7,22 @@
     <title>Vintage Car</title>
 
     <style>
-        .label {
-            color: gray;
+        .box {
+            width: 300px;
+            height: auto;
         }
-
-        .itemtotal {
-            color: orangered;
-            text-align: right;
-            font-weight: bold;
-            font-size: large;
+        .navbar .navbar-nav .nav-link .icon {
+            display: inline-block;
+            width: 20px; /* Adjust the size as needed */
+            height: 20px; /* Adjust the size as needed */
+            margin-right: 10px;
         }
-
         .button {
-            background-color: orangered;
+            background-color: orange;
             border: none;
             color: white;
             font-weight: bold;
-            padding: 7px;
+            padding: 16px 32px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -32,75 +31,240 @@
             transition-duration: 0.4s;
             cursor: pointer;
             border-radius: 8px;
+            width: 55%;
         }
 
         .button:hover {
-            background-color: rgba(255, 68, 0, 0.575);
+            background-color: rgba(255, 166, 0, 0.61);
             color: white;
+        }
+
+        hr.solid {
+            border-top: 3px solid #bbb;
+        }
+
+        .infoheader {
+            color: orange;
+            font-weight: bolder; 
+            font-size: x-large;
+        }
+
+        .comment {
+            background-color: #f3f3f3;         
+            border: none;
+            padding: 10px;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .label {
+            color: gray;
+        }
+
+        .value {
+            color: black;
+            font-weight: 500;
+        }
+
+        /* Limit the size of the carousel */
+        #carouselExampleCaptions {
+            max-width: 200px; /* Adjust the maximum width as needed */
+            max-height: auto; /* Adjust the maximum height as needed */
+            margin: auto; /* Center the carousel horizontally */
+        }
+
+        /* Limit the size of the carousel images */
+        .carousel-item img {
+            max-width: 100%; /* Make images responsive within the carousel */
+            max-height: 100%; /* Make images responsive within the carousel */
+        }
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            height:200px;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Change padding for smaller pop-up */
+            z-index: 9999;
+            border-radius: 10px; /* Add rounded corners to pop-up box */
+        }
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative; /* Set position relative for close button positioning */
+            height: 100%;
+        }
+        .close-btn {
+            cursor: pointer;
+            position: absolute;
+            top: 5px;
+            right: 5px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container mt-4 mb-4">
         <!-- Navigation Bar -->
-        <div class="row justify-content-between">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="row">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
                 <span class="navbar-brand mb-0 h1">VintageCar</span>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class="navbar-toggler-icon"></span>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                  <div class="navbar-nav">
-                    <a class="nav-item nav-link active" href="index.html">Home</a>
-                    <a class="nav-item nav-link" href="#">Car Parts</a>
-                    <a class="nav-item nav-link" href="#">Others</a>
-                  </div>
+                    <div class="navbar-nav">
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5002/">Home</a>
+                        <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5006/forum">Community Forum</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5005/buyer_order">Orders</a>
+                    </div>
                 </div>
-                <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="register.html">Register</a>
-                    <a class="nav-item nav-link" href="login.html">Login</a>
+                <div class="navbar-nav ml-auto">
+                    <a class="nav-item nav-link" href="http://127.0.0.1:5002/cart">
+                        <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
+                        Cart
+                    </a>
+                    <a class="nav-item nav-link" href="#">
+                        <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
+                        Messages
+                    </a>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                            <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
+                            Profile
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Account Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="http://127.0.0.1:5001/logout">Logout</a>
+                        </div>
+                    </div>
                 </div>
                 <form class="form-inline">
-                    <button class="btn btn-outline-danger" type="button">Sell</button>
+                    <button id="sellBtn" class="btn btn-outline-danger" type="button" onclick="toggleButton()">Sell</button>
                 </form>
             </nav>
         </div>
 
-        <div class="row mb-4"></div>
     </div>
 
     <div class="container">
         <div class="row">
             <div style="font-weight: bolder; font-size: x-large; text-align: center;">Shopping Cart</div>
         </div>
-        <div class="row mb-4"></div>
-        <div class="row">
-            {% for key, value in cart.items() %}
-                <div class="col-md-3 mb-4">
-                    <div class="card" style="width: 18rem;">
-                        <div class="card-body">
-                            <h5 class="card-title pl-3">{{ value['ProductName'] }}</h5>
-                            <img src="{{ value['Pic'] }}" class="card-img-top" alt="...">
-                            <h6 class="card-subtitle mb-2"></h6>
-                            <h6></h6>
-                            <p class="card-text">
-                                {{ value['Description'] }}<br><br>
-                                <span class="label">Unit Price:</span>
-                                ${{ '%.2f'|format(value['Unit Price']) }}<br>
-                                <span class="label">Quantity: </span>
-                                {{ value['Quantity'] }}<br>
-                                <div class="itemtotal">
-                                    Total Price: ${{ '%.2f'|format(value['Total Price']) }}<br>
-                                    <button type="submit" class=" button">Remove</button>
-                                </div>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+        <div id="cart-items"></div>
+        
+    <button id="checkout-button" class="checkout">Checkout</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('http://127.0.0.1:3000/items') // Update this URL if your backend is hosted elsewhere
+                .then(response => response.json())
+                .then(items => {
+                    const cartItemsContainer = document.getElementById('cart-items');
+                    if (items.length === 0) {
+                        cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+                    } else {
+                        items.forEach(item => {
+                            const itemElement = document.createElement('div');
+                            itemElement.innerHTML = `
+                                <h4>${item.name}</h4>
+                                <p>${item.quantity} in cart</p>
+                                <p>$${(item.priceInCents / 100).toFixed(2)}</p>
+                            `;
+                            cartItemsContainer.appendChild(itemElement);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching items:', error));
+        });
+
+        // Define the cart array
+        let cart = [];
+
+        // Function to fetch items and populate the cart
+        const fetchItemsAndPopulateCart = () => {
+            return fetch('http://127.0.0.1:3000/items') 
+                .then(response => response.json())
+                .then(fetchedItems => {
+                    // Clear the existing cart items
+                    cart.length = 0;
+
+                    // Iterate over each item fetched and add it to the cart
+                    fetchedItems.forEach(item => {
+                        const itemToAdd = {
+                            id: item.id, // Assuming ID is unique and should be kept as is
+                            priceInCents: item.priceInCents,
+                            quantity: item.quantity,
+                            BuyerID: item.BuyerID,
+                            SellerID: item.SellerID,
+                            name: item.name,
+                        };
+                        cart.push(itemToAdd);
+                    });
+
+                    console.log('Cart items:', cart);
+                })
+                .catch(error => console.error('Error fetching items:', error));
+            };
+
+        // Checkout function
+        const checkout = () => {
+            fetch("http://localhost:3000/create-checkout-session", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    items: cart.map(item => ({ id: parseInt(item.id), quantity: item.quantity })),
+                }),
+            })
+            .then(res => {
+                if (res.ok) return res.json();
+                return res.json().then(json => Promise.reject(json));
+            })
+            .then(({ url }) => {
+                window.location = url; // Redirect to payment URL
+            })
+            .catch(e => {
+                console.error(e.error);
+            });
+        };
+
+        // Attach event listener to the "Checkout" button
+        document.getElementById('checkout-button').addEventListener('click', (event) => {
+            if (cart.length === 0) {
+                // Fetch items and populate cart if cart is empty before proceeding to checkout
+                fetchItemsAndPopulateCart().then(() => {
+                    if (cart.length > 0) {
+                        checkout();
+                    } else {
+                        alert("Your cart is still empty after trying to fetch items.");
+                    }
+                });
+            } else {
+                checkout(); // Proceed to checkout if the cart is already populated
+            }
+        });
+    </script>
+
+
+
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>

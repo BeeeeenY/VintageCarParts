@@ -545,11 +545,6 @@ def display_part(part):
 def store_page():
     return render_template('add.html')
 
-@app.route('/chat')
-def chat_page():
-    return render_template('chat.html')
-
-
 # if __name__ == '__main__':
 #     app.run(port=5002, debug=True)
 if __name__ == '__main__':

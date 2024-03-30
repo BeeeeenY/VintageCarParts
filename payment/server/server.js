@@ -48,6 +48,12 @@ app.post("/add-to-cart", (req, res) => {
   
 });
 
+app.post("/clear-cart", (req, res) => {
+  storeItems.clear(); // This clears the entire map, effectively emptying the cart
+  console.log("Cart has been emptied");
+  res.status(200).send("Cart cleared successfully");
+});
+
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({

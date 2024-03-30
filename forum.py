@@ -61,6 +61,23 @@ class Comments(db.Model):
 
 @app.route('/forum', methods=['GET'])
 def get_forum_posts():
+    """
+    Fetch forum posts.
+    ---
+    tags:
+        -  posts
+    parameters:
+        -   in: query
+            name: search
+            schema:
+                type: string
+                description: Optional search query for filtering posts.
+    responses:
+      200:
+        description: Returns forum posts.
+      404:
+        description: No posts found.
+    """
     search_query = request.args.get('search')
     if search_query == None:
         search_query = ""
@@ -170,23 +187,38 @@ def create_post_page():
 
 @app.route("/create_post", methods=['POST'])
 def create_post():
-    # """
-    # Create a post in the forum.
-    # ---
-    #     responses:
-    #         302:
-    #             description: Post created successfully.
-    #             headers:
-    #             Location:
-    #                 description: URL of the created post.
-    #                 schema:
-    #                     type: string
-    #                     example: "/forum"
-    #         400:
-    #             description: Missing form data or invalid request.
-    #         500:
-    #             description: An error occurred while creating the post.
-    # """
+    """
+    Create a post in the forum.
+    ---
+    tags:
+      - posts
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              Title:
+                type: string
+                description: Title of the post.
+              Content:
+                type: string
+                description: Content of the post.
+    responses:
+            200:
+                description: Post created successfully.
+                headers:
+                Location:
+                    description: URL of the created post.
+                    schema:
+                        type: string
+                        example: "/forum"
+            400:
+                description: Missing form data or invalid request.
+            500:
+                description: An error occurred while creating the post.
+    """
     title = request.form.get('Title')
     content = request.form.get('Content')
 
@@ -250,6 +282,38 @@ def create_post():
 
 @app.route('/create_comment', methods=['POST'])
 def create_comment():
+    """
+    Create a comment in the forum.
+    ---
+    tags:
+      - create_comment
+    requestBody:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              post_id:
+                type: string
+                description: ID of the post.
+              comment:
+                type: string
+                description: Content of the comment.
+    responses:
+            200:
+                description: Comment created successfully.
+                headers:
+                Location:
+                    description: URL of the created post.
+                    schema:
+                        type: string
+                        example: "/forum"
+            400:
+                description: Missing form data or invalid request.
+            500:
+                description: An error occurred while creating the comment.
+    """
     comment_content = request.form.get('comment')
     post_id = request.form.get('post_id')
 
@@ -275,6 +339,24 @@ def create_comment():
 
 @app.route("/delete_post/<int:PostID>")
 def delete_post(PostID):
+    """
+    Delete a Post.
+
+    ---
+    tags:
+        -   Deletepost
+    parameters:
+        -   name: PostID
+            in: path
+            description: ID of the post to delete
+            required: true
+            type: integer
+    responses:
+        200:
+            description: Post deleted successfully
+        500:
+            description: An error occurred while deleting the post
+    """
     db.session.query(Forum).filter_by(PostID=PostID).delete()
     db.session.commit()
 
@@ -282,6 +364,24 @@ def delete_post(PostID):
 
 @app.route("/delete_comment/<int:CommentID>")
 def delete_comment(CommentID):
+    """
+    Delete a comment.
+
+    ---
+    tags:
+        -   Deletecomment
+    parameters:
+        -   name: CommentID
+            in: path
+            description: ID of the comment to delete
+            required: true
+            type: integer
+    responses:
+        200:
+            description: Comment deleted successfully
+        500:
+            description: An error occurred while deleting the comment
+    """
     db.session.query(Comments).filter_by(CommentID=CommentID).delete()
     db.session.commit()
 
@@ -289,6 +389,22 @@ def delete_comment(CommentID):
 
 @app.route("/update_post_page/<int:PostID>")
 def update_post_page(PostID):
+    """
+    Retrieve the page for updating a post.
+
+    This endpoint returns an HTML page containing a form for updating the post details.
+
+    ---
+    parameters:
+      - name: PostID
+        in: path
+        description: ID of the post to update
+        required: true
+        type: integer
+    responses:
+      200:
+        description: HTML page for updating the post
+    """
     post_details = db.session.query(Forum).filter(Forum.PostID == PostID).first()
     if post_details:
         post = {
@@ -300,6 +416,45 @@ def update_post_page(PostID):
 
 @app.route("/update_post/<int:PostID>", methods=['POST'])
 def update_post(PostID):
+    """
+    Update a post
+
+    ---
+    parameters:
+        -   name: PostID
+            in: path
+            description: ID of the post to be updated
+            required: true
+            type: integer
+        -   name: Title
+            in: formData
+            description: New title for the post
+            required: true
+            type: string
+        -   name: Content
+            in: formData
+            description: New content for the post
+            required: true
+            type: string
+        -   name: file
+            in: formData
+            description: Files to be uploaded (optional)
+            required: false
+            type: file
+            format: binary
+    responses:
+        '200':
+                description: Post updated successfully
+        '400':
+                description: Bad request - If the request does not contain valid data
+        '500':
+                description: Internal server error - If an error occurs while updating the post
+    consumes:
+        -   multipart/form-data
+    produces:
+        -   application/json
+
+    """
     Title = request.form.get('Title')
     Content = request.form.get('Content')
 
@@ -363,6 +518,35 @@ def update_post(PostID):
 
 @app.route("/update_comment/<int:CommentID>", methods=['POST'])
 def update_comment(CommentID):
+    """
+    Update a comment
+
+    ---
+    parameters:
+        -   name: CommentID
+            in: path
+            description: ID of the comment to be updated
+            required: true
+            type: integer
+        -   name: edited_comment
+            in: formData
+            description: New content for the comment
+            required: true
+            type: string
+            
+    responses:
+        '200':
+                description: Post updated successfully
+        '400':
+                description: Bad request - If the request does not contain valid data
+        '500':
+                description: Internal server error - If an error occurs while updating the post
+    consumes:
+        -   multipart/form-data
+    produces:
+        -   application/json
+
+    """
     edited_comment = request.form.get('edited_comment')
 
     comment = db.session.query(Comments).filter_by(CommentID = CommentID).first()

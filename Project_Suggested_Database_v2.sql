@@ -77,6 +77,7 @@
 		PartID INT,
 		Quantity INT,
 		Purchaseddate datetime,
+		Receivedate datetime,
 		Price DECIMAL(10, 2),
 		SellerID INT,
 		Status VARCHAR(255),
@@ -173,10 +174,10 @@
 
 	-- Assuming CartIDs: 1, 2, 3 and PartIDs from Parts table: 1, 2, 3
 	-- Insert into OrderDetails
-    INSERT INTO OrderDetails (PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID) VALUES 
-    (1, 2, NOW(), 99.99, 1, 'Pending', 2),
-    (2, 1, NOW(), 199.99, 2, 'Packing', 3),
-    (3, 3, NOW(), 9.99, 3, 'Shipped', 1);
+    INSERT INTO OrderDetails (PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID) VALUES 
+    (1, 2, NOW(), NULL, 99.99, 1, 'Pending', 2),
+    (2, 1, NOW(), NULL, 199.99, 2, 'Packing', 3),
+    (3, 3, NOW(), NULL, 9.99, 3, 'Shipped', 1);
 
 	USE `Payment`;
 
@@ -209,3 +210,4 @@
 	(1, 1, 2, 'Try checking the manual', NOW()),
 	(2, 2, 3, 'Part B is very durable, no worries', NOW()),
 	(3, 3, 1, 'Bulk deals are usually available end of year', NOW());
+

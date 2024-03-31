@@ -216,31 +216,43 @@ def create_order():
     Create a new order.
     ---
     tags:
-      - Order
+        - Order
     requestBody:
-      required: true
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            type: object
-            properties:
-              UserID:
-                type: integer
-                description: ID of the user placing the order.
-              PartID:
-                type: integer
-                description: ID of the part being ordered.
-              quantity:
-                type: integer
-                description: Quantity of the part being ordered.
-              Price:
-                type: number
-                description: Price of the part being ordered.
+        required: true
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        orders:
+                            type: array
+                            description: Array of orders.
+                            items:
+                                type: object
+                                properties:
+                                    BuyerID:
+                                        type: integer
+                                        description: ID of the user placing the order.
+                                    PartID:
+                                        type: integer
+                                        description: ID of the part being ordered.
+                                    Quantity:
+                                        type: integer
+                                        description: Quantity of the part being ordered.
+                                    Price:
+                                        type: number
+                                        description: Price of the part being ordered.
+                                    SellerID:
+                                        type: integer
+                                        description: ID of the seller.
+                                    name:
+                                        type: string
+                                        description: Optional name of the product.
     responses:
-      201:
-        description: Order created successfully.
-      500:
-        description: An error occurred while creating the order.
+        201:
+            description: Order created successfully.
+        500:
+            description: An error occurred while creating the order.
     """
     try:
         orders_data = request.json.get('orders')  # Expecting a JSON array of orders

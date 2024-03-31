@@ -100,6 +100,20 @@ def get_userphone():
         return jsonify(userphone=user_phone)
     else:
         return jsonify(error="User not found"), 404
+    
+@app.route("/get_country")
+def get_country():
+    user_id = request.args.get('user_id')
+    print(user_id)
+   
+    country = db.session.query(Users.Country).filter(Users.UserID == user_id).first()
+
+    if country: 
+        country = country[0]
+        print(country)
+        return jsonify(country=country)
+    else:
+        return jsonify(error="User not found"), 404
 
 @app.route("/add_user")
 def add_user():

@@ -152,7 +152,7 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
         // Extract data from the request body
         const { Brand, Model, VehicleIdentificationNum, Description, Price, Location, SellerID } = req.body;
         const Images = req.files; // Access the uploaded files using req.files
-
+        console.log(Images);
         // Array to store image URLs
         const imageUrls = [];
 
@@ -215,7 +215,7 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
         console.log('Car created successfully:', response.data);
         
         // Send a response back to the client
-        res.status(200).send('Car created successfully');
+        res.redirect(`http://127.0.0.1:5009/car/${VehicleIdentificationNum}`);
     } catch (error) {
         // Handle errors
         console.error('Error:', error.message);

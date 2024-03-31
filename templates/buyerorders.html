@@ -183,7 +183,11 @@
                         <td>{{order.Purchaseddate}}</td>
                         <td>
                             {% if order.Status == "Shipped" %}
-                                <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')">Review</button>
+                                {% if order.Expired == False %}
+                                    <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')">Review</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')" disabled>Review</button>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>

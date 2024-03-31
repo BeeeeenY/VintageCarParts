@@ -1,6 +1,5 @@
 1. cd to the car folder
-
-2. Install following packages
+Make sure following packages are installed:
 npm install
 npm install express
 npm install axios
@@ -8,5 +7,5 @@ npm install body-parser
 npm install ejs
 npm install firebase-admin
 
-3. Run the server
+2. Run the server
 npm start

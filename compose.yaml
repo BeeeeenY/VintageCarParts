@@ -133,3 +133,17 @@ services:
       PYTHONUNBUFFERED: 1
     ports:
         - "5008:5008"
+
+  ##################################
+  # The car microservice
+  ##################################
+  car:
+    build:
+      context: ./car
+      dockerfile: car.Dockerfile
+    image: lewchinyee/car:esd
+    restart: always
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5009:5009"

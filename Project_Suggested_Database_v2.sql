@@ -51,22 +51,6 @@
 		PasswordHash VARCHAR(255) NOT NULL
 	);
 
-	CREATE TABLE Addresses (
-		AddressID INT AUTO_INCREMENT PRIMARY KEY,
-		UserID INT,
-		FirstName VARCHAR(255),
-		LastName VARCHAR(255),
-		Company VARCHAR(255),
-		StreetAddress1 VARCHAR(255),
-		StreetAddress2 VARCHAR(255),
-		City VARCHAR(255),
-		StateProvince VARCHAR(255),
-		PostalCode VARCHAR(20),
-		Country VARCHAR(255),
-		Phone VARCHAR(20),
-		AddressType ENUM('billing', 'shipping')
-	);
-
 	CREATE DATABASE IF NOT EXISTS `Orders` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 	USE `Orders`;
@@ -163,12 +147,6 @@
 	(1, 'john.doe@example.com', 'hashedpassword1'),
 	(2, 'jane.smith@example.com', 'hashedpassword2'),
 	(3, 'bob.brown@example.com', 'hashedpassword3');
-
-	-- Insert into Addresses
-	INSERT INTO Addresses (UserID, FirstName, LastName, Company, StreetAddress1, StreetAddress2, City, StateProvince, PostalCode, Country, Phone, AddressType) VALUES 
-	(1, 'John', 'Doe', 'Company A', '123 Main St', 'Suite 100', 'CityA', 'StateA', '12345', 'UnitedStates', '123-456-7890', 'shipping'),
-	(2, 'Jane', 'Smith', 'Company B', '456 Second St', NULL, 'CityB', 'StateB', '67890', 'UnitedKingdom', '098-765-4321', 'billing'),
-	(3, 'Bob', 'Brown', '', '789 Third St', NULL, 'CityC', 'StateC', '111213', 'Canada', '456-789-1230', 'shipping');
 
 	USE `Orders`;
 

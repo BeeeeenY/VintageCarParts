@@ -1,30 +1,10 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import update
-from datetime import datetime
-import datetime as dt
-from sqlalchemy import and_
-
 import requests
-import re
-from bs4 import BeautifulSoup
-from urllib.parse import urlencode
 from flasgger import Swagger
 
 app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-app.config['SQLALCHEMY_BINDS'] = {
-    'users': 'mysql+mysqlconnector://root@localhost:3306/users',
-    'userauth': 'mysql+mysqlconnector://root@localhost:3306/Authentication'
-}
-
-db = SQLAlchemy(app)
-
 
 # Initialize flasgger 
 app.config['SWAGGER'] = {
@@ -34,27 +14,6 @@ app.config['SWAGGER'] = {
     'description': 'Allows retrieval of shipping rates'
 }
 swagger = Swagger(app)
-
-
-class Users(db.Model):
-    __bind_key__ = 'users'
-    __tablename__ = 'users'  # Ensure this matches the actual table name in your database
-
-    UserID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Name = db.Column(db.String(255), nullable=False)
-    Phone = db.Column(db.String(20))
-    Age = db.Column(db.Integer)
-    Country = db.Column(db.String(255))
-
-class UserAuth(db.Model):
-    __bind_key__ = 'userauth'
-    __tablename__ = 'addresses'  # Specify the correct table name here
-
-    AddressID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UserID = db.Column(db.Integer, nullable=False)
-    FirstName = db.Column(db.String(255), unique=True, nullable=False)
-    Lastname = db.Column(db.String(255), nullable=False)
-    Country = db.Column(db.String(255), nullable=False)
 
 @app.route('/shipping', methods=['GET', 'POST'])
 def get_shipping_rate():
@@ -83,11 +42,22 @@ def get_shipping_rate():
                 description: Invalid request.
     """
 
-    origin_country = db.session.query(Users.Country).filter(Users.UserID == 3).scalar()
-    destination_country = db.session.query(UserAuth.Country).filter(UserAuth.UserID == 1).scalar()
+    get_origin_country_url = 'http://host.docker.internal:5002/get_country'
+    get_origin_country_params = {'part_id': 3}
+    get_origin_country_response = requests.get(get_origin_country_url, params=get_origin_country_params)
 
-    print(origin_country)
-    print(destination_country)
+    if get_origin_country_response.status_code == 200:
+        origin_country = get_origin_country_response.json().get('Country')
+        print("Origin country:", origin_country)
+
+
+    get_destination_country_url = 'http://host.docker.internal:5004/get_country'
+    get_destination_country_params = {'user_id': 3}
+    get_destination_country_response = requests.get(get_destination_country_url, params=get_destination_country_params)
+
+    if get_destination_country_response.status_code == 200:
+        destination_country = get_destination_country_response.json().get('country')
+        print("Destination country:", destination_country)
 
     # Constructing the URL with dynamic origin and destination countries
     url = f"https://ship.freightos.com/api/shippingCalculator?loadtype=boxes&weight=1&width=50&length=50&height=50&origin={origin_country}&quantity=1&destination={destination_country}"
@@ -125,4 +95,4 @@ def get_shipping_rate():
         # print("Max Transit Time:", max_transit_time, "days")
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(port=5008, debug=True)

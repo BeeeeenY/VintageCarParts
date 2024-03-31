@@ -199,8 +199,8 @@ def get_all_parts():
             }
         ), 404
 
-# http://127.0.0.1:5002/<PartID> to render product.html to view product details.    
-@app.route("/<int:PartID>")
+# Car Parts Details
+@app.route("/<int:PartID>")  
 def find_by_partID(PartID):
     """
     Get a car part by its PartID
@@ -216,51 +216,32 @@ def find_by_partID(PartID):
             description: No car part with the specified PartID found
     """
     buyer_id = session.get('loggedin_user_id')
-    print(buyer_id)
-
-    part = db.session.scalars(db.select(Parts).filter_by(PartID=PartID).limit(1)).first()
-
-    user_id = part.UserID
-
-    # Fetch user name for the current part
-    get_username_url = 'http://host.docker.internal:5004/get_username'
-    get_username_params = {'user_id': user_id}
-    get_username_response = requests.get(get_username_url, params=get_username_params)
-
-    if get_username_response.status_code == 200:
-        # Get the username from the response if needed
-        username = get_username_response.json().get('username')
-        print("Username:", username)
 
     # Fetch part details for the current part
     part_details = db.session.query(Parts).filter(Parts.PartID == PartID).first()
 
-    part_id_str = str(PartID)
-
-    # Get a reference to the folder
-    folder_prefix = "parts/" + part_id_str + '/'
-    
-    # Retrieves all the files within the folder specified by folder_prefix.
-    blobs = bucket.list_blobs(prefix=folder_prefix)
-
-    # Define a distant future timestamp
-    future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
-
-    pic_arr = []
-
-    for blob in blobs:
-        picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
-        pic_arr.append(picture_url)
-
-    if len(pic_arr) == 0:
-        print("No files found.")
-
-    print(pic_arr)
-
-    comments = db.session.scalars(db.select(Comments).filter_by(PartID=PartID)).all()
-    
     if part_details:
-        # Create a dictionary to hold part data
+        user_id = part_details.UserID
+        
+        # Fetch username for the current user ID
+        get_username_url = 'http://host.docker.internal:5004/get_username'
+        get_username_params = {'user_id': user_id}
+        get_username_response = requests.get(get_username_url, params=get_username_params)
+
+        if get_username_response.status_code == 200:
+            username = get_username_response.json().get('username')
+        else:
+            username = "Unknown"
+        
+        # Fetch comments for the current part
+        comments = db.session.scalars(db.select(Comments).filter_by(PartID=PartID)).all()
+
+        part_id_str = str(PartID)
+        folder_prefix = "parts/" + part_id_str + '/'
+        blobs = bucket.list_blobs(prefix=folder_prefix)
+        future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
+        pic_arr = [blob.generate_signed_url(expiration=future_timestamp) for blob in blobs]
+
         part = {
             "PartID": PartID,
             "ProductName": part_details.Name,
@@ -272,13 +253,28 @@ def find_by_partID(PartID):
             "Model": part_details.Model,
             "Status": part_details.Status,
             "Pics": pic_arr,
-            "Comments": comments,
+            "Comments": [],
             "BuyerID": buyer_id,
-            "SellerID":user_id
-            }
+            "SellerID": user_id
+        }
+        
+        for comment in comments:
+            # Fetch username for the current comment's user ID
+            get_comment_username_params = {'user_id': comment.UserID}
+            get_comment_username_response = requests.get(get_username_url, params=get_comment_username_params)
 
+            if get_comment_username_response.status_code == 200:
+                comment_username = get_comment_username_response.json().get('username')
+            else:
+                comment_username = "Unknown"
+            
+            part["Comments"].append({
+                "UserID": comment.UserID,
+                "UserName": comment_username,
+                "CommentDate": comment.CommentDate,
+                "Content": comment.Content
+            })
 
-    if part:
         return display_part(part)
 
     return jsonify(
@@ -569,7 +565,7 @@ def display_all_parts(parts_data):
     # Render the template and pass data to it
     return render_template('template.html', parts=parts_data)
 
-# Display selected carpart
+# Render car parts details
 def display_part(part):
     return render_template('product.html', part=part)
 

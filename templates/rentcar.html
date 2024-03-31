@@ -3,79 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Rent a Car</title>
     <style>
+        /* Navigation Bar */
+        .navbar .navbar-nav .nav-link .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        /* Table */
         .category {
             font-weight:bolder;
             font-size: large;
         }
-        .box {
-            width: 300px;
-            height: auto;
-        }
-        .greyed-out {
-            opacity: 0.5; /* Set opacity to make image appear greyed out */
-        }
-        .navbar .navbar-nav .nav-link .icon {
-            display: inline-block;
-            width: 20px; /* Adjust the size as needed */
-            height: 20px; /* Adjust the size as needed */
-            margin-right: 10px;
-        }
-        .card {
-            width: 300px;
-            height: 350px; /* Increased height to accommodate the edit button */
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border-bottom: 15px solid orange; /* Set thicker orange border at the bottom */
-        }
-    
-        .card img {
-            width: 100%; /* Make the image fill the entire width of the card */
-            height: 50%; /* Set height to 50% of the card height */
-            object-fit: cover; /* Ensure the image covers the entire space */
-            object-position: top center; /* Position the image at the top center */
-        }
-    
-        .card-body {
-            padding: 10px;
-            height: calc(50% - 20px); /* Set height to 50% of the card height minus padding */
-            box-sizing: border-box; /* Include padding and border in height calculation */
-            overflow: auto; /* Add overflow for scrolling if needed */
-        }
-        .edit-icon {
-            position: absolute;
-            bottom: 5px; /* Adjust vertical position */
-            right: 10px; /* Adjust horizontal position */
-            width: 20px;
-            height: 40px;
-            z-index: 999; /* Ensure edit icon appears on top of other content */
-        }
-
-        #plus-button-container {
-            position: fixed;
-            bottom: 80px;
-            right: 80px;
-        }
-
-        #yellow-button {
-            background-color: orange;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 30px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
         
+        /* Container */
+        .container {
+            position: relative;
+        }
+
+        /* About Pop-up */
         .popup-container {
             display: none;
             position: fixed;
@@ -86,9 +36,9 @@
             background-color: white;
             border: 1px solid #ccc;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px; /* Change padding for smaller pop-up */
+            padding: 20px;
             z-index: 9999;
-            border-radius: 10px; /* Add rounded corners to pop-up box */
+            border-radius: 10px;
         }
         .popup-content {
             display: flex;
@@ -96,7 +46,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            position: relative; /* Set position relative for close button positioning */
+            position: relative;
             height: 100%;
         }
         .close-btn {
@@ -108,8 +58,8 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <div class="container mt-4 mb-4">
-        <!-- Navigation Bar -->
         <div class="row">
             <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
                 <span class="navbar-brand mb-0 h1">VintageCar</span>
@@ -121,23 +71,18 @@
                     <div class="navbar-nav">
                         <a class="nav-item nav-link active" href="http://127.0.0.1:5002/listing">Home</a>
                         <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
-                        <a class="nav-item nav-link" href="http://127.0.0.1:5006/forum">Community Forum</a>
                         <a class="nav-item nav-link" href="http://127.0.0.1:5005/seller">Orders</a>
                         <a class="nav-item nav-link" href="http://127.0.0.1:5001/rentcar">Car Rental</a>
                     </div>
                 </div>
                 <div class="navbar-nav ml-auto">
                     <a class="nav-item nav-link" href="#">
-                        <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
-                        Cart
-                    </a>
-                    <a class="nav-item nav-link" href="#">
                         <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
                         Messages
                     </a>
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
+                           aria-haspopup="true" aria-expanded="false">
                             <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
                             Profile
                         </a>
@@ -149,72 +94,93 @@
                     </div>
                 </div>
                 <form class="form-inline">
-                    <button class="btn btn-outline-success" type="button">Buy</button>
+                    <button class="btn btn-success" type="button">Buy</button>
                 </form>
             </nav>
         </div>
-    </div>
-    </div>
 
     <h1 class="text-center mt-5 mb-4">Car Rental</h1>
-
+    
+    <!-- Buttons -->
     <div class="d-grid gap-2 justify-content-center">
-        User ID: {{loggedin_user_id}}
         <form id="sellerForm" action="http://127.0.0.1:5009/seller" method="POST" style="color:gray">
             <input type="hidden" id="SellerID" name="SellerID" value="{{ loggedin_user_id }}">
-            <button type="submit" class="btn btn-success btn-lg" style="width: 300px;">List Car for Rent</button></br></br>
-            <button type="button" class="btn btn-danger btn-lg" onclick="manageCarRentals()" style="width: 300px;">Manage Car Rentals</button></br></br>
-            <button type="button" class="btn btn-primary btn-lg" onclick="viewCarListing()" style="width: 300px;">View Rental Rental Listings</button></br>
+            <button type="submit" class="btn btn-success btn-lg" style="width: 300px;">List Your Car</button></br></br>
+            <button type="button" class="btn btn-danger btn-lg" onclick="manageCarRentals()" style="width: 300px;">Manage Rentals</button></br></br>
+            <button type="button" class="btn btn-primary btn-lg" onclick="viewCarListing()" style="width: 300px;">View Listings</button></br>
         </form>
     </div>
     
 
-    <!-- Pop-up Box -->
+    <!-- About Pop-up -->
     <div id="popup" class="popup-container">
         <div class="popup-content">
             <span id="popup-text">Welcome to XXX, where opulence meets automotive excellence.
-        
+
                 Introducing a bespoke platform tailored exclusively for discerning connoisseurs of vintage automobiles, addressing the distinct challenges faced by owners of luxury classics. Our singular platform offers three distinct experiences:
                 </span>
             <span class="close-btn" onclick="closePopup()">X</span>
         </div>
     </div>
 
+    <!-- Buy Button -->
+    <form id="sellForm" action="http://127.0.0.1:5002/" method="get" style="display: none;"></form>
+
+    <!-- Profile -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SellerID -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- About Us -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
     <script>
         document.getElementById('sellerForm').addEventListener('submit', function(event) {
-            // event.preventDefault(); // Prevent default form submission
-            
-            // Send form data as JSON to /seller endpoint
+            // Send SellerID
             axios.post('http://127.0.0.1:5009/seller', { SellerID: document.getElementById('SellerID').value })
                 .then(response => {
                     console.log('Response from seller endpoint:', response.data);
-                    // Proceed to /addcar endpoint after receiving response from /seller endpoint
                     window.location.href = "http://127.0.0.1:5009/addcar?SellerID=" + document.getElementById('SellerID').value;
                 })
                 .catch(error => {
                     console.error('Error:', error.response.data);
-                    // Optionally, display an error message to the user
                 });
         });
 
+        // Redirect to Car Rental Management 
         function manageCarRentals() {
-            // Get the loggedin_user_id from the hidden input field
             const sellerID = document.getElementById('SellerID').value;
-
-            // Redirect to the appropriate URL
             window.location.href = `http://127.0.0.1:5009/car/owner/${sellerID}`;
         }
 
+        // Redirect to Car Rental Listing
         function viewCarListing() {
-            // Redirect to the appropriate URL
             window.location.href = `http://127.0.0.1:5009/cars`;
         }
 
-        // Add event listener to the Buy button
+        // Buy Button
+        function toggleButton() {
+            const button = document.getElementById('sellBtn');
+            const sellForm = document.getElementById('sellForm');
+
+            if (isSell) {
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-success');
+                button.textContent = 'Buy';
+                sellForm.submit();
+            } else {
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-danger');
+                button.textContent = 'Sell';
+            }
+            isSell = !isSell;
+        }
+
         document.querySelector('button.btn-success').addEventListener('click', function() {
-            window.location.href = "/";
+            window.location.href = "http://127.0.0.1:5002/";
         });
 
+        // About Pop-up
         document.getElementById('about-link').addEventListener('click', function(event) {
             event.preventDefault();
             document.getElementById('popup').style.display = 'block';

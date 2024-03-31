@@ -54,7 +54,8 @@ class Orderdetails(db.Model):
 
     def json(self):
         return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
-# http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
+
+# Order Management for Seller
 @app.route("/seller")
 def find_by_SellerID():
     """
@@ -91,7 +92,6 @@ def find_by_SellerID():
             get_part_response = requests.get(get_part_url, params=get_part_params)
 
             if get_part_response.status_code == 200:
-                # Get the username from the response if needed
                 part_details = get_part_response.json().get('part_details')
 
             if part_details:
@@ -101,28 +101,23 @@ def find_by_SellerID():
                     "Purchaseddate": order_detail.Purchaseddate,
                     "ProductName": part_details['ProductName'],
                     "Quantity": order_detail.Quantity,
-                    "UnitPrice": part_details['Price'],
-                    "TotalPrice": order_detail.Price
+                    "UnitPrice": order_detail.Price,
+                    "TotalPrice": order_detail.Price*order_detail.Quantity
                 }
 
                 if order_detail.Status == "Pending":
                     pending_orders.append(order_item)
                 elif order_detail.Status == "Packing":
                     packing_orders.append(order_item)
-                elif order_detail.Status == "Shipped":
+                elif order_detail.Status == "Shipping":
                     shipping_orders.append(order_item)
 
         return render_template('seller.html', pending_orders=pending_orders, packing_orders=packing_orders, shipping_orders=shipping_orders)
 
-    return jsonify(
-        {
-            "code": 404,
-            "message": "Order not found."
-        }
-    ), 404
+    else:
+        return render_template('seller.html', data = "There are no items ordered.") 
 
-# http://127.0.0.1:5000/order/<OrderDetailID> to render order.html to view order details.
-# Or click [view] hyperlink in seller.html.
+# Order Details
 @app.route('/order/<int:OrderDetailID>')
 def order_detail(OrderDetailID):
     """
@@ -144,13 +139,35 @@ def order_detail(OrderDetailID):
                 description: No order detail found for the specified OrderDetailID.
     """
     order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderDetailID).limit(1)).first()
+    
+    get_username_url = 'http://host.docker.internal:5004/get_username'
+    get_username_params = {'user_id': order.BuyerID}
+    get_username_response = requests.get(get_username_url, params=get_username_params)
+
+    if get_username_response.status_code == 200:
+            username = get_username_response.json().get('username')
+    else:
+            username = "Unknown"
+
+    partid = order.PartID
+
+    get_part_url = 'http://host.docker.internal:5002/part'
+    get_part_params = {'partid': partid}
+    get_part_response = requests.get(get_part_url, params=get_part_params)
+
+    if get_part_response.status_code == 200:
+        part_details = get_part_response.json().get('part_details')
+
     if order:
         order_detail = {
             "OrderID": order.OrderDetailID,
             "BuyerID": order.BuyerID,
+            "BuyerName": username,
             "Purchaseddate": order.Purchaseddate,
+            "ProductName": part_details['ProductName'],
+            "ProductPrice": order.Price,
             "Quantity": order.Quantity,
-            "TotalPrice": order.Price
+            "TotalPrice": order.Price*order.Quantity
         }
 
         return render_template('order.html', order=order_detail)
@@ -165,6 +182,7 @@ def order_detail(OrderDetailID):
         }
     ), 404
 
+# Update status
 @app.route('/update_status', methods=['PUT'])
 def update_status():
     """
@@ -195,7 +213,6 @@ def update_status():
     order_id = data.get('orderId')
     status = data.get('status')
 
-    # Update the status in the database
     order = db.session.query(Orderdetails).filter_by(OrderDetailID=order_id).first()
     if order:
         order.Status = status
@@ -207,8 +224,7 @@ def update_status():
 @app.route("/create_order_new")
 def cart():
     return render_template('success.html')
-
-# To integrate with cart page.    
+   
 @app.route("/create_order", methods=['POST'])
 def create_order():
 

@@ -177,7 +177,7 @@
     INSERT INTO OrderDetails (PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID) VALUES 
     (1, 2, NOW(), NULL, 99.99, 1, 'Pending', 2),
     (2, 1, NOW(), NULL, 199.99, 2, 'Packing', 3),
-    (3, 3, NOW(), NULL, 9.99, 3, 'Shipped', 1);
+    (3, 3, NOW(), NULL, 9.99, 3, 'Shipping', 1);
 
 	USE `Payment`;
 

@@ -29,7 +29,6 @@ app.config['SWAGGER'] = {
 }
 swagger = Swagger(app)
 
-
 class Orderdetails(db.Model):
     __tablename__ = 'orderdetails'
 
@@ -37,23 +36,24 @@ class Orderdetails(db.Model):
     PartID = db.Column(db.Integer)
     Quantity = db.Column(db.Integer)
     Purchaseddate = db.Column(db.DateTime)
+    Receivedate = db.Column(db.DateTime)
     Price = db.Column(db.Float)
     SellerID = db.Column(db.Integer)
     Status = db.Column(db.String(255))
     BuyerID = db.Column(db.Integer)
 
-    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID):
+    def __init__(self, PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID):
         self.PartID = PartID
         self.Quantity = Quantity
         self.Purchaseddate = Purchaseddate
+        self.Receivedate = Receivedate
         self.Price = Price
         self.SellerID = SellerID
         self.Status = Status
         self.BuyerID = BuyerID
 
     def json(self):
-        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
-
+        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
 # http://127.0.0.1:5000/seller/<SellerID> to render seller.html to manage orders.
 @app.route("/seller")
 def find_by_SellerID():

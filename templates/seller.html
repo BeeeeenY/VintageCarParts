@@ -1,82 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Vintage Car</title>
-
     <style>
+        /* Navigation Bar */
+        .navbar .navbar-nav .nav-link .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        /* Table */
         .category {
             font-weight:bolder;
             font-size: large;
         }
-        .box {
-            width: 300px;
-            height: auto;
-        }
-        .greyed-out {
-            opacity: 0.5; /* Set opacity to make image appear greyed out */
-        }
-        .navbar .navbar-nav .nav-link .icon {
-            display: inline-block;
-            width: 20px; /* Adjust the size as needed */
-            height: 20px; /* Adjust the size as needed */
-            margin-right: 10px;
-        }
-        .card {
-            width: 300px;
-            height: 350px; /* Increased height to accommodate the edit button */
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border-bottom: 15px solid orange; /* Set thicker orange border at the bottom */
-        }
-    
-        .card img {
-            width: 100%; /* Make the image fill the entire width of the card */
-            height: 50%; /* Set height to 50% of the card height */
-            object-fit: cover; /* Ensure the image covers the entire space */
-            object-position: top center; /* Position the image at the top center */
-        }
-    
-        .card-body {
-            padding: 10px;
-            height: calc(50% - 20px); /* Set height to 50% of the card height minus padding */
-            box-sizing: border-box; /* Include padding and border in height calculation */
-            overflow: auto; /* Add overflow for scrolling if needed */
-        }
-        .edit-icon {
-            position: absolute;
-            bottom: 5px; /* Adjust vertical position */
-            right: 10px; /* Adjust horizontal position */
-            width: 20px;
-            height: 40px;
-            z-index: 999; /* Ensure edit icon appears on top of other content */
-        }
-
-        #plus-button-container {
-            position: fixed;
-            bottom: 80px;
-            right: 80px;
-        }
-
-        #yellow-button {
-            background-color: orange;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 30px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
         
-        .popup-container {
+        /* Container */
+        .container {
+            position: relative;
+        }
+
+       /* About Pop-up */
+       .popup-container {
             display: none;
             position: fixed;
             top: 50%;
@@ -86,9 +37,9 @@
             background-color: white;
             border: 1px solid #ccc;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px; /* Change padding for smaller pop-up */
+            padding: 20px;
             z-index: 9999;
-            border-radius: 10px; /* Add rounded corners to pop-up box */
+            border-radius: 10px;
         }
         .popup-content {
             display: flex;
@@ -96,7 +47,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            position: relative; /* Set position relative for close button positioning */
+            position: relative;
             height: 100%;
         }
         .close-btn {
@@ -108,45 +59,51 @@
     </style>
 </head>
 <body>
-<div class="container mt-4 mb-4">
     <!-- Navigation Bar -->
-    <div class="row">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
-            <span class="navbar-brand mb-0 h1">VintageCar</span>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+    <div class="container mt-4 mb-4">
+        <div class="row">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+                <span class="navbar-brand mb-0 h1">VintageCar</span>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
                     aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="http://127.0.0.1:5002/listing">Home</a>
-                    <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
-                    <a class="nav-item nav-link active" href="http://127.0.0.1:5005/seller">Orders</a>
-                    <a class="nav-item nav-link" href="http://127.0.0.1:5001/rentcar">Car Rental</a>
-                </div>
-            </div>
-            <div class="navbar-nav ml-auto">
-                <a class="nav-item nav-link" href="#">
-                    <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
-                    Messages
-                </a>
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-                       aria-haspopup="true" aria-expanded="false">
-                        <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
-                        Profile
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Account Settings</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="http://127.0.0.1:5001/logout">Logout</a>
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5002/">Home</a>
+                        <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5006/forum">Community Forum</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5005/buyer_order">Orders</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5001/rentcar">Car Rental</a>
                     </div>
                 </div>
-            </div>
-            <form class="form-inline">
-                <button class="btn btn-success" type="button">Buy</button>
-            </form>
-        </nav>
+                <div class="navbar-nav ml-auto">
+                    <a class="nav-item nav-link" href="http://127.0.0.1:5002/cart">
+                        <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
+                        Cart
+                    </a>
+                    <a class="nav-item nav-link" href="#">
+                        <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
+                        Messages
+                    </a>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                            <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
+                            Profile
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Account Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="http://127.0.0.1:5001/logout">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                <form class="form-inline">
+                    <button id="sellBtn" class="btn btn-outline-danger" type="button" onclick="toggleButton()">Sell</button>
+                </form>
+            </nav>
+        </div>
     </div>
 
     <div class="container">
@@ -154,7 +111,8 @@
             <div style="font-weight: bolder; font-size: x-large; text-align: center;">Manage Orders</div>
         </div>
     </div>
-        
+    
+    <!-- Pending Orders -->
     <div class="container">
         <span class="category">Pending Orders</span>
         <table class="table table-bordered" id="pending-orders">
@@ -182,6 +140,8 @@
             {% endfor %}
         </table>
     </div>
+
+    <!-- Packing Orders -->
     <div class="container">
         <span class="category">Packing Orders</span>
         <table class="table table-bordered" id="packing-orders">
@@ -210,6 +170,7 @@
         </table>
     </div>
     
+    <!-- Shipping Orders -->
     <div class="container">
         <span class="category">Shipping Orders</span>
         <table class="table table-bordered" id="shipping-orders">
@@ -237,9 +198,8 @@
             {% endfor %}
         </table>
     </div>
-</div>
 
-    <!-- Pop-up Box -->
+    <!-- About Pop-up -->
     <div id="popup" class="popup-container">
         <div class="popup-content">
             <span id="popup-text">Welcome to XXX, where opulence meets automotive excellence.
@@ -249,14 +209,19 @@
             <span class="close-btn" onclick="closePopup()">X</span>
         </div>
     </div>
-    
+
+    <!-- Sell Button -->
+    <form id="sellForm" action="http://127.0.0.1:5002/listing" method="get" style="display: none;"></form>
+
+    <!-- Profile -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- About Us -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    
     <script>
         $(document).ready(function() {
+            // Proccessed button to change to packing orders
             $('#pending-orders').on('click', '.processed-btn', function() {
                 var row = $(this).closest('tr');
                 var orderId = row.find('td:first').text();
@@ -265,6 +230,7 @@
                 updateOrderStatus(orderId, 'Packing');
             });
 
+            // Packed button to change to shipping orders
             $('#packing-orders').on('click', '.packed-btn', function() {
                 var row = $(this).closest('tr');
                 var orderId = row.find('td:first').text();
@@ -273,18 +239,19 @@
                 updateOrderStatus(orderId, 'Shipped');
             });
     
-            // Event handler for the "Shipped" button
+            // Shipped button to remove orders
             $('#shipping-orders').on('click', '.shipped-btn', function() {
                 var row = $(this).closest('tr');
                 var orderId = row.find('td:first').text();
-                row.remove(); // Remove the row from the table
+                row.remove();
                 updateOrderStatus(orderId, 'Completed');
             });
 
+            // Update order status
             function updateOrderStatus(orderId, status) {
                 $.ajax({
                     url: '/update_status',
-                    type: 'PUT',  // Use PUT method
+                    type: 'PUT', 
                     contentType: 'application/json',
                     data: JSON.stringify({ 'orderId': orderId, 'status': status }),
                     success: function(response) {
@@ -297,34 +264,27 @@
             }
         });
 
+        // Sell Button
+        let isSell = true;
+
         function toggleButton() {
             const button = document.getElementById('sellBtn');
-            const plusButtonContainer = document.getElementById('plus-button-container');
             const sellForm = document.getElementById('sellForm');
 
             if (isSell) {
                 button.classList.remove('btn-outline-danger');
                 button.classList.add('btn-success');
                 button.textContent = 'Buy';
-                plusButtonContainer.style.display = 'block'; // Show the plus button container
-                // Submit the form to redirect to /listing
                 sellForm.submit();
             } else {
                 button.classList.remove('btn-success');
                 button.classList.add('btn-outline-danger');
                 button.textContent = 'Sell';
-                plusButtonContainer.style.display = 'none'; // Hide the plus button container
-                // Redirect to another URL
-                window.location.href = "/another-url";
             }
             isSell = !isSell;
         }
 
-        // Add event listener to the Buy button
-        document.querySelector('button.btn-success').addEventListener('click', function() {
-            window.location.href = "http://127.0.0.1:5002/";
-        });
-
+        // About Pop-up
         document.getElementById('about-link').addEventListener('click', function(event) {
             event.preventDefault();
             document.getElementById('popup').style.display = 'block';

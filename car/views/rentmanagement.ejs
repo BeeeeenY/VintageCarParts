@@ -58,7 +58,7 @@
     <div class="container mt-4 mb-4">
         <div class="row">
             <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
-                <span class="navbar-brand mb-0 h1">VintageCar</span>
+                <img src="/logo.jpg" alt="VintageCar" class="icon" width="180">
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
                     aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -219,6 +219,21 @@
                 return rowData;
             }
 
+            // Retrieve button state from local storage
+            var rentButtonStates = JSON.parse(localStorage.getItem('rentButtonStates')) || {};
+
+            // Update button state based on data retrieved from local storage
+            Object.keys(rentButtonStates).forEach(function(vin) {
+                var button = $('[data-vin="' + vin + '"]');
+                if (rentButtonStates[vin] === 'On Rent') {
+                    button.text('Return');
+                    button.removeClass('rent-btn').addClass('return-btn');
+                } else {
+                    button.text('Rent');
+                    button.removeClass('return-btn').addClass('rent-btn');
+                }
+            });
+
             // Rent button to update availability on 'On Rent' and change button to 'Return'
             $('.container').on('click', '.rent-btn', function() {
                 var button = $(this);
@@ -232,6 +247,10 @@
                         button.removeClass('rent-btn').addClass('return-btn');
                         button.closest('tr').find('td:nth-child(7)').text('On Rent');
                         button.data('availability', 'On Rent');
+
+                        // Update button state in local storage
+                        rentButtonStates[vin] = 'On Rent';
+                        localStorage.setItem('rentButtonStates', JSON.stringify(rentButtonStates));
                     },
                     error: function(xhr, status, error) {
                         console.error(error);
@@ -252,6 +271,10 @@
                         button.removeClass('return-btn').addClass('rent-btn');
                         button.closest('tr').find('td:nth-child(7)').text('Available');
                         button.data('availability', 'Available');
+
+                        // Update button state in local storage
+                        rentButtonStates[vin] = 'Available';
+                        localStorage.setItem('rentButtonStates', JSON.stringify(rentButtonStates));
                     },
                     error: function(xhr, status, error) {
                         console.error(error);

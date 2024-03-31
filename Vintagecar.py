@@ -553,6 +553,17 @@ def create_review(PartID):
 
     return redirect('http://127.0.0.1:5005/buyer_order')
 
+@app.route('/review_status')
+def review_status():
+    loggedin_user_id = request.args.get('loggedin_user_id')
+    PartID = request.args.get('part_id')
+    comments = db.session.query(Comments).filter_by(PartID = PartID).all()
+    if comments:
+        for comment in comments:
+            if comment.UserID == int(loggedin_user_id):
+                return jsonify(review_status='done')
+    return jsonify(review_status='uncompleted')
+
 # Display all carparts
 def display_all_parts(parts_data):
     # Render the template and pass data to it

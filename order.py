@@ -342,6 +342,15 @@ def buyer_orders():
         for order_detail in order_details:
             partid = order_detail.PartID
 
+            get_review_status_url = 'http://host.docker.internal:5002/review_status'
+
+            get_review_status_params = {'part_id': partid, 'loggedin_user_id':loggedin_user_id}
+            get_review_status_response = requests.get(get_review_status_url, params=get_review_status_params)
+
+            if get_review_status_response.status_code == 200:
+                review_status = get_review_status_response.json().get('review_status')
+                print("Review Status:", review_status)
+
             get_part_url = 'http://host.docker.internal:5002/part'
             get_part_params = {'partid': partid}
             get_part_response = requests.get(get_part_url, params=get_part_params)
@@ -353,26 +362,29 @@ def buyer_orders():
             print(part_details)
             
             if part_details:
-                formatted_datetime = order_detail.Purchaseddate.strftime("%Y-%m-%d %H:%M:%S")
-                order_date = datetime.strptime(formatted_datetime, "%Y-%m-%d %H:%M:%S")
-                current_date = datetime.now()
+                formatted_purchase_datetime = order_detail.Purchaseddate.strftime("%Y-%m-%d %H:%M:%S")
+                receive_date = order_detail.Receivedate
                 expired = False
-                difference = current_date - order_date
-                if difference.days >= 30:
-                    expired = True
-                print(difference.days)
-                print(expired)
+                if receive_date:
+                    current_date = datetime.now()
+                    difference = current_date - receive_date
+                    if difference.days > 30:
+                        expired = True
+                    print(difference.days)
+                    print(expired)
                 total_price = order_detail.Quantity * part_details['Price']
                 order_item = {
+                    "OrderID": order_detail.OrderDetailID,
                     "SellerID": order_detail.SellerID,
-                    "Purchaseddate": formatted_datetime,
+                    "Purchaseddate": formatted_purchase_datetime,
                     "ProductName": part_details['ProductName'],
                     "PartID": order_detail.PartID,
                     "Quantity": order_detail.Quantity,
                     "UnitPrice": part_details['Price'],
                     "TotalPrice": total_price,
                     "Status": order_detail.Status,
-                    "Expired": expired
+                    "Expired": expired,
+                    "ReviewStatus": review_status
                 }
                 order_items.append(order_item)
                 print(order_item)
@@ -381,6 +393,16 @@ def buyer_orders():
         return render_template('buyerorders.html', orders = order_items)
     else:
         return render_template('buyerorders.html', data = "There are no items ordered.")  # Render a template indicating no orders
+    
+@app.route('/receive/<int:OrderID>')
+def receive(OrderID):
+    order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderID).limit(1)).first()
+    if order:
+        order.Status = 'Received'
+        order.Receivedate = datetime.now()
+        db.session.commit()
+
+    return redirect('http://127.0.0.1:5005/buyer_order')
     
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5005, debug=True)

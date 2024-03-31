@@ -105,7 +105,7 @@
 
     
     <h1 class="text-center mt-5 mb-4">Add Car</h1>
-    <form id="carForm" method="POST" enctype="multipart/form-data">
+    <form id="carForm" action="http://127.0.0.1:5009/addcar" method="POST" enctype="multipart/form-data">
         <input type="hidden" id="SellerID" name="SellerID" value="">
         <div class="mb-3">
             <label for="brand" class="form-label">Brand:</label>
@@ -181,36 +181,6 @@
     const SellerID = urlParams.get('SellerID');
     console.log('SellerID:', SellerID);
     document.getElementById('SellerID').value = SellerID;
-    
-    document.getElementById('carForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        // Serialize form data into a JSON object
-        const formData = {};
-        const formElements = event.target.elements;
-        for (let i = 0; i < formElements.length; i++) {
-            const element = formElements[i];
-            if (element.name) {
-                formData[element.name] = element.value;
-            }
-        }
-
-        console.log(formData)
-
-        // Send form data as JSON
-        axios.post('/addcar', formData)
-            .then(response => {
-                console.log('Response:', response.data);
-                // Optionally, redirect the user or display a success message
-                window.location.href = 'http://127.0.0.1:5001/rentcar';
-            })
-            .catch(error => {
-                console.error('Error:', error.response.data);
-                // Optionally, display an error message to the user
-            });
-    });
-
-
 </script>
 
 </html>

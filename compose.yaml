@@ -119,3 +119,17 @@ services:
       PYTHONUNBUFFERED: 1
     ports:
         - "5007:5007"
+
+  ##################################
+  # The shipping microservice
+  ##################################
+  shipping:
+    build:
+      context: ./
+      dockerfile: shipping.Dockerfile
+    image: charmainetan/shipping:esd
+    restart: always
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+        - "5008:5008"

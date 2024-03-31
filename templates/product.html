@@ -295,11 +295,11 @@
             <div class="infoheader">Reviews</div>
         </div>
         {% for comment in part.Comments %}
-        <div class="row comment">
-            <div style="font-weight:bold">{{comment.CommentDate}}</div>
-            <div">{{comment.Content}}</div>
-        </div>
-        <div class="row mb-4"></div>
+            <div class="row comment">
+                <div style="font-weight:bold">{{comment.CommentDate}}</div>
+                <div>{{comment.Content}}</div>
+            </div>
+            <div class="row mb-4"></div>
         {% endfor %}
     </div>
 

@@ -449,7 +449,6 @@ def update_part_page():
         }
     ), 404
     
-
 @app.route("/update_part/<int:PartID>", methods=['POST'])
 def update_part(PartID):
     """
@@ -482,8 +481,12 @@ def update_part(PartID):
         print(PartID)
         print(data)
 
+        updated_date = dt.datetime.now()
         try:
             db.session.query(Parts).filter_by(PartID=PartID).update(data)
+            db.session.commit()
+
+            db.session.query(Parts).filter_by(PartID=PartID).update({'PostDate': updated_date}, synchronize_session=False)
             db.session.commit()
         except Exception as e:
             return jsonify(
@@ -531,6 +534,28 @@ def update_part(PartID):
 
         return redirect(url_for('seller_product_listing'))
     
+@app.route('/review/<int:PartID>')
+def review_page(PartID):
+    return render_template('review.html', PartID = PartID)
+
+@app.route('/create_review/<int:PartID>', methods=['POST'])
+def create_review(PartID):
+    Content = request.form.get('content')
+    print(Content)
+    loggedin_user_id = session.get('loggedin_user_id')
+    comment = Comments(PartID = PartID, UserID = loggedin_user_id, Content = Content, CommentDate = dt.datetime.now())
+
+    try:
+        db.session.add(comment)
+        db.session.commit()
+        
+    except Exception as e:
+        return jsonify({
+            "code": 500,
+            "message": f"An error occurred creating the comment: {str(e)}"
+        }), 500
+
+    return redirect('http://127.0.0.1:5005/buyer_order')
 
 # Display all carparts
 def display_all_parts(parts_data):

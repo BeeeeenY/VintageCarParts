@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: Payment API
+  description: API for managing payments
+  version: 1.0.0
+tags:
+  - name: Store
+    description: Endpoints for managing store items and cart
+paths:
+  /items:
+    get:
+      summary: Get all items in the store
+      description: Retrieve all items available in the store
+      responses:
+        '200':
+          description: A list of store items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StoreItem'
+  /add-to-cart:
+    post:
+      summary: Add an item to the cart
+      description: Add an item to the shopping cart with specified details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '302':
+          description: Redirect to the cart page after adding the item to the cart
+        '500':
+          description: Internal server error
+  /clear-cart:
+    post:
+      summary: Clear the cart
+      description: Clear all items from the shopping cart
+      responses:
+        '200':
+          description: Cart cleared successfully
+        '500':
+          description: Internal server error
+  /create-checkout-session:
+    post:
+      summary: Create a checkout session
+      description: Create a new checkout session for processing payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutSessionRequest'
+      responses:
+        '200':
+          description: URL for the checkout session
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    StoreItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the item
+        name:
+          type: string
+          description: The name of the item
+        priceInCents:
+          type: integer
+          description: The price of the item in cents
+    AddToCartRequest:
+      type: object
+      properties:
+        PartID:
+          type: integer
+          description: ID of the part being ordered
+        Price:
+          type: number
+          description: Price of the part being ordered
+        quantity:
+          type: integer
+          description: Quantity of the part being ordered
+        BuyerID:
+          type: integer
+          description: ID of the user placing the order
+        SellerID:
+          type: integer
+          description: ID of the seller
+        ProductName:
+          type: string
+          description: Optional name of the product
+    CreateCheckoutSessionRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the item
+              quantity:
+                type: integer
+                description: Quantity of the item

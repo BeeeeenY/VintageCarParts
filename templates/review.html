@@ -107,6 +107,39 @@
             top: 5px;
             right: 5px;
         }
+        .review-form-container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        form input[type="text"],
+        form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        form input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form input[type="submit"]:hover {
+            background-color: #429944;
+        }
     </style>
 </head>
 
@@ -122,11 +155,10 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-item nav-link active" href="http://127.0.0.1:5002/">Home</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5002/">Home</a>
                         <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
                         <a class="nav-item nav-link" href="http://127.0.0.1:5006/forum">Community Forum</a>
-                        <a class="nav-item nav-link" href="http://127.0.0.1:5005/buyer_order">Orders</a>
-                        <a class="nav-item nav-link" href="http://127.0.0.1:5001/rentcar">Car Rental</a>
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5005/buyer_order">Orders</a>
                     </div>
                 </div>
                 <div class="navbar-nav ml-auto">
@@ -156,66 +188,17 @@
                 </form>
             </nav>
         </div>
-        {% if not data %}
-            <!-- Search Bar-->
-            <div class="row mt-4 mb-4">
-                <form class="form-inline" action="/">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="search" placeholder="Search" aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-success" type="submit">Search</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        {% endif %}
 
-    </div>
+        <div class="review-form-container">
+            <h1>Rate Product</h1>
 
-    {% if data %}
-        <div class="row mt-5 mb-4 justify-content-center">
-            {{data}}
+            <form id="reviewForm" action="http://127.0.0.1:5002/create_review/{{PartID}}" method="POST">
+                <label for="content">Your Review:</label>
+                <textarea id="content" name="content" rows="4" required></textarea>
+                <input type="submit" value="Submit Review">
+            </form>
         </div>
-    {% else %}
-        <div class="container">
-            <div class="row">
-                {% for part in parts %}
-                    {% if part.Status == 'Available' %}
-                        <div class="col-md-3 mb-4">
-                            <div class="card custom-card box" onclick="redirectToUrl('http://127.0.0.1:5002/{{part.PartID}}')" style="cursor: pointer;">
-                                {% if part.Pic %}
-                                    <img src="{{part.Pic}}" alt="Part Image">
-                                {% else %}
-                                    <img src="{{ url_for('static', filename='logo.jpg') }}">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h5 class="card-title">{{part.ProductName}}</h5>
-                                    {% if part.Price %}
-                                        <h6 class="card-subtitle mb-2 text-orange">${{part.Price}}</h6>
-                                    {% endif %}
-                                    {% if part.Description %}
-                                        <h6>{{part.Description}}</h6>
-                                    {% endif %}
-                                    <p class="card-text">
-                                        {% if part.Brand %}
-                                            {{part.Brand}}
-                                        {% endif %}
-                                        {% if part.Model %}
-                                            {{part.Model}}
-                                        {% endif %}
-                                        <div class="rounded bg-light p-2" style="width: calc(100% - 1rem);"> <!-- Adjust width to fit the card -->
-                                            <span>{{ part.UserName }}</span> 
-                                        </div>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
-
+        
     <!-- Pop-up Box -->
     <div id="popup" class="popup-container">
         <div class="popup-content">
@@ -231,7 +214,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-    <form id="sellForm" action="/listing" method="get" style="display: none;">
+    <form id="sellForm" action="http://127.0.0.1:5002/listing" method="get" style="display: none;">
         <!-- Add any necessary input fields here -->
     </form>
 

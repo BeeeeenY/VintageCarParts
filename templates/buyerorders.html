@@ -125,7 +125,7 @@
                         <a class="nav-item nav-link" href="http://127.0.0.1:5002/">Home</a>
                         <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
                         <a class="nav-item nav-link" href="http://127.0.0.1:5006/forum">Community Forum</a>
-                        <a class="nav-item nav-link active" href="http://127.0.0.1:5005/order">Orders</a>
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5005/buyer_order">Orders</a>
                     </div>
                 </div>
                 <div class="navbar-nav ml-auto">
@@ -173,12 +173,18 @@
                     <th>Name</th>
                     <th>Status</th>
                     <th>Purchase Date</th>
+                    <th>Review</th>
                 </tr>
                 {% for order in orders %}
                     <tr>
                         <td>{{order.ProductName}}</td>
                         <td>{{order.Status}}</td>
                         <td>{{order.Purchaseddate}}</td>
+                        <td>
+                            {% if order.Status == "Shipped" %}
+                                <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')">Review</button>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </table>

@@ -87,6 +87,20 @@ def get_username():
 
     return jsonify(username=user_name)
 
+@app.route("/get_userphone")
+def get_userphone():
+    user_id = request.args.get('user_id')
+    print(user_id)
+   
+    user_phone = db.session.query(Users.Phone).filter(Users.UserID == user_id).first()
+
+    if user_phone: 
+        user_phone = user_phone[0]
+        print(user_phone)
+        return jsonify(userphone=user_phone)
+    else:
+        return jsonify(error="User not found"), 404
+
 @app.route("/add_user")
 def add_user():
     """

@@ -354,6 +354,14 @@ def buyer_orders():
             
             if part_details:
                 formatted_datetime = order_detail.Purchaseddate.strftime("%Y-%m-%d %H:%M:%S")
+                order_date = datetime.strptime(formatted_datetime, "%Y-%m-%d %H:%M:%S")
+                current_date = datetime.now()
+                expired = False
+                difference = current_date - order_date
+                if difference.days >= 30:
+                    expired = True
+                print(difference.days)
+                print(expired)
                 total_price = order_detail.Quantity * part_details['Price']
                 order_item = {
                     "SellerID": order_detail.SellerID,
@@ -363,7 +371,8 @@ def buyer_orders():
                     "Quantity": order_detail.Quantity,
                     "UnitPrice": part_details['Price'],
                     "TotalPrice": total_price,
-                    "Status": order_detail.Status
+                    "Status": order_detail.Status,
+                    "Expired": expired
                 }
                 order_items.append(order_item)
                 print(order_item)

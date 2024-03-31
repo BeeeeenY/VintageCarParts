@@ -174,6 +174,7 @@
                     <th>Name</th>
                     <th>Status</th>
                     <th>Purchase Date</th>
+                    <th>Received?</th>
                     <th>Review</th>
                 </tr>
                 {% for order in orders %}
@@ -182,7 +183,12 @@
                         <td>{{order.Status}}</td>
                         <td>{{order.Purchaseddate}}</td>
                         <td>
-                            {% if order.Status == "Shipped" %}
+                            {% if order.Status != "Received" %}
+                                <button type="button" class="btn btn-outline-primary" onclick="redirectToUrl('http://127.0.0.1:5005/receive/{{order.OrderID}}')">Received</button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.Status == "Received" and order.ReviewStatus == 'uncompleted' %}
                                 {% if order.Expired == False %}
                                     <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')">Review</button>
                                 {% else %}

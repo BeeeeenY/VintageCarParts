@@ -560,6 +560,14 @@ def review_status():
                 return jsonify(review_status='done')
     return jsonify(review_status='uncompleted')
 
+@app.route('/get_country')
+def get_country():
+    part_id = request.args.get('part_id')
+    part = db.session.query(Parts).filter(Parts.PartID == part_id).first()
+    country = part.Location
+    print(country)
+    return jsonify(Country=country)
+
 # Display all carparts
 def display_all_parts(parts_data):
     # Render the template and pass data to it

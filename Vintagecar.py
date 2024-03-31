@@ -481,12 +481,8 @@ def update_part(PartID):
         print(PartID)
         print(data)
 
-        updated_date = dt.datetime.now()
         try:
             db.session.query(Parts).filter_by(PartID=PartID).update(data)
-            db.session.commit()
-
-            db.session.query(Parts).filter_by(PartID=PartID).update({'PostDate': updated_date}, synchronize_session=False)
             db.session.commit()
         except Exception as e:
             return jsonify(

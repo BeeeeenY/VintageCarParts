@@ -5,9 +5,20 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 const firebase = require('firebase-admin');
+const swaggerUi = require("swagger-ui-express");
 const serviceAccount = require('./serviceAccountKey.json');
+const YAML = require("yamljs");
 
 const app = express();
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+const swaggerDocument = YAML.load("./swagger.yaml");
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // EJS Template
 app.set('view engine', 'ejs');
@@ -40,6 +51,8 @@ app.get('/cars', async (req, res) => {
         const response = await axios.get(`https://personal-dz59up8e.outsystemscloud.com/Rental/rest/v1/cars/`);
         const carData = response.data;
         console.log('Retrieved car data:', carData);
+
+        res.status(200).json(carData); // Send JSON response
 
         // Fetch image URLs for each car
         const carsWithImages = await Promise.all(carData.Cars.map(async (car) => {
@@ -101,7 +114,8 @@ app.get('/car/:VehicleIdentificationNum', async (req, res) => {
 
         const response = await axios.get(`https://personal-dz59up8e.outsystemscloud.com/Rental/rest/v1/cars/${VehicleIdentificationNum}`);
         const carData = response.data;
-
+        // Uncomment to send swagger JSON response
+        // res.json({ carData, imageUrls });
         res.render('car', { carData, imageUrls });
 
     } catch (error) {
@@ -112,19 +126,24 @@ app.get('/car/:VehicleIdentificationNum', async (req, res) => {
 
 // Car Rental Management
 app.get('/car/owner/:SellerID', async (req, res) => {
-  try {
-      const { SellerID } = req.params;
+    try {
+        const { SellerID } = req.params;
 
-      const response = await axios.get(`https://personal-dz59up8e.outsystemscloud.com/Rental/rest/v1/cars/owner/${SellerID}`);
-      const carData = response.data;
-      console.log('Retrieved car data:', carData);
+        const response = await axios.get(`https://personal-dz59up8e.outsystemscloud.com/Rental/rest/v1/cars/owner/${SellerID}`);
+        const carData = response.data;
+        console.log('Retrieved car data:', carData);
 
-      res.render('rentmanagement', { carData });
+      // uncomment to send JSON response for swagger
+        // res.json({ carData });
+        res.render('rentmanagement', { carData });
+        
 
-  } catch (error) {
-      console.error('Error:', error.message);
-      res.render('rentmanagement', carData=0);
-  }
+    } catch (error) {
+        console.error('Error:', error.message);
+        // res.status(500).json({ error: 'Error fetching car data' });
+        res.render('rentmanagement', carData=0);
+
+    }
 });
 
 // Receive SellerID
@@ -134,6 +153,14 @@ app.post('/seller', async (req, res) => {
         console.log('Received SellerID from sellerForm:', SellerID);
         
         res.redirect(`http://127.0.0.1:5009/addcar?SellerID=${SellerID}`);
+
+        const responseData = {
+                message: 'Received SellerID successfully',
+                SellerID: SellerID
+            };
+    
+        // Send JSON response
+        res.status(200).json(responseData);
 
     } catch (error) {
         console.error('Error:', error.message);

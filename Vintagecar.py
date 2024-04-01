@@ -18,7 +18,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 # app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/products"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -526,12 +526,12 @@ def update_part(PartID):
 
         return redirect(url_for('seller_product_listing'))
     
-@app.route('/review/<int:PartID>')
-def review_page(PartID):
-    return render_template('review.html', PartID = PartID)
+@app.route('/review/<int:PartID>/<int:OrderID>')
+def review_page(PartID, OrderID):
+    return render_template('review.html', PartID = PartID, OrderID = OrderID)
 
-@app.route('/create_review/<int:PartID>', methods=['POST'])
-def create_review(PartID):
+@app.route('/create_review/<int:PartID>/<int:OrderID>', methods=['POST'])
+def create_review(PartID, OrderID):
     Content = request.form.get('content')
     print(Content)
     loggedin_user_id = session.get('loggedin_user_id')
@@ -547,18 +547,8 @@ def create_review(PartID):
             "message": f"An error occurred creating the comment: {str(e)}"
         }), 500
 
-    return redirect('http://127.0.0.1:5005/buyer_order')
-
-@app.route('/review_status')
-def review_status():
-    loggedin_user_id = request.args.get('loggedin_user_id')
-    PartID = request.args.get('part_id')
-    comments = db.session.query(Comments).filter_by(PartID = PartID).all()
-    if comments:
-        for comment in comments:
-            if comment.UserID == int(loggedin_user_id):
-                return jsonify(review_status='done')
-    return jsonify(review_status='uncompleted')
+    redirect_url = f'http://127.0.0.1:5005/review/{OrderID}'
+    return redirect(redirect_url)
 
 @app.route('/get_country')
 def get_country():
@@ -567,6 +557,17 @@ def get_country():
     country = part.Location
     print(country)
     return jsonify(Country=country)
+
+@app.route("/reduce_quantity")
+def reduce_quantity():
+    PartID = request.args.get('PartID')
+    Quantity = request.args.get('Quantity')
+    part = db.session.query(Parts).filter(Parts.PartID == PartID).first()
+    part.QuantityAvailable -= int(Quantity)
+    if part.QuantityAvailable == 0:
+        part.Status = 'Sold'
+    db.session.commit()
+    return 'success', 200
 
 # Display all carparts
 def display_all_parts(parts_data):

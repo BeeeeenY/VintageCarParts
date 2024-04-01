@@ -183,16 +183,16 @@
                         <td>{{order.Status}}</td>
                         <td>{{order.Purchaseddate}}</td>
                         <td>
-                            {% if order.Status != "Received" %}
+                            {% if order.Status != "Received" and order.Status != 'Reviewed' %}
                                 <button type="button" class="btn btn-outline-primary" onclick="redirectToUrl('http://127.0.0.1:5005/receive/{{order.OrderID}}')">Received</button>
                             {% endif %}
                         </td>
                         <td>
-                            {% if order.Status == "Received" and order.ReviewStatus == 'uncompleted' %}
+                            {% if order.Status == "Received" %}
                                 {% if order.Expired == False %}
-                                    <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')">Review</button>
+                                    <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}/{{order.OrderID}}')">Review</button>
                                 {% else %}
-                                    <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}')" disabled>Review</button>
+                                    <button type="button" class="btn btn-outline-success" onclick="redirectToUrl('http://127.0.0.1:5002/review/{{order.PartID}}/{{order.OrderID}}')" disabled>Review</button>
                                 {% endif %}
                             {% endif %}
                         </td>

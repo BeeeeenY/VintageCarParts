@@ -88,9 +88,36 @@ def get_username():
     return jsonify(username=user_name)
 
 @app.route("/get_userphone")
-def get_userphone():
+def get_userphone(user_id=None):
+    """
+    Get the username associated with the provided user ID.
+
+    ---
+        parameters:
+            -   name: user_id
+                in: query
+                description: The ID of the user whose phone number is to be retrieved.
+                required: true
+                schema:
+                type: string
+        responses:
+            200:
+                description: OK. The phone number was retrieved successfully.
+                content:
+                application/json:
+                    schema:
+                    type: object
+                    properties:
+                        username:
+                        type: string
+                        description: The username associated with the provided user ID.
+            400:
+                description: Bad Request. The request is missing the user ID parameter.
+            404:
+                description: Not Found. The provided user ID does not exist in the database.
+"""
+
     user_id = request.args.get('user_id')
-    print(user_id)
    
     user_phone = db.session.query(Users.Phone).filter(Users.UserID == user_id).first()
 
@@ -102,7 +129,34 @@ def get_userphone():
         return jsonify(error="User not found"), 404
     
 @app.route("/get_country")
-def get_country():
+def get_country(user_id=None):
+    """
+    Get the username associated with the provided user ID.
+
+    ---
+        parameters:
+            -   name: user_id
+                in: query
+                description: The ID of the user whose country is to be retrieved.
+                required: true
+                schema:
+                type: string
+        responses:
+            200:
+                description: OK. The country was retrieved successfully.
+                content:
+                application/json:
+                    schema:
+                    type: object
+                    properties:
+                        username:
+                        type: string
+                        description: The country associated with the provided user ID.
+            400:
+                description: Bad Request. The request is missing the user ID parameter.
+            404:
+                description: Not Found. The provided user ID does not exist in the database.
+"""
     user_id = request.args.get('user_id')
     print(user_id)
    

@@ -193,7 +193,7 @@
         <div class="review-form-container">
             <h1>Rate Product</h1>
 
-            <form id="reviewForm" action="http://127.0.0.1:5002/create_review/{{PartID}}" method="POST">
+            <form id="reviewForm" action="http://127.0.0.1:5002/create_review/{{PartID}}/{{OrderID}}" method="POST">
                 <label for="content">Your Review:</label>
                 <textarea id="content" name="content" rows="4" required></textarea>
                 <input type="submit" value="Submit Review">

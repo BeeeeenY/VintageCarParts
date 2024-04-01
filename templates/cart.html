@@ -11,12 +11,14 @@
             width: 300px;
             height: auto;
         }
+
         .navbar .navbar-nav .nav-link .icon {
             display: inline-block;
             width: 20px; /* Adjust the size as needed */
             height: 20px; /* Adjust the size as needed */
             margin-right: 10px;
         }
+
         .button {
             background-color: orange;
             border: none;
@@ -31,58 +33,28 @@
             transition-duration: 0.4s;
             cursor: pointer;
             border-radius: 8px;
-            width: 55%;
+            width: 100%;
         }
-
         .button:hover {
             background-color: rgba(255, 166, 0, 0.61);
             color: white;
         }
 
-        hr.solid {
-            border-top: 3px solid #bbb;
+        .card {
+            width: 200px;
+            height: 250px; /* Increased height to accommodate the edit button */
+            position: relative;
+            overflow: hidden;
+            margin: 5px;
+            border-bottom: 15px solid orange; /* Set thicker orange border at the bottom */
         }
-
-        .infoheader {
-            color: orange;
-            font-weight: bolder; 
-            font-size: x-large;
-        }
-
-        .comment {
-            background-color: #f3f3f3;         
-            border: none;
+        .card-body {
             padding: 10px;
-            text-align: left;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            border-radius: 8px;
-            width: 100%;
+            height: calc(50% - 20px); /* Set height to 50% of the card height minus padding */
+            box-sizing: border-box; /* Include padding and border in height calculation */
+            overflow: auto; /* Add overflow for scrolling if needed */
         }
 
-        .label {
-            color: gray;
-        }
-
-        .value {
-            color: black;
-            font-weight: 500;
-        }
-
-        /* Limit the size of the carousel */
-        #carouselExampleCaptions {
-            max-width: 200px; /* Adjust the maximum width as needed */
-            max-height: auto; /* Adjust the maximum height as needed */
-            margin: auto; /* Center the carousel horizontally */
-        }
-
-        /* Limit the size of the carousel images */
-        .carousel-item img {
-            max-width: 100%; /* Make images responsive within the carousel */
-            max-height: 100%; /* Make images responsive within the carousel */
-        }
         .popup-container {
             display: none;
             position: fixed;
@@ -166,33 +138,53 @@
 
     <div class="container">
         <div class="row">
-            <div style="font-weight: bolder; font-size: x-large; text-align: center;">Shopping Cart</div>
+            <div style="font-weight: bolder; font-size: x-large; text-align: center;">Shopping Cart</div></br>
         </div>
-        <div id="cart-items"></div>
+        <div id="cart-items" class="row"></div>
         
-    <button id="checkout-button" class="checkout">Checkout</button>
+    <button id="checkout-button" class="checkout button">Checkout</button>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('http://127.0.0.1:3000/items') // Update this URL if your backend is hosted elsewhere
-                .then(response => response.json())
-                .then(items => {
-                    const cartItemsContainer = document.getElementById('cart-items');
-                    if (items.length === 0) {
-                        cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
-                    } else {
-                        items.forEach(item => {
-                            const itemElement = document.createElement('div');
-                            itemElement.innerHTML = `
-                                <h4>${item.name}</h4>
-                                <p>${item.quantity} in cart</p>
-                                <p>$${(item.priceInCents / 100).toFixed(2)}</p>
-                            `;
-                            cartItemsContainer.appendChild(itemElement);
-                        });
-                    }
-                })
-                .catch(error => console.error('Error fetching items:', error));
+            fetchItemsAndPopulateCart();
         });
+
+        // Function to create a card for each item in the cart
+        const createItemCard = (item) => {
+            const card = document.createElement('div');
+            card.classList.add('col-12', 'col-md-6', 'col-lg-4', 'mb-4');
+            card.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" font-weight: bolder; font-size: large>${item.name}</h5>
+                        <p class="card-text">
+                            <span>Quantity:</span>
+                            <span style="font-weight:bold;">${item.quantity}</span>
+                        </p>
+                        <p class="card-text">
+                            <span>Unit Price:</span>
+                            <span style="font-weight:bold;">$${(item.priceInCents / 100).toFixed(2)}</span>
+                        </p>
+                        <p class="card-text">
+                            <span>Total Price:</span>
+                            <span style="font-weight:bold;color:orange;">$${(item.priceInCents * item.quantity / 100).toFixed(2)}</span>
+                        </p>
+                        </div>
+                </div>
+            `;
+            return card;
+        };
+
+        // Function to display cart items
+        const displayCartItems = () => {
+            const cartItemsContainer = document.getElementById('cart-items');
+            cartItemsContainer.innerHTML = ''; // Clear previous items
+
+            // Create and append card for each item in the cart
+            cart.forEach(item => {
+                const itemCard = createItemCard(item);
+                cartItemsContainer.appendChild(itemCard);
+            });
+        };
 
         // Define the cart array
         let cart = [];
@@ -247,9 +239,8 @@
         };
 
         // Attach event listener to the "Checkout" button
-        document.getElementById('checkout-button').addEventListener('click', (event) => {
+        document.getElementById('checkout-button').addEventListener('click', () => {
             if (cart.length === 0) {
-                // Fetch items and populate cart if cart is empty before proceeding to checkout
                 fetchItemsAndPopulateCart().then(() => {
                     if (cart.length > 0) {
                         checkout();
@@ -258,14 +249,11 @@
                     }
                 });
             } else {
-                checkout(); // Proceed to checkout if the cart is already populated
+                checkout();
             }
         });
     </script>
-
-
-
-        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
 </body>
+</html>

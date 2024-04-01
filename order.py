@@ -34,14 +34,13 @@ class Orderdetails(db.Model):
     PartID = db.Column(db.Integer)
     Quantity = db.Column(db.Integer)
     Purchaseddate = db.Column(db.DateTime)
-    Receivedate = db.Column(db.DateTime)
+    Receivedate = db.Column(db.DateTime, nullable=True)
     Price = db.Column(db.Float)
     SellerID = db.Column(db.Integer)
     Status = db.Column(db.String(255))
     BuyerID = db.Column(db.Integer)
-    ShippingAddress = db.Column(db.String(255))
 
-    def __init__(self, PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID, ShippingAddress):
+    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None):
         self.PartID = PartID
         self.Quantity = Quantity
         self.Purchaseddate = Purchaseddate
@@ -50,11 +49,11 @@ class Orderdetails(db.Model):
         self.SellerID = SellerID
         self.Status = Status
         self.BuyerID = BuyerID
-        self.ShippingAddress = ShippingAddress
 
     def json(self):
-        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID, "ShippingAddress": self.ShippingAddress}
-
+        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, 
+                "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
+        
 # Order Management for Seller
 @app.route("/seller")
 def find_by_SellerID():

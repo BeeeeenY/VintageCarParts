@@ -298,41 +298,21 @@ def create_order():
             )
             db.session.add(order)
         
-        db.session.commit()  # Commit once after all orders are added
+            db.session.commit()  # Commit once after all orders are added            
+            
+            reduce_quantity_url = 'http://host.docker.internal:5002/reduce_quantity'
+            reduce_quantity_params = {'PartID': PartID, 'Quantity':Quantity}
+            reduce_quantity_response = requests.get(reduce_quantity_url, params=reduce_quantity_params)
 
+            if reduce_quantity_response.status_code != 200:
+                return jsonify({"code": 500, "message": f"Failed to reduce quantity for PartID {PartID}"}), 500
+            
         return jsonify({"code": 201, "message": "Orders created successfully"}), 201
+    
     except Exception as e:
         db.session.rollback()  # Rollback in case of error
         return jsonify({"code": 500, "message": "An error occurred while creating the orders: " + str(e)}), 500
-    # try:
-    #     # Get form data
-    #     UserID = request.form.get('UserID')
-    #     PartID = request.form.get('PartID')
-    #     Quantity = int(request.form.get('quantity'))  # Note: 'quantity' field, not 'Quantity'
-    #     Price = float(request.form.get('Price'))
-    #     print("Form Data:", request.form)
-        
-    #     # Get current date and time
-    #     current_datetime = datetime.now()
-
-    #     # Create a new Orderdetails instance
-    #     orderdetails = Orderdetails(PartID=PartID, Quantity=Quantity, Purchaseddate=current_datetime.date(), Price=Price, SellerID=UserID, Status="Pending", BuyerID=1) # To change buyer id.
-    #     db.session.add(orderdetails)
-    #     db.session.commit()
-
-    #     # Return success response
-    #     return jsonify({
-    #         "code": 201,
-    #         "message": "Order created successfully."
-    #     }), 201
     
-    # except Exception as e:
-    #     # Return error response
-    #     return jsonify({
-    #         "code": 500,
-    #         "message": "An error occurred while creating the order " + str(e)
-    #     }), 500
-
 @app.route('/buyer_order')
 def buyer_orders():
     """
@@ -356,15 +336,6 @@ def buyer_orders():
     if order_details:
         for order_detail in order_details:
             partid = order_detail.PartID
-
-            get_review_status_url = 'http://host.docker.internal:5002/review_status'
-
-            get_review_status_params = {'part_id': partid, 'loggedin_user_id':loggedin_user_id}
-            get_review_status_response = requests.get(get_review_status_url, params=get_review_status_params)
-
-            if get_review_status_response.status_code == 200:
-                review_status = get_review_status_response.json().get('review_status')
-                print("Review Status:", review_status)
 
             get_part_url = 'http://host.docker.internal:5002/part'
             get_part_params = {'partid': partid}
@@ -398,8 +369,7 @@ def buyer_orders():
                     "UnitPrice": part_details['Price'],
                     "TotalPrice": total_price,
                     "Status": order_detail.Status,
-                    "Expired": expired,
-                    "ReviewStatus": review_status
+                    "Expired": expired
                 }
                 order_items.append(order_item)
                 print(order_item)
@@ -415,6 +385,15 @@ def receive(OrderID):
     if order:
         order.Status = 'Received'
         order.Receivedate = datetime.now()
+        db.session.commit()
+
+    return redirect('http://127.0.0.1:5005/buyer_order')
+
+@app.route('/review/<int:OrderID>')
+def review(OrderID):
+    order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderID).limit(1)).first()
+    if order:
+        order.Status = 'Reviewed'
         db.session.commit()
 
     return redirect('http://127.0.0.1:5005/buyer_order')

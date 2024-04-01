@@ -41,7 +41,7 @@ class Orderdetails(db.Model):
     BuyerID = db.Column(db.Integer)
     ShippingAddress = db.Column(db.String(255))
 
-    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None, ShippingAddress):
+    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None, ShippingAddress=None):
         self.PartID = PartID
         self.Quantity = Quantity
         self.Purchaseddate = Purchaseddate

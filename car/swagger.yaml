@@ -1,0 +1,241 @@
+openapi: 3.0.3
+info:
+  title: Car Rentals API
+  description: API for managing car rentals
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5009
+tags:
+  - name: Car Listings
+    description: Endpoints related to car listings
+  - name: Car Management
+    description: Endpoints for managing car data
+paths:
+  /cars:
+    get:
+      summary: Retrieve car listings
+      description: Retrieve a list of available cars for rental
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+        '500':
+          description: Error fetching car data
+  /car/{VehicleIdentificationNum}:
+    get:
+      summary: Retrieve car details
+      description: Retrieve details of a specific car
+      parameters:
+        - in: path
+          name: VehicleIdentificationNum
+          required: true
+          schema:
+            type: string
+          description: VIN of the car to retrieve
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarDetails'
+        '500':
+          description: Error fetching car details
+  /car/owner/{SellerID}:
+    get:
+      summary: Retrieve rental management details
+      description: Retrieve details of cars managed by a specific owner
+      parameters:
+        - in: path
+          name: SellerID
+          required: true
+          schema:
+            type: string
+          description: ID of the seller/owner
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalManagement'
+        '500':
+          description: Error fetching rental management details
+  /seller:
+    post:
+      summary: Receive SellerID
+      description: Receive SellerID from a form and redirect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                SellerID:
+                  type: string
+      responses:
+        '302':
+          description: Redirect to the addcar page
+        '500':
+          description: Error processing SellerID
+  /addcar:
+    get:
+      summary: Render addcar form
+      description: Render the form to add a new car
+      responses:
+        '200':
+          description: Successful operation
+    post:
+      summary: Add a new car
+      description: Add a new car to the rental inventory
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarInput'
+      responses:
+        '302':
+          description: Redirect to the car details page after adding the car
+        '500':
+          description: Error adding car
+  /updatecar:
+    post:
+      summary: Render updatecar form
+      description: Render the form to update car details
+      responses:
+        '200':
+          description: Successful operation
+  /updatedetails:
+    post:
+      summary: Update car details
+      description: Update details of a specific car
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarDetailsInput'
+      responses:
+        '302':
+          description: Redirect to the updated car details page
+        '500':
+          description: Internal server error
+  /car/rent/{vin}:
+    post:
+      summary: Update availability to 'False'
+      description: Update availability of a car to 'False' indicating it's rented
+      parameters:
+        - in: path
+          name: vin
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Internal server error
+  /car/return/{vin}:
+    post:
+      summary: Update availability to 'True'
+      description: Update availability of a car to 'True' indicating it's returned
+      parameters:
+        - in: path
+          name: vin
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Internal server error
+  /deletecar:
+    post:
+      summary: Delete car
+      description: Delete a specific car from the inventory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                VehicleIdentificationNum:
+                  type: string
+      responses:
+        '200':
+          description: Car deleted successfully
+        '500':
+          description: Failed to delete car
+components:
+  schemas:
+    Car:
+      type: object
+      properties:
+        Brand:
+          type: string
+        Model:
+          type: string
+        Description:
+          type: string
+        Price:
+          type: number
+        Location:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+    CarInput:
+      type: object
+      properties:
+        Brand:
+          type: string
+        Model:
+          type: string
+        VehicleIdentificationNum:
+          type: string
+        Description:
+          type: string
+        Price:
+          type: number
+        Location:
+          type: string
+        SellerID:
+          type: string
+        Image:
+          type: array
+          items:
+            type: string
+    CarDetails:
+      type: object
+      properties:
+        Brand:
+          type: string
+        Model:
+          type: string
+        Description:
+          type: string
+        Price:
+          type: number
+        Location:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+    RentalManagement:
+      type: object
+      properties:
+        Cars:
+          type: array
+          items:
+            $ref: '#/components/schemas/Car'

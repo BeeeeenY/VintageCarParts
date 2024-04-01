@@ -17,7 +17,7 @@ paths:
       description: Retrieve a list of available cars for rental
       responses:
         '200':
-          description: Successful operation
+          description: Successful retrieval of car data for rental
           content:
             application/json:
               schema:
@@ -39,7 +39,7 @@ paths:
           description: VIN of the car to retrieve
       responses:
         '200':
-          description: Successful operation
+          description: Successful retrieval of the car details
           content:
             application/json:
               schema:
@@ -59,7 +59,7 @@ paths:
           description: ID of the seller/owner
       responses:
         '200':
-          description: Successful operation
+          description: Successful retrieval of the details of cars managed by a specific owner
           content:
             application/json:
               schema:
@@ -120,8 +120,38 @@ paths:
         required: true
         content:
           multipart/form-data:
+            # schema:
+            #   $ref: '#/components/schemas/CarDetailsInput'
             schema:
-              $ref: '#/components/schemas/CarDetailsInput'
+              type: object
+              properties:
+                VehicleIdentificationNum:
+                  type: string
+                  description: The unique identification number of the car.
+                SellerID:
+                  type: string
+                  description: The ID of the seller who owns the car.
+                Brand:
+                  type: string
+                  description: The brand of the car.
+                Model:
+                  type: string
+                  description: The model of the car.
+                Description:
+                  type: string
+                  description: Description of the car.
+                Price:
+                  type: number
+                  description: The price of the car.
+                Location:
+                  type: string
+                  description: The location of the car.
+                Image:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                    description: Images of the car.
       responses:
         '302':
           description: Redirect to the updated car details page
@@ -139,7 +169,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Successful operation
+          description: Successful update of availability
         '500':
           description: Internal server error
   /car/return/{vin}:
@@ -154,7 +184,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Successful operation
+          description: Successful update of availability
         '500':
           description: Internal server error
   /deletecar:

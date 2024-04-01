@@ -134,7 +134,7 @@ app.get('/car/owner/:SellerID', async (req, res) => {
         console.log('Retrieved car data:', carData);
 
       // uncomment to send JSON response for swagger
-        // res.json({ carData });
+        res.json({ carData });
         res.render('rentmanagement', { carData });
         
 

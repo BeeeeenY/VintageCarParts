@@ -245,7 +245,7 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
 
 // Render updatecar form
 app.post('/updatecar', (req, res) => {
-    res.render('updatecar'); // Assuming updatecar.ejs is in your views directory
+    res.render('updatecar');
 });
 
 // Update car details

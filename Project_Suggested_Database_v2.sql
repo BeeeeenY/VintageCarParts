@@ -65,7 +65,8 @@
 		Price DECIMAL(10, 2),
 		SellerID INT,
 		Status VARCHAR(255),
-		BuyerID INT
+		BuyerID INT,
+		ShippingAddress VARCHAR(255)
 	);
 
 	CREATE DATABASE IF NOT EXISTS `Payment` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -152,10 +153,10 @@
 
 	-- Assuming CartIDs: 1, 2, 3 and PartIDs from Parts table: 1, 2, 3
 	-- Insert into OrderDetails
-    INSERT INTO OrderDetails (PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID) VALUES 
-    (1, 2, NOW(), NULL, 99.99, 1, 'Pending', 2),
-    (2, 1, NOW(), NULL, 199.99, 2, 'Packing', 3),
-    (3, 3, NOW(), NULL, 9.99, 3, 'Shipping', 1);
+    INSERT INTO OrderDetails (PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID, ShippingAddress) VALUES 
+    (1, 2, NOW(), NULL, 99.99, 1, 'Pending', 2, NULL),
+    (2, 1, NOW(), NULL, 199.99, 2, 'Packing', 3, NULL),
+    (3, 3, NOW(), NULL, 9.99, 3, 'Shipping', 1, NULL);
 
 	USE `Payment`;
 

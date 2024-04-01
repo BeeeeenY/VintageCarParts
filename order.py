@@ -10,8 +10,6 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/orders'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/orders"
 )
@@ -36,13 +34,13 @@ class Orderdetails(db.Model):
     PartID = db.Column(db.Integer)
     Quantity = db.Column(db.Integer)
     Purchaseddate = db.Column(db.DateTime)
-    Receivedate = db.Column(db.DateTime)
+    Receivedate = db.Column(db.DateTime, nullable=True)
     Price = db.Column(db.Float)
     SellerID = db.Column(db.Integer)
     Status = db.Column(db.String(255))
     BuyerID = db.Column(db.Integer)
 
-    def __init__(self, PartID, Quantity, Purchaseddate, Receivedate, Price, SellerID, Status, BuyerID):
+    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None):
         self.PartID = PartID
         self.Quantity = Quantity
         self.Purchaseddate = Purchaseddate
@@ -53,8 +51,9 @@ class Orderdetails(db.Model):
         self.BuyerID = BuyerID
 
     def json(self):
-        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
-
+        return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, 
+                "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
+        
 # Order Management for Seller
 @app.route("/seller")
 def find_by_SellerID():

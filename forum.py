@@ -167,7 +167,7 @@ def get_forum_posts():
             }
         posts_arr.append(post_details)
 
-        if search_query in post.Title:
+        if search_query in post.Title or search_query in post.Content:
             search_data.append(post_details)
 
     print(posts_arr)

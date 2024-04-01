@@ -147,3 +147,17 @@ services:
       PYTHONUNBUFFERED: 1
     ports:
       - "5009:5009"
+
+  ##################################
+  # The payment microservice
+  ##################################
+  payment:
+    build:
+      context: ./payment/server
+      dockerfile: payment.Dockerfile
+    image: lewchinyee/payment:esd
+    restart: always
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "3000:3000"

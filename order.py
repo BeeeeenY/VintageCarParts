@@ -39,8 +39,9 @@ class Orderdetails(db.Model):
     SellerID = db.Column(db.Integer)
     Status = db.Column(db.String(255))
     BuyerID = db.Column(db.Integer)
+    ShippingAddress = db.Column(db.String(255))
 
-    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None):
+    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None, ShippingAddress=None):
         self.PartID = PartID
         self.Quantity = Quantity
         self.Purchaseddate = Purchaseddate
@@ -49,10 +50,12 @@ class Orderdetails(db.Model):
         self.SellerID = SellerID
         self.Status = Status
         self.BuyerID = BuyerID
+        self.ShippingAddress = ShippingAddress
 
     def json(self):
         return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, 
-                "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
+                "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, 
+                "BuyerID": self.BuyerID, "ShippingAddress": self.ShippingAddress}
         
 # Order Management for Seller
 @app.route("/seller")

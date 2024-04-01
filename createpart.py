@@ -5,7 +5,6 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
 from os import environ
-from flasgger import Swagger
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -23,14 +22,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize flasgger 
-app.config['SWAGGER'] = {
-    'title': 'createpart microservice API',
-    'version': 1.0,
-    "openapi": "3.0.2",
-    'description': 'Allows create of carparts'
-}
-swagger = Swagger(app)
 
 db = SQLAlchemy(app)
 
@@ -76,68 +67,6 @@ class Parts(db.Model):
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 
 def create_part():
-
-    """
-    Create Part
-    ---
-    tags:
-        - carpart
-    parameters: []
-    requestBody:
-        required: true
-        content:
-            application/x-www-form-urlencoded:
-                schema:
-                    type: object
-                    properties:
-                        Name:
-                            type: string
-                            description: The Name of the part
-                        AuthenticationNum:
-                            type: string                
-                            description: The Authentication number of the part
-                        Category:
-                            type: string
-                            description: The Category of the part   
-                        Description:
-                            type: string    
-                            description: The Description of the part
-                        Price:      
-                            type: number
-                            description: The Price of the part
-                        QuantityAvailable:
-                            type: integer
-                            description: The Quantity available of the part
-                        Location:
-                            type: string
-                            description: The Location of the part
-                        Brand:
-                            type: string
-                            description: The Brand of the part
-                        Model:
-                            type: string
-                            description: The Model of the part
-                        AddInfo:
-                            type: string
-                            description: Additional information about the part
-                        Status:
-                            type: string            
-                            description: The Status of the part 
-    responses:
-        302:
-            description: Part created successfully.
-            headers:
-                Location:
-                    description: URL of the created part.
-                    schema:
-                        type: string
-                        example: "http://127.0.0.1:5002/listing"
-        400:
-            description: Missing form data or invalid request.
-        500:
-            description: An error occurred while creating the part.
-    """
-
     if request.form.get('Name'):
         name = request.form.get('Name')
     else:

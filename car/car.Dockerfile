@@ -1,6 +1,7 @@
 FROM node:18
 WORKDIR /usr/src/app
 COPY package*.json server.js ./
+COPY swagger.yaml ./
 COPY views /usr/src/app/views
 COPY static /usr/src/app/static
 COPY ./serviceAccountKey.json ./

@@ -52,8 +52,6 @@ app.get('/cars', async (req, res) => {
         const carData = response.data;
         console.log('Retrieved car data:', carData);
 
-        res.status(200).json(carData); // Send JSON response
-
         // Fetch image URLs for each car
         const carsWithImages = await Promise.all(carData.Cars.map(async (car) => {
             const folderPrefix = `cars/${car.VehicleIdentificationNum}/`;
@@ -247,7 +245,7 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
 
 // Render updatecar form
 app.post('/updatecar', (req, res) => {
-    res.render('updatecar'); // Assuming updatecar.ejs is in your views directory
+    res.render('updatecar');
 });
 
 // Update car details

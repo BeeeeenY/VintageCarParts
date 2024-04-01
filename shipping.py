@@ -67,32 +67,21 @@ def get_shipping_rate():
 
     estimated_rates = data['response']['estimatedFreightRates']
 
+    min_price = None  # Initialize min_price variable
+
     if 'mode' in estimated_rates:
         modes = estimated_rates['mode']
         if isinstance(modes, list) and len(modes) >= 1:
-            # If 'mode' is a list, take the first mode
             first_mode = modes[0]
         elif isinstance(modes, dict):
-            # If 'mode' is a dictionary, use it directly
             first_mode = modes
 
         min_price = first_mode['price']['min']['moneyAmount']['amount']
-        max_price = first_mode['price']['max']['moneyAmount']['amount']
-        min_transit_time = first_mode['transitTimes']['min']
-        max_transit_time = first_mode['transitTimes']['max']
-        
-        print(f"Min Price: {min_price} USD")
-        print(f"Max Price: {max_price} USD")
-        print(f"Min Transit Time: {min_transit_time} days")
-        print(f"Max Transit Time: {max_transit_time} days")
-    else:
-        print("No shipping rates found.")
+        print(min_price)
+        return jsonify({'min_price': min_price}) 
 
-    return "Shipping rates retrieved."
+    return "Shipping rates not found"
 
-        # print("Max Price:", max_price, "USD")
-        # print("Min Transit Time:", min_transit_time, "days")
-        # print("Max Transit Time:", max_transit_time, "days")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=5008, debug=True)
+    app.run(host='0.0.0.0', port=5008, debug=True)

@@ -121,7 +121,6 @@
                     <th>Availability</th>
                     <th>Manage</th>
                     <th>Edit</th>
-                    <th>View</th>
                 </tr>
             </thead>
             <tbody>
@@ -152,11 +151,6 @@
                                 </form>
                                 <!-- Edit Button -->
                                 <button type="button" class="btn btn-primary edit-btn" data-formid="editForm_<%= car.VehicleIdentificationNum %>" data-sellerid="<%= car.SellerID %>">Edit</button>
-                            </td>
-
-                            <td>
-                                <!-- View Button -->
-                                <button type="button" class="btn btn-primary view-btn" data-vin="<%= car.VehicleIdentificationNum %>">View</button>
                             </td>
                         </tr>
                     <% }); %>
@@ -280,12 +274,6 @@
                         console.error(error);
                     }
                 });
-            });
-
-            // View button to redirect to car details page
-            $('.container').on('click', '.view-btn', function() {
-                var vin = $(this).data('vin');
-                window.location.href = 'http://127.0.0.1:5009/car/' + vin;
             });
         });
 

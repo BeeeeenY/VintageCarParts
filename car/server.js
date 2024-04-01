@@ -151,16 +151,13 @@ app.post('/seller', async (req, res) => {
     try {
         const { SellerID } = req.body;
         console.log('Received SellerID from sellerForm:', SellerID);
-        
-        res.redirect(`http://127.0.0.1:5009/addcar?SellerID=${SellerID}`);
 
         const responseData = {
                 message: 'Received SellerID successfully',
                 SellerID: SellerID
             };
     
-        // Send JSON response
-        res.status(200).json(responseData);
+        res.redirect(`http://127.0.0.1:5009/addcar?SellerID=${SellerID}`);
 
     } catch (error) {
         console.error('Error:', error.message);

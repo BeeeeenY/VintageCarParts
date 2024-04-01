@@ -52,8 +52,6 @@ app.get('/cars', async (req, res) => {
         const carData = response.data;
         console.log('Retrieved car data:', carData);
 
-        res.status(200).json(carData); // Send JSON response
-
         // Fetch image URLs for each car
         const carsWithImages = await Promise.all(carData.Cars.map(async (car) => {
             const folderPrefix = `cars/${car.VehicleIdentificationNum}/`;
@@ -134,7 +132,7 @@ app.get('/car/owner/:SellerID', async (req, res) => {
         console.log('Retrieved car data:', carData);
 
       // uncomment to send JSON response for swagger
-        res.json({ carData });
+        // res.json({ carData });
         res.render('rentmanagement', { carData });
         
 

@@ -41,7 +41,7 @@ class Orderdetails(db.Model):
     BuyerID = db.Column(db.Integer)
     ShippingAddress = db.Column(db.String(255))
 
-    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None, ShippingAddress):
+    def __init__(self, PartID, Quantity, Purchaseddate, Price, SellerID, Status, BuyerID, Receivedate=None, ShippingAddress=None):
         self.PartID = PartID
         self.Quantity = Quantity
         self.Purchaseddate = Purchaseddate
@@ -60,24 +60,6 @@ class Orderdetails(db.Model):
 # Order Management for Seller
 @app.route("/seller")
 def find_by_SellerID():
-    """
-    Retrieve orders by SellerID.
-    ---
-    tags:
-        -   Seller
-    parameters:
-        -   name: SellerID
-            in: query
-            description: ID of the seller
-            required: true
-            schema:
-                type: integer
-    responses:
-            200:
-                description: Returns orders for the logged-in seller.
-            404:
-                description: No orders found for the logged-in seller.
-    """
     loggedin_user_id = session.get('loggedin_user_id')
 
     order_details = db.session.scalars(db.select(Orderdetails).filter_by(SellerID=loggedin_user_id)).all()
@@ -122,24 +104,6 @@ def find_by_SellerID():
 # Order Details
 @app.route('/order/<int:OrderDetailID>')
 def order_detail(OrderDetailID):
-    """
-    Retrieve order details by OrderDetailID.
-    ---
-    tags:
-        -   Order
-    parameters:
-        -   name: OrderDetailID
-            in: path
-            description: ID of the order detail to retrieve
-            required: true
-            schema:
-                type: integer
-    responses:
-            200:
-                description: Returns order details for the specified OrderDetailID.
-            404:
-                description: No order detail found for the specified OrderDetailID.
-    """
     order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderDetailID).limit(1)).first()
     
     get_username_url = 'http://host.docker.internal:5004/get_username'
@@ -318,17 +282,6 @@ def create_order():
     
 @app.route('/buyer_order')
 def buyer_orders():
-    """
-    Retrieve orders placed by the logged-in buyer.
-    ---
-    tags:
-        - Order
-    responses:
-        200:
-            description: Orders retrieved successfully.
-        404:
-            description: No orders found for the logged-in buyer.
-    """
     loggedin_user_id = session.get('loggedin_user_id')
     print(loggedin_user_id)
 

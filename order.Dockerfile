@@ -1,6 +1,5 @@
 FROM python:3-slim
 WORKDIR /usr/src/app
-COPY invokes.py ./
 COPY requirements.txt ./
 COPY templates /usr/src/app/templates
 COPY static /usr/src/app/static

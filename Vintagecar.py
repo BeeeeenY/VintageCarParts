@@ -473,6 +473,7 @@ def update_part(PartID):
             ), 400
 
         data = request.form.to_dict()
+        QuantityAvailable = int(data.get('QuantityAvailable'))
 
         print(PartID)
         print(data)
@@ -480,6 +481,15 @@ def update_part(PartID):
         try:
             db.session.query(Parts).filter_by(PartID=PartID).update(data)
             db.session.commit()
+
+            if QuantityAvailable != 0:
+                db.session.query(Parts).filter_by(PartID=PartID).update({'Status': 'Available'})
+                db.session.commit()
+            
+            if QuantityAvailable == 0:
+                db.session.query(Parts).filter_by(PartID=PartID).update({'Status': 'Sold'})
+                db.session.commit()
+
         except Exception as e:
             return jsonify(
                 {

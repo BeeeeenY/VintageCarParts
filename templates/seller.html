@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Vintage Car</title>
     <style>
-        /* Navigation Bar */
         .navbar .navbar-nav .nav-link .icon {
             display: inline-block;
             width: 20px;
@@ -15,18 +14,15 @@
             margin-right: 10px;
         }
 
-        /* Table */
         .category {
             font-weight:bolder;
             font-size: large;
         }
         
-        /* Container */
         .container {
             position: relative;
         }
 
-       /* About Pop-up */
        .popup-container {
             display: none;
             position: fixed;
@@ -205,15 +201,12 @@
         </div>
     </div>
 
-    <!-- Profile -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- About Us -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     
     <script>
         $(document).ready(function() {
-            // Proccessed button to change to packing orders
             $('#pending-orders').on('click', '.processed-btn', function() {
                 var row = $(this).closest('tr');
                 var orderId = row.find('td:first').text();
@@ -222,7 +215,6 @@
                 updateOrderStatus(orderId, 'Packing');
             });
 
-            // Packed button to change to shipping orders
             $('#packing-orders').on('click', '.packed-btn', function() {
                 var row = $(this).closest('tr');
                 var orderId = row.find('td:first').text();
@@ -231,7 +223,6 @@
                 updateOrderStatus(orderId, 'Shipped');
             });
     
-            // Shipped button to remove orders
             $('#shipping-orders').on('click', '.shipped-btn', function() {
                 var row = $(this).closest('tr');
                 var orderId = row.find('td:first').text();
@@ -239,7 +230,6 @@
                 updateOrderStatus(orderId, 'Completed');
             });
 
-            // Update order status
             function updateOrderStatus(orderId, status) {
                 $.ajax({
                     url: '/update_status',
@@ -256,12 +246,10 @@
             }
         });
 
-        // Add event listener to the Buy button
         document.querySelector('button.btn-success').addEventListener('click', function() {
             window.location.href = "http://127.0.0.1:5002/";
         });
 
-        // About Pop-up
         document.getElementById('about-link').addEventListener('click', function(event) {
             event.preventDefault();
             document.getElementById('popup').style.display = 'block';

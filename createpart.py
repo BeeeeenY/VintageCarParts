@@ -5,6 +5,9 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import datetime as dt
 from os import environ
+from twilio.rest import Client
+import twilio
+import pika
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -119,7 +122,19 @@ def create_part():
     try:
         db.session.add(part)
         db.session.commit()
-        
+
+        def send_sms_notification(phone_number, message):
+            try:
+                message = client.messages.create(body=message,from_='+12565105293',to=phone_number
+            )
+                print(f"SMS sent successfully to {phone_number}: {message.sid}")
+            except Exception as e:
+                print(f"Error sending SMS: {e}")
+                
+        phone_number = '+6581382823'  # User's phone number
+        message = 'Hello from Gentlemen Garage Bot! Your car part has been added.'
+        send_sms_notification(phone_number, message)
+
     except Exception as e:
         return jsonify({
             "code": 500,

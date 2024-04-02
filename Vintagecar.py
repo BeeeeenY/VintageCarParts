@@ -6,6 +6,7 @@ import datetime as dt
 import requests
 from os import environ
 from flasgger import Swagger
+import pika
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -296,6 +297,28 @@ def find_part_details():
             }
         
     return jsonify(part_details=part)
+
+@app.route("/brand")
+def find_brand_details():
+    """
+    Get car brand details
+    ---
+    responses:
+        200:
+            description: Return car brand details
+        404:
+            description: No car brand details found
+    """
+    brand_array = {}
+    
+    parts = db.session.query(Parts).all()
+        
+    for brand in parts:
+        brand_name = brand.Brand
+        part_id = brand.PartID
+        brand_array[part_id] = brand_name
+
+    return render_template("chat.html", brand_array=brand_array)
 
 @app.route("/listing")
 def seller_product_listing():

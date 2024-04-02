@@ -18,20 +18,18 @@
     fetch("http://localhost:3000/items")
         .then(response => response.json())
         .then(items => {
-            // Prepare the payload expected by the `/create_order` endpoint
             const payload = {
                 orders: items.map(item => ({
                     PartID: item.id,
                     Quantity: item.quantity,
-                    Price: item.priceInCents / 100 * item.quantity, // Convert back to dollars
+                    Price: item.priceInCents / 100 * item.quantity,
                     BuyerID: item.BuyerID,
                     SellerID: item.SellerID,
-                    name: item.name, // Optional
+                    name: item.name,
                 }))
             };
             console.log("Order creation payload:", payload);
 
-            // Now send this payload to the `/create_order` endpoint
             return fetch("http://127.0.0.1:5005/create_order", {
                 method: 'POST',
                 headers: {
@@ -49,7 +47,6 @@
         .then(orderCreationResult => {
                 console.log("Order created successfully:", orderCreationResult);
                 
-                // After successful order creation, clear the cart
                 return fetch("http://localhost:3000/clear-cart", { method: 'POST' });
           })
         .then(cartClearResponse => {
@@ -58,7 +55,6 @@
                 }
                 console.log("Cart cleared successfully");
                 
-                // After clearing the cart, redirect to the order page
                 window.location.href = 'http://127.0.0.1:5005/buyer_order'; 
           })
         .catch(error => {

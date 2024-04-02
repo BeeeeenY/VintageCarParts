@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // Checkout function
   const checkout = () => {
     fetch("http://localhost:3000/create-checkout-session", {
         method: "POST",
@@ -65,18 +64,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return res.json().then(json => Promise.reject(json));
     })
     .then(({ url }) => {
-        window.location = url; // Redirect to payment URL
+        window.location = url;
     })
     .catch(e => {
         console.error(e.error);
     });
 };
 
-// Attach event listener to the "Checkout" button
 document.getElementById('checkout').addEventListener('click', (event) => {
-    event.preventDefault(); // Prevent any default action
+    event.preventDefault();
     if (cart.length > 0) {
-        checkout(); // Only proceed to checkout if the cart is not empty
+        checkout();
     } else {
         alert("Your cart is empty.");
     }
@@ -88,6 +86,5 @@ document.getElementById('checkout').addEventListener('click', (event) => {
 
 document.getElementById('proceed-to-checkout').addEventListener('click', (event) => {
     event.preventDefault();
-    // Redirect to a checkout page or create a Stripe Checkout session here
-    redirectToCheckout(); // Implement this function based on your checkout logic
+    redirectToCheckout();
 });

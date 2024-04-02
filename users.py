@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-from invokes import invoke_http
 from os import environ
 from flasgger import Swagger
 

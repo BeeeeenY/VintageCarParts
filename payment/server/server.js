@@ -6,7 +6,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: ["http://localhost:8888", "http://127.0.0.1:5002","http://127.0.0.1:5005"],
@@ -14,15 +14,10 @@ app.use(
 );
 
 const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY)
-// Load your API definition file
+
 const swaggerDocument = YAML.load("./swagger.yaml");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// const storeItems = new Map([
-//   [1, { priceInCents: 100000, name: "Aston Martin DB7 I6 engine parts" }],
-//   [2, { priceInCents: 20000, name: "Get an A for ESD" }],
-//   [3, { priceInCents: 20000, name: "Get an A for ESM" }],
-// ])
 const storeItems = new Map([])
 
 /**
@@ -59,7 +54,6 @@ const storeItems = new Map([])
  *                     description: The price of the item in cents
  */
 
-// this endpoint to serve the items' data
 app.get("/items", (req, res) => {
   const itemsArray = Array.from(storeItems, ([id, details]) => ({
     id,
@@ -67,6 +61,7 @@ app.get("/items", (req, res) => {
   }));
   res.json(itemsArray);
 });
+
 /**
  * @swagger
  * /add-to-cart:
@@ -105,12 +100,10 @@ app.get("/items", (req, res) => {
  *         description: Internal server error
  */
 
-// To add in user
 app.post("/add-to-cart", (req, res) => {
   console.log("Received data:", req.body);
   const {  PartID, Price, quantity, BuyerID, SellerID, ProductName } = req.body;
   
-  // Assuming PartID is unique, directly add it to the storeItems
   storeItems.set(parseInt(PartID), {
     priceInCents: Math.round(parseFloat(Price)*100),
     quantity: parseInt(quantity),
@@ -119,7 +112,6 @@ app.post("/add-to-cart", (req, res) => {
     name: ProductName,
   });
   console.log(storeItems)
-  // Redirect to cart.html after adding the item to the cart
   res.redirect('http://127.0.0.1:5002/cart');
   
 });
@@ -139,7 +131,7 @@ app.post("/add-to-cart", (req, res) => {
 
 
 app.post("/clear-cart", (req, res) => {
-  storeItems.clear(); // This clears the entire map, effectively emptying the cart
+  storeItems.clear();
   console.log("Cart has been emptied");
   res.status(200).send("Cart cleared successfully");
 });
@@ -229,10 +221,7 @@ app.delete("/remove-from-cart/:PartID", (req, res) => {
 });
 
 
-// app.listen(3000)
 
-
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

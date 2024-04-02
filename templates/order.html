@@ -70,18 +70,13 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-item nav-link active" href="http://127.0.0.1:5002/">Home</a>
+                        <a class="nav-item nav-link" href="http://127.0.0.1:5002/">Home</a>
                         <a id="about-link" class="nav-item nav-link" href="#">About Us</a>
-                        <a class="nav-item nav-link" href="http://127.0.0.1:5006/forum">Community Forum</a>
-                        <a class="nav-item nav-link" href="http://127.0.0.1:5005/buyer_order">Orders</a>
+                        <a class="nav-item nav-link active" href="http://127.0.0.1:5005/seller">Orders</a>
                         <a class="nav-item nav-link" href="http://127.0.0.1:5001/rentcar">Car Rental</a>
                     </div>
                 </div>
                 <div class="navbar-nav ml-auto">
-                    <a class="nav-item nav-link" href="http://127.0.0.1:5002/cart">
-                        <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
-                        Cart
-                    </a>
                     <a class="nav-item nav-link" href="#">
                         <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
                         Messages
@@ -100,7 +95,7 @@
                     </div>
                 </div>
                 <form class="form-inline">
-                    <button id="sellBtn" class="btn btn-outline-danger" type="button" onclick="toggleButton()">Sell</button>
+                    <button class="btn btn-success" type="button">Buy</button>
                 </form>
             </nav>
         </div>
@@ -171,25 +166,37 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-        // Sell Button
-        let isSell = true;
-
+        function submitForm() {
+            document.getElementById("addForm").submit();
+        }
+        
         function toggleButton() {
             const button = document.getElementById('sellBtn');
+            const plusButtonContainer = document.getElementById('plus-button-container');
             const sellForm = document.getElementById('sellForm');
 
             if (isSell) {
                 button.classList.remove('btn-outline-danger');
                 button.classList.add('btn-success');
                 button.textContent = 'Buy';
+                plusButtonContainer.style.display = 'block'; // Show the plus button container
+                // Submit the form to redirect to /listing
                 sellForm.submit();
             } else {
                 button.classList.remove('btn-success');
                 button.classList.add('btn-outline-danger');
                 button.textContent = 'Sell';
+                plusButtonContainer.style.display = 'none'; // Hide the plus button container
+                // Redirect to another URL
+                window.location.href = "/another-url";
             }
             isSell = !isSell;
         }
+
+        // Add event listener to the Buy button
+        document.querySelector('button.btn-success').addEventListener('click', function() {
+            window.location.href = "/";
+        });
 
         // About Pop-up
         document.getElementById('about-link').addEventListener('click', function(event) {

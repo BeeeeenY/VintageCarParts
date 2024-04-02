@@ -202,6 +202,32 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /remove-from-cart/{PartID}:
+ *   delete:
+ *     summary: Remove an item from the cart
+ *     description: Remove an item from the shopping cart based on its PartID
+ *     parameters:
+ *       - in: path
+ *         name: PartID
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the part to be removed from the cart
+ *     responses:
+ *       200:
+ *         description: Item removed successfully
+ *       500:
+ *         description: Internal server error
+ */
+
+app.delete("/remove-from-cart/:PartID", (req, res) => {
+  const PartID = parseInt(req.params.PartID);
+  storeItems.delete(PartID);
+  res.status(200).send("Item removed successfully");
+});
+
 
 // app.listen(3000)
 

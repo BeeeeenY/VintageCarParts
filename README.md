@@ -70,6 +70,10 @@ Once the Docker containers are running, you can access the VintageCarParts web a
 1. **Open Your Web Browser**: Launch your preferred web browser on your local machine.
 
 2. **Navigate to the Application URL**: Enter the following URL in the address bar of your web browser:
+
+  ```bash
+  http://127.0.0.1:5001/
+  ```
    
 
 ### Registering as a New User

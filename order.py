@@ -85,8 +85,8 @@ def find_by_SellerID():
                     "Purchaseddate": order_detail.Purchaseddate,
                     "ProductName": part_details['ProductName'],
                     "Quantity": order_detail.Quantity,
-                    "UnitPrice": order_detail.Price,
-                    "TotalPrice": order_detail.Price*order_detail.Quantity
+                    "UnitPrice": part_details['Price'],
+                    "TotalPrice": order_detail.Price
                 }
 
                 if order_detail.Status == "Pending":
@@ -131,9 +131,9 @@ def order_detail(OrderDetailID):
             "BuyerName": username,
             "Purchaseddate": order.Purchaseddate,
             "ProductName": part_details['ProductName'],
-            "ProductPrice": order.Price,
+            "ProductPrice": part_details['Price'],
             "Quantity": order.Quantity,
-            "TotalPrice": order.Price*order.Quantity
+            "TotalPrice": order.Price
         }
 
         return render_template('order.html', order=order_detail)
@@ -313,7 +313,6 @@ def buyer_orders():
                         expired = True
                     print(difference.days)
                     print(expired)
-                total_price = order_detail.Quantity * part_details['Price']
                 order_item = {
                     "OrderID": order_detail.OrderDetailID,
                     "SellerID": order_detail.SellerID,
@@ -322,7 +321,7 @@ def buyer_orders():
                     "PartID": order_detail.PartID,
                     "Quantity": order_detail.Quantity,
                     "UnitPrice": part_details['Price'],
-                    "TotalPrice": total_price,
+                    "TotalPrice": order_detail.Price,
                     "Status": order_detail.Status,
                     "Expired": expired
                 }

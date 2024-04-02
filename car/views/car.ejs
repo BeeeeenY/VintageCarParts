@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Vintage Car</title>
     <style>
-        /* Navigation Bar */
         .navbar .navbar-nav .nav-link .icon {
             display: inline-block;
             width: 20px;
@@ -15,33 +14,28 @@
             margin-right: 10px;
         }
         
-        /* Container */
         .container {
             position: relative;
         }
 
-        /* Availability */
         .badge {
             font-weight: bold;
             font-size: medium;
         }
 
-        /* Title */
         .title {
             font-size: x-large;
         }
 
-        /* Price */
         .price {
             font-size: xx-large;
             color:orange;
         }
-        /* Bold Text */
+        
         .bold-text {
             font-weight: bold;
         }
 
-        /* Button */
         .button {
             background-color: orange;
             border: none;
@@ -63,7 +57,6 @@
             color: white;
         }
 
-        /* About Pop-up */
         .popup-container {
             display: none;
             position: fixed;
@@ -140,28 +133,23 @@
         </div>
     </div>
     
-    <!-- Car Details -->
     <div class="container">
         <div class="row">
-            <!-- Image Carousel -->
             <div id="carouselExample" class="carousel slide col-6">
                 <div class="carousel-inner">
                     <% if (imageUrls.length > 0) { %>
-                        <!-- Images -->
                         <% imageUrls.forEach((imageUrl, index) => { %>
                             <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
                                 <img src="<%= imageUrl %>" class="d-block w-100" alt="Slide <%= index + 1 %>">
                             </div>
                         <% }); %>
                     <% } else { %>
-                        <!-- No Image -->
                         <div class="carousel-item active">
                             <img src="/logo.jpg" class="d-block w-100" alt="Placeholder Image">
                         </div>
                     <% } %>
                 </div>
 
-                <!-- Navigation Button -->
                 <% if (imageUrls.length > 1) { %>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -175,28 +163,23 @@
             </div>
 
             <div class="col-6">
-                <!-- Availability -->
                 <% if (carData.Car.Availability == true) { %>
                 <span class="badge bg-success">Available</span>
                 <% } else { %>
                 <span class="badge bg-secondary">Unavailable</span>
                 <% } %>
                 
-                <!-- Title -->
                 <span class="bold-text title"><%= carData.Car.Brand %> <%= carData.Car.Model %></span>
 
-                <!-- Price -->
                 <div class="row mx-0 bold-text price">
                     $<%= carData.Car.Price %>/hour
                 </div>
 
-                <!-- Location -->
                 <div>
                     <span class="bold-text">Location: </span>
                     <span><%= carData.Car.Location %></span>
                 </div>
 
-                <!-- Description -->
                 <div>
                     <span class="bold-text">Description: </span></br>
                     <span><%= carData.Car.Description %></span>
@@ -205,18 +188,15 @@
                 <div class="row mb-3"></div>
                 <div class="row">
                     
-                    <!-- Chat Button -->
                     <button id="chatButton" class="button">Chat to Rent</button>
                 </div>
             </div>
         </div>
 
-        <!-- Empty Row -->
         <div class="row mb-4"></div>
         <hr class="solid">
     </div>
 
-    <!-- About Pop-up -->
     <div id="popup" class="popup-container">
         <div class="popup-content">
             <span id="popup-text">Welcome to XXX, where opulence meets automotive excellence.
@@ -227,21 +207,16 @@
         </div>
     </div>
 
-    <!-- Buy Button -->
     <form id="sellForm" action="http://127.0.0.1:5002/" method="get" style="display: none;"></form>
 
-    <!-- Caraousel and Profile -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- About Us -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-        // Chat Button
         document.getElementById('chatButton').addEventListener('click', function() {
             window.location.href = "http://127.0.0.1:5007/";
         })
-        // Buy Button
         function toggleButton() {
             const button = document.getElementById('sellBtn');
             const sellForm = document.getElementById('sellForm');
@@ -263,7 +238,6 @@
             window.location.href = "http://127.0.0.1:5002/";
         });
 
-        // About Pop-up
         document.getElementById('about-link').addEventListener('click', function(event) {
             event.preventDefault();
             document.getElementById('popup').style.display = 'block';

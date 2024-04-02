@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
+from flask import Flask, request, jsonify, render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 import requests
 from datetime import datetime
@@ -17,8 +17,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-
-# Initialize flasgger 
 app.config['SWAGGER'] = {
     'title': 'order microservice API',
     'version': 1.0,
@@ -54,7 +52,6 @@ class Orderdetails(db.Model):
         return {"OrderDetailID": self.OrderDetailID, "PartID": self.PartID, "Quantity": self.Quantity, "Purchaseddate": self.Purchaseddate, 
                 "Receivedate": self.Receivedate, "Price": self.Price, "SellerID": self.SellerID, "Status": self.Status, "BuyerID": self.BuyerID}
     
-# Order Management for Seller
 @app.route("/seller")
 def find_by_SellerID():
     loggedin_user_id = session.get('loggedin_user_id')
@@ -98,7 +95,6 @@ def find_by_SellerID():
     else:
         return render_template('seller.html', data = "There are no items ordered.") 
 
-# Order Details
 @app.route('/order/<int:OrderDetailID>')
 def order_detail(OrderDetailID):
     order = db.session.scalars(db.select(Orderdetails).filter_by(OrderDetailID=OrderDetailID).limit(1)).first()
@@ -145,7 +141,6 @@ def order_detail(OrderDetailID):
         }
     ), 404
 
-# Update status
 @app.route('/update_status', methods=['PUT'])
 def update_status():
     """

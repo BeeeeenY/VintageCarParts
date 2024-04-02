@@ -23,7 +23,7 @@
                 orders: items.map(item => ({
                     PartID: item.id,
                     Quantity: item.quantity,
-                    Price: item.priceInCents / 100, // Convert back to dollars
+                    Price: item.priceInCents / 100 * item.quantity, // Convert back to dollars
                     BuyerID: item.BuyerID,
                     SellerID: item.SellerID,
                     name: item.name, // Optional

@@ -13,8 +13,8 @@
         }
         .navbar .navbar-nav .nav-link .icon {
             display: inline-block;
-            width: 20px; /* Adjust the size as needed */
-            height: 20px; /* Adjust the size as needed */
+            width: 20px;
+            height: 20px;
             margin-right: 10px;
         }
         #plus-button-container {
@@ -51,7 +51,7 @@
         }
 
         .post h3 {
-            color: orange; /* Orange color for post titles */
+            color: orange;
         }
 
         .post p {
@@ -68,9 +68,9 @@
             background-color: white;
             border: 1px solid #ccc;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px; /* Change padding for smaller pop-up */
+            padding: 20px;
             z-index: 9999;
-            border-radius: 10px; /* Add rounded corners to pop-up box */
+            border-radius: 10px;
         }
         .popup-content {
             display: flex;
@@ -78,7 +78,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            position: relative; /* Set position relative for close button positioning */
+            position: relative;
             height: 100%;
         }
         .close-btn {
@@ -103,17 +103,17 @@
         
         .picture-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Display three pictures in each row */
-            grid-gap: 10px; /* Adjust the gap between pictures */
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
         }
 
         .post-picture {
             width: 100%;
             height: auto;
-            max-height: 200px; /* Set a maximum height for each picture */
-            object-fit: cover; /* Ensure the entire picture is visible, cropping as needed */
-            border-radius: 5px; /* Add border-radius for rounded corners */
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Add shadow for each picture */
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
 
@@ -219,7 +219,6 @@
                         Comment
                     </a>
         
-                    <!-- Comment form -->
                     <form class="comment-form" action= '/create_comment' method= 'POST' style="display: none;" data-post-id="{{post.PostID}}">
                         <input type="hidden" name="post_id" value="{{post.PostID}}">
                         <div class="form-group">
@@ -254,7 +253,6 @@
                                     </div>
                                     <button type="submit" class="btn btn-outline-primary">Update</button>
                                 </form>
-                                <!-- <p><em>{{ comment.CommentDate }}</em></p> -->
                             </div>
                         {% endfor %}
                     </div>
@@ -279,7 +277,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <form id="sellForm" action="http://127.0.0.1:5002/listing" method="get" style="display: none;">
-        <!-- Add any necessary input fields here -->
     </form>
 
     <div id="plus-button-container">
@@ -287,7 +284,6 @@
     </div>
 
     <form id="addForm" action="/create_post_page" method="get" style="display: none;">
-        <!-- Add any necessary input fields here -->
     </form>
 
     <script>
@@ -298,9 +294,9 @@
                 var commentForms = document.querySelectorAll('.comment-form-edit[data-comment-id="' + commentID + '"]');
                 commentForms.forEach(function(commentForm) {
                     if (commentForm.style.display === 'none') {
-                        commentForm.style.display = 'block'; // Show the comment form
+                        commentForm.style.display = 'block';
                     } else {
-                        commentForm.style.display = 'none'; // Hide the comment form
+                        commentForm.style.display = 'none';
                     }
                 });
             });
@@ -313,9 +309,9 @@
                 var commentForms = document.querySelectorAll('.comment-form[data-post-id="' + postId + '"]');
                 commentForms.forEach(function(commentForm) {
                     if (commentForm.style.display === 'none') {
-                        commentForm.style.display = 'block'; // Show the comment form
+                        commentForm.style.display = 'block';
                     } else {
-                        commentForm.style.display = 'none'; // Hide the comment form
+                        commentForm.style.display = 'none';
                     }
                 });
             });
@@ -336,13 +332,12 @@
                 button.classList.remove('btn-outline-danger');
                 button.classList.add('btn-success');
                 button.textContent = 'Buy';
-                // Submit the form to redirect to /listing
                 sellForm.submit();
             } else {
                 button.classList.remove('btn-success');
                 button.classList.add('btn-outline-danger');
                 button.textContent = 'Sell';
-                plusButtonContainer.style.display = 'none'; // Hide the plus button container
+                plusButtonContainer.style.display = 'none';
             }
             isSell = !isSell;
         }

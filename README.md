@@ -11,16 +11,15 @@
 ##### Introduction
 The project consists of multiple microservices, each encapsulated within a Docker container. These microservices include:
 
-- **Vintagecar**: Description of the Vintagecar microservice.
-- **Users**: Description of the Users microservice.
-- **Logintemplate**: Description of the Logintemplate microservice.
-- **Order**: Description of the Order microservice.
-- **Createpart**: Description of the Createpart microservice.
-- **Forum**: Description of the Forum microservice.
-- **Chat**: Description of the Chat microservice.
-- **Shipping**: Description of the Shipping microservice.
-- **Car**: Description of the Car microservice.
-- **Payment**: Description of the Payment microservice.
+- **Vintagecar**: This microservice handles functionalities related to vintage cars. It may include features such as listing vintage cars for sale, providing details about vintage car models, and managing vintage car inventory.
+- **Users**: The Users microservice manages user-related operations within the system. It handles user authentication and registration
+- **Logintemplate**: The Logintemplate microservice provides authentication and login functionalities for users accessing the system. It manages user login sessions, verifies user credentials, and ensures secure access to the system.
+- **Order**: The Order microservice facilitates order management functionalities. It allows users to place orders for products or services, view order history, track order statuses, and manage orders throughout the order lifecycle.
+- **Createpart**: The Createpart microservice enables users to create and manage parts listings within the system. It provides functionalities for adding new parts, updating existing parts, and managing part inventory.
+- **Forum**: The Forum microservice serves as a platform for users to engage in discussions, share information, and ask questions related to the system's domain. It manages forum posts and comment.
+- **Chat**:  The Chat microservice facilitates real-time communication between users within the system. It provides chat functionalities -  one-on-one
+- **Car**: The Car microservice deals with functionalities related to rental of modern cars. It may include features such as listing modern car models, providing details about car specifications, and managing modern car inventory.
+- **Payment**: The Payment microservice manages payment processing functionalities within the system. It handles payment methods, transactions, payment gateway integrations, and ensures secure and reliable payment processing.
 
 ##### Setup
 ###### Prerequisites

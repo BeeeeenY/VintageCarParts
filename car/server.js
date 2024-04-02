@@ -20,39 +20,31 @@ app.use(function(req, res, next) {
 const swaggerDocument = YAML.load("./swagger.yaml");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// EJS Template
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
-// CORS
 app.use(cors());
 
-// Static Images
 app.use(express.static(path.join(__dirname, 'static')));
 
-// Parse JSON and URL-encoded body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Set up multer storage and file filter
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Firebase Storage 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
     storageBucket: 'esdfirebase-2fe43.appspot.com'
 });
 const bucket = firebase.storage().bucket();
 
-// Car Rental Listing
 app.get('/cars', async (req, res) => {
     try {
         const response = await axios.get(`https://personal-dz59up8e.outsystemscloud.com/Rental/rest/v1/cars/`);
         const carData = response.data;
         console.log('Retrieved car data:', carData);
 
-        // Fetch image URLs for each car
         const carsWithImages = await Promise.all(carData.Cars.map(async (car) => {
             const folderPrefix = `cars/${car.VehicleIdentificationNum}/`;
             const [blobs] = await bucket.getFiles({ prefix: folderPrefix });
@@ -69,7 +61,7 @@ app.get('/cars', async (req, res) => {
                     });
                     console.log("Images", imageUrl);
                     imageUrls.push(imageUrl[0]);
-                    break; // Only fetch the first image for each car
+                    break;
                 } else {
                     console.log('File does not exist:', blob.name);
                 }
@@ -86,7 +78,6 @@ app.get('/cars', async (req, res) => {
     }
 });
 
-// Car Details
 app.get('/car/:VehicleIdentificationNum', async (req, res) => {
     try {
         const { VehicleIdentificationNum } = req.params;
@@ -112,8 +103,6 @@ app.get('/car/:VehicleIdentificationNum', async (req, res) => {
 
         const response = await axios.get(`https://personal-dz59up8e.outsystemscloud.com/Rental/rest/v1/cars/${VehicleIdentificationNum}`);
         const carData = response.data;
-        // Uncomment to send swagger JSON response
-        // res.json({ carData, imageUrls });
         res.render('car', { carData, imageUrls });
 
     } catch (error) {
@@ -122,7 +111,6 @@ app.get('/car/:VehicleIdentificationNum', async (req, res) => {
     }
 });
 
-// Car Rental Management
 app.get('/car/owner/:SellerID', async (req, res) => {
     try {
         const { SellerID } = req.params;
@@ -131,20 +119,16 @@ app.get('/car/owner/:SellerID', async (req, res) => {
         const carData = response.data;
         console.log('Retrieved car data:', carData);
 
-      // uncomment to send JSON response for swagger
-        // res.json({ carData });
         res.render('rentmanagement', { carData });
         
 
     } catch (error) {
         console.error('Error:', error.message);
-        // res.status(500).json({ error: 'Error fetching car data' });
         res.render('rentmanagement', carData=0);
 
     }
 });
 
-// Receive SellerID
 app.post('/seller', async (req, res) => {
     try {
         const { SellerID } = req.body;
@@ -163,12 +147,10 @@ app.post('/seller', async (req, res) => {
     }
 });
 
-// Render addcar form
 app.get('/addcar', (req, res) => {
     res.render('addcar');
   });
 
-// Add Car
 app.post('/addcar', upload.array('Image'), async (req, res) => {
     try {
         const { Brand, Model, VehicleIdentificationNum, Description, Price, Location, SellerID } = req.body;
@@ -183,10 +165,8 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
                 const folderPath = `cars/${VehicleIdentificationNum}/`;
                 const filePath = folderPath + imageName;
 
-                // Check if the file already exists in storage
                 const fileExists = await bucket.file(filePath).exists();
 
-                // If the file doesn't exist, proceed with uploading it
                 if (!fileExists[0]) {
                     const file = bucket.file(filePath);
                     const stream = file.createWriteStream({
@@ -195,7 +175,6 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
                         }
                     });
 
-                    // Upload image
                     await new Promise((resolve, reject) => {
                         stream.on('error', (err) => {
                             console.error('Error uploading image:', err);
@@ -203,7 +182,6 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
                         });
                         stream.on('finish', async () => {
                             console.log('Image uploaded successfully');
-                            // Get the public URL of the uploaded image
                             const imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
                             imageUrls.push(imageUrl);
                             resolve();
@@ -243,12 +221,10 @@ app.post('/addcar', upload.array('Image'), async (req, res) => {
     }
 });
 
-// Render updatecar form
 app.post('/updatecar', (req, res) => {
     res.render('updatecar');
 });
 
-// Update car details
 app.post('/updatedetails', upload.array('Image'), async (req, res) => {
     try {
         const VehicleIdentificationNum = req.body.VehicleIdentificationNum;
@@ -264,18 +240,14 @@ app.post('/updatedetails', upload.array('Image'), async (req, res) => {
 
         const imageUrls = [];
 
-        // Check if images were uploaded
         if (Images && Images.length > 0) {
-            // Process each uploaded image
             for (const image of Images) {
                 const imageName = `${image.originalname}`;
                 const folderPath = `cars/${VehicleIdentificationNum}/`;
                 const filePath = folderPath + imageName;
 
-                // Check if the file already exists in storage
                 const fileExists = await bucket.file(filePath).exists();
 
-                // If the file doesn't exist, proceed with uploading it
                 if (!fileExists[0]) {
                     const file = bucket.file(filePath);
                     const stream = file.createWriteStream({
@@ -284,7 +256,6 @@ app.post('/updatedetails', upload.array('Image'), async (req, res) => {
                         }
                     });
 
-                    // Upload image
                     await new Promise((resolve, reject) => {
                         stream.on('error', (err) => {
                             console.error('Error uploading image:', err);
@@ -292,7 +263,6 @@ app.post('/updatedetails', upload.array('Image'), async (req, res) => {
                         });
                         stream.on('finish', async () => {
                             console.log('Image uploaded successfully');
-                            // Get the public URL of the uploaded image
                             const imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
                             imageUrls.push(imageUrl);
                             resolve();
@@ -326,7 +296,6 @@ app.post('/updatedetails', upload.array('Image'), async (req, res) => {
     }
 });
 
-// Update availability to 'False'
 app.post('/car/rent/:vin', (req, res) => {
     const vin = req.params.vin;
     console.log("VIN:",vin);
@@ -340,7 +309,6 @@ app.post('/car/rent/:vin', (req, res) => {
         });
 });
 
-// Update availability to 'True'
 app.post('/car/return/:vin', (req, res) => {
     const vin = req.params.vin;
     console.log("VIN:",vin);
@@ -354,7 +322,6 @@ app.post('/car/return/:vin', (req, res) => {
         });
 });
 
-// Delete car
 app.post('/deletecar', async (req, res) => {
     try {
         const { VehicleIdentificationNum } = req.body;

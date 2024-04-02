@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,18 +15,12 @@
             margin-right: 10px;
         }
 
-        /* Form */
-        body {
-            padding: 20px;
+        /* Table */
+        .category {
+            font-weight:bolder;
+            font-size: large;
         }
-        form {
-            max-width: 600px;
-            margin: auto;
-        }
-        .form-label {
-            font-weight: bold;
-        }
-
+        
         /* Container */
         .container {
             position: relative;
@@ -63,7 +58,6 @@
         }
     </style>
 </head>
-
 <body>
     <!-- Navigation Bar -->
     <div class="container mt-4 mb-4">
@@ -85,17 +79,17 @@
                 </div>
                 <div class="navbar-nav ml-auto">
                     <a class="nav-item nav-link" href="http://127.0.0.1:5002/cart">
-                        <img src="/Cart.png" alt="Cart" class="icon">
+                        <img src="{{ url_for('static', filename='Cart.png') }}" alt="Cart" class="icon">
                         Cart
                     </a>
                     <a class="nav-item nav-link" href="#">
-                        <img src="/message-icon.png" alt="Messages" class="icon">
+                        <img src="{{ url_for('static', filename='message-icon.png') }}" alt="Messages" class="icon">
                         Messages
                     </a>
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">
-                            <img src="/user-profile.png" alt="Profile" class="icon">
+                            <img src="{{ url_for('static', filename='user-profile.png') }}" alt="Profile" class="icon">
                             Profile
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -106,56 +100,55 @@
                     </div>
                 </div>
                 <form class="form-inline">
-                    <button class="btn btn-success" type="button">Buy</button>
+                    <button id="sellBtn" class="btn btn-outline-danger" type="button" onclick="toggleButton()">Sell</button>
                 </form>
             </nav>
         </div>
     </div>
 
-    <!-- Form -->
-    <h1 class="text-center mt-5 mb-4">Update Car Details</h1>
-    <form id="updateForm" method="POST" action="http://127.0.0.1:5009/updatedetails" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="vehicleidentificationnum" class="form-label">Vehicle Identification Number:</label>
-            <input type="hidden" id="vehicleidentificationnum" name="VehicleIdentificationNum" class="form-control">
-            <span id="vehicleidentificationnum_text"></span>
-            <label for="sellerid" class="form-label"></label>
-            <input type="hidden" id="sellerid" name="SellerID" class="form-control">
+    <div class="container">
+        <div class="row">
+            <div style="font-weight: bolder; font-size: x-large; text-align: center;">Order Details</div>
         </div>
-        
-        <div class="mb-3">
-            <label for="brand" class="form-label">Brand:</label>
-            <input type="text" id="brand" name="Brand" class="form-control">
-        </div>
+    </div></br>
 
-        <div class="mb-3">
-            <label for="model" class="form-label">Model:</label>
-            <input type="text" id="model" name="Model" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label for="description" class="form-label">Description:</label>
-            <textarea id="description" name="Description" class="form-control" rows="4"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label for="price" class="form-label">Price/hour ($):</label>
-            <input type="number" id="price" name="Price" step="any" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="location" class="form-label">Location:</label>
-            <input type="text" id="location" name="Location" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label for="image" class="form-label">Image:</label>
-            <input type="file" id="image" name="Image" class="form-control" accept="image/*" multiple>
-        </div>
-
-        <button type="submit" class="btn btn-outline-primary">Update</button>
-        <button class="btn btn-outline-danger" id="deleteBtn">Delete</button>
-    </form>
+    <!-- Order Details -->
+    <div class="container">
+        <table class="table table-bordered">
+            <tr>
+                <th>Order ID</th>
+                <td>{{order.OrderID}}</td>
+            </tr>
+            <tr>
+                <th>Buyer ID</th>
+                <td>{{order.BuyerID}}</td>
+            </tr>
+            <tr>
+                <th>Buyer Name</th>
+                <td>{{order.BuyerName}}</td>
+            </tr>
+            <tr>
+                <th>Purchased Date</th>
+                <td>{{order.Purchaseddate}}</td>
+            </tr>
+            <tr>
+                <th>Product Name</th>
+                <td>{{order.ProductName}}</td>
+            </tr>
+            <tr>
+                <th>Unit Price</th>
+                <td>{{order.ProductPrice}}</td>
+            </tr>
+            <tr>
+                <th>Quantity</th>
+                <td>{{order.Quantity}}</td>
+            </tr>
+            <tr>
+                <th>Total Price</th>
+                <td>{{order.TotalPrice}}</td>
+            </tr>
+        </table>
+    </div>
 
     <!-- About Pop-up -->
     <div id="popup" class="popup-container">
@@ -168,51 +161,19 @@
         </div>
     </div>
 
-    <!-- Buy Button -->
-    <form id="sellForm" action="http://127.0.0.1:5002/" method="get" style="display: none;"></form>
+    <!-- Sell Button -->
+    <form id="sellForm" action="http://127.0.0.1:5002/listing" method="get" style="display: none;"></form>
 
     <!-- Profile -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Delete -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- About Us -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Retrieve row data
-            var rowData = sessionStorage.getItem('rowData');
-            console.log('rowData:', rowData);
-            if (rowData) {
-                rowData = JSON.parse(rowData);
-                document.getElementById('model').value = rowData.Model;
-                document.getElementById('brand').value = rowData.Brand;
-                document.getElementById('vehicleidentificationnum').value = rowData.VIN;
-                document.getElementById('vehicleidentificationnum_text').textContent = rowData.VIN;
-                document.getElementById('description').value = rowData.Description;
-                document.getElementById('price').value = parseFloat(rowData.Price.replace(/[^\d.-]/g, ''));
-                document.getElementById('location').value = rowData.Location;
-                document.getElementById('sellerid').value = rowData.SellerID;
-            }
+        // Sell Button
+        let isSell = true;
 
-            // Delete car
-            document.getElementById('deleteBtn').addEventListener('click', function() {
-                const VIN = document.getElementById('vehicleidentificationnum').value;
-
-                axios.post('/deletecar', { VehicleIdentificationNum: VIN })
-                    .then(response => {
-                        console.log(response.data);
-                        window.location.href = `/cars`;
-                    })
-                    .catch(error => {
-                        // Handle error
-                        console.error('Error:', error);
-                    });
-            });
-        });
-
-        // Buy Button
         function toggleButton() {
             const button = document.getElementById('sellBtn');
             const sellForm = document.getElementById('sellForm');
@@ -229,10 +190,6 @@
             }
             isSell = !isSell;
         }
-
-        document.querySelector('button.btn-success').addEventListener('click', function() {
-            window.location.href = "http://127.0.0.1:5002/";
-        });
 
         // About Pop-up
         document.getElementById('about-link').addEventListener('click', function(event) {

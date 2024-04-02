@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, session, redirect
-from flask_cors import CORS, cross_origin  # Import Flask-CORS
+from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 import firebase_admin
 from firebase_admin import credentials, storage
@@ -11,12 +11,10 @@ firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot
 bucket = storage.bucket()
 
 app = Flask(__name__)
-CORS(app)  # Initialize Flask-CORS
+CORS(app)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
 )
@@ -133,44 +131,33 @@ def create_part():
     print(part_id)
 
     if request.method == "POST":
-        # Get the uploaded photos from the HTML form
         photos = request.files.getlist("file")
 
-        # Filter out empty FileStorage objects
         photos = [photo for photo in photos if photo.filename]
         
         if photos:
             print("User uploaded photos, proceeding with upload")
-            # User uploaded photos, proceed with upload
-            # List to store upload results
             upload_results = []
 
-            # Upload each photo to Firebase Storage
             for photo in photos:
-                # Specify a unique path for each photo in Firebase Storage
                 photo_blob = bucket.blob(f"parts/{part_id}/{photo.filename}")
                 
-                # Upload the photo
                 try:
                     photo_blob.upload_from_file(photo)
-                    upload_results.append(True)  # Successful upload
+                    upload_results.append(True)
                 except Exception as e:
-                    upload_results.append(False)  # Failed upload
+                    upload_results.append(False)
                     print(f"Error uploading photo: {e}")
 
-            # Check if all uploads were successful
             try:
                 all(upload_results)
                 print("Photos uploaded successfully!")
             except Exception as e:
-                print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
+                print("Failed to upload all photos. Please try again.")
         
         redirect_url = 'http://127.0.0.1:5002/listing'
-    
-        # Redirect to the constructed URL
+
         return redirect(redirect_url, code=302)
     
-
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5003, debug=True)

@@ -1,92 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
     <style>
+        .message-even {
+            background-color: #2ed64a;
+        }
+
+        .message-odd {
+            background-color: #c0bfbf;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
         }
 
         .container {
             max-width: 600px;
-            margin: 20px auto;
+            margin: 0 auto;
             padding: 20px;
             background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .messages {
-            max-height: 300px;
-            overflow-y: auto;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
+            overflow-y: scroll;
+            max-height: 300px;
+            padding: 10px;
+            border-radius: 5px;
         }
 
         .message {
-            border-radius: 8px;
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
             padding: 10px;
-            margin-bottom: 10px;
-            clear: both;
-            width: fit-content;
-        }
-
-        .message.from-me {
-            background-color: #dcf8c6;
-            float: right;
-        }
-
-        .message.from-other {
-            background-color: #f1f0f0;
-            float: left;
-        }
-
-        /* .message.system {
-            background-color: #beccf6;
-            float: center;
-        } */
-        .input-container {
-            display: flex;
-        }
-
-        #messageInput {
-            flex: 1;
-            padding: 10px;
-            border-radius: 4px;
+            border-radius: 5px;
             border: 1px solid #ccc;
+            outline: none;
         }
 
-        #sendButton {
-            padding: 10px 20px;
-            margin-left: 10px;
-            border-radius: 4px;
-            border: none;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
+        input[type="text"]:focus {
+            border-color: #007bff;
         }
     </style>
 </head>
-
 <body>
+
+    
     <div class="container">
-        <div class="messages" id="messageContainer">
-            <!-- Messages will be displayed here -->
-        </div>
-        <div class="input-container">
-            <input placeholder="Type your message..." id="messageInput" />
-            <button id="sendButton">Send</button>
-        </div>
-        <input type="text" id="username" placeholder="Username">
-        <input type="text" id="message" placeholder="Message">
-        <button id="sendBtn">Send</button>
-    </body>
+        <h1>You're connected</h1>
+        <div class="messages" id="message-container"></div>
+        <input type="text" id="messageInput" placeholder="Type your message...">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+        integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+        crossorigin="anonymous"></script>
+    <script>
+
+        const socket = io();
+        let messageContainer = document.getElementById("message-container");
+        let messageCount = 0;
+
+        socket.on("connect", () => {
+            console.log("You're connected");
+        });
+
+        array = {"1":"BMW", "2":"Mini Cooper", "3": "Ferrari"}
+
+        function appendMessage(message) {
+            let messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            messageElement.innerText = message;
+
+            if (messageCount % 2 === 0) {
+                messageElement.classList.add("message-even");
+            } else {
+                messageElement.classList.add("message-odd");
+            }
+            messageCount++;
+
+            messageContainer.appendChild(messageElement);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            
+
+            for (const [k, v] of Object.entries(array)){
+                if (message.includes(v)){
+          
+                    window.open(`http://127.0.0.1:5002/${k}`, '_blank').focus();
+                }
+            }
+            
+        }
+
+        let messageInput = document.getElementById("messageInput");
+        messageInput.addEventListener("keypress", (e) => {
+            if (e.which === 13) {
+                socket.emit("message", messageInput.value);
+                messageInput.value = "";
+            }
+        });
+
+        socket.on('message', (message) => {
+            appendMessage(message);
+        });
+    </script>
+</body>
 </html>

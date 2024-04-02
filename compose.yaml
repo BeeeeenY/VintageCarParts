@@ -121,20 +121,6 @@ services:
         - "5007:5007"
 
   ##################################
-  # The shipping microservice
-  ##################################
-  shipping:
-    build:
-      context: ./
-      dockerfile: shipping.Dockerfile
-    image: qiuhaoyin/shipping:esd
-    restart: always
-    environment:
-      PYTHONUNBUFFERED: 1
-    ports:
-        - "5008:5008"
-
-  ##################################
   # The car microservice
   ##################################
   car:

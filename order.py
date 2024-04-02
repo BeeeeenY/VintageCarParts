@@ -237,17 +237,17 @@ def create_order():
             description: An error occurred while creating the order.
     """
     try:
-        orders_data = request.json.get('orders')  # Expecting a JSON array of orders
+        orders_data = request.json.get('orders')
         if not orders_data:
             return jsonify({"code": 400, "message": "No order data provided"}), 400
 
         for order_data in orders_data:
             PartID = order_data.get('PartID')
             Quantity = order_data.get('Quantity')
-            Price = order_data.get('Price')  # Assuming this is in dollars
+            Price = order_data.get('Price')
             BuyerID = order_data.get('BuyerID')
             SellerID = order_data.get('SellerID')
-            ProductName = order_data.get('name')  # opetional
+            ProductName = order_data.get('name')
             
             my_timezone = pytz.timezone('Asia/Singapore')
 
@@ -265,7 +265,7 @@ def create_order():
             )
             db.session.add(order)
         
-            db.session.commit()  # Commit once after all orders are added            
+            db.session.commit()     
             
             reduce_quantity_url = 'http://host.docker.internal:5002/reduce_quantity'
             reduce_quantity_params = {'PartID': PartID, 'Quantity':Quantity}
@@ -277,7 +277,7 @@ def create_order():
         return jsonify({"code": 201, "message": "Orders created successfully"}), 201
     
     except Exception as e:
-        db.session.rollback()  # Rollback in case of error
+        db.session.rollback()
         return jsonify({"code": 500, "message": "An error occurred while creating the orders: " + str(e)}), 500
     
 @app.route('/buyer_order')
@@ -298,7 +298,6 @@ def buyer_orders():
             get_part_response = requests.get(get_part_url, params=get_part_params)
 
             if get_part_response.status_code == 200:
-                # Get the username from the response if needed
                 part_details = get_part_response.json().get('part_details')
 
             print(part_details)
@@ -333,7 +332,7 @@ def buyer_orders():
     if order_items != []:
         return render_template('buyerorders.html', orders = order_items)
     else:
-        return render_template('buyerorders.html', data = "There are no items ordered.")  # Render a template indicating no orders
+        return render_template('buyerorders.html', data = "There are no items ordered.")
     
 @app.route('/receive/<int:OrderID>')
 def receive(OrderID):
@@ -356,6 +355,3 @@ def review(OrderID):
     
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5005, debug=True)
-
-
-

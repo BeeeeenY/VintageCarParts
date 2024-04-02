@@ -127,7 +127,7 @@ services:
     build:
       context: ./
       dockerfile: shipping.Dockerfile
-    image: charmainetan/shipping:esd
+    image: qiuhaoyin/shipping:esd
     restart: always
     environment:
       PYTHONUNBUFFERED: 1
@@ -141,7 +141,7 @@ services:
     build:
       context: ./car
       dockerfile: car.Dockerfile
-    image: lewchinyee/car:esd
+    image: qiuhaoyin/car:esd
     restart: always
     environment:
       PYTHONUNBUFFERED: 1
@@ -155,7 +155,7 @@ services:
     build:
       context: ./payment/server
       dockerfile: payment.Dockerfile
-    image: lewchinyee/payment:esd
+    image: qiuhaoyin/payment:esd
     restart: always
     environment:
       PYTHONUNBUFFERED: 1

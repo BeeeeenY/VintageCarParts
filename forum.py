@@ -5,7 +5,6 @@ from firebase_admin import credentials, storage
 import datetime as dt
 import requests
 from os import environ
-from flasgger import Swagger
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'esdfirebase-2fe43.appspot.com'})
@@ -21,14 +20,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-# Initialize flasgger
-app.config['SWAGGER'] = {
-    'title': 'Forum microservice API',
-    'version': 1.0,
-    "openapi": "3.0.2",
-    'description': 'Allows create, retrieve, update, and delete of forum posts'
-}
-swagger = Swagger(app)
 
 class Forum(db.Model):
     __tablename__ = 'Posts'
@@ -61,23 +52,6 @@ class Comments(db.Model):
 
 @app.route('/forum', methods=['GET'])
 def get_forum_posts():
-    """
-    Fetch forum posts.
-    ---
-    tags:
-        -  posts
-    parameters:
-        -   in: query
-            name: search
-            schema:
-                type: string
-                description: Optional search query for filtering posts.
-    responses:
-      200:
-        description: Returns forum posts.
-      404:
-        description: No posts found.
-    """
     search_query = request.args.get('search')
     if search_query == None:
         search_query = ""
@@ -105,7 +79,6 @@ def get_forum_posts():
             get_username_response = requests.get(get_username_url, params=get_username_params)
 
             if get_username_response.status_code == 200:
-                # Get the username from the response if needed
                 username = get_username_response.json().get('username')
                 print("Username:", username)
 
@@ -125,7 +98,6 @@ def get_forum_posts():
         get_username_response = requests.get(get_username_url, params=get_username_params)
 
         if get_username_response.status_code == 200:
-            # Get the username from the response if needed
             username = get_username_response.json().get('username')
             print("Username:", username)
 
@@ -135,26 +107,22 @@ def get_forum_posts():
         
         post_id_str = str(post_id)
 
-        # Get a reference to the folder
         folder_prefix = "forum/" + post_id_str + '/'
-        
-        # Retrieves all the files within the folder specified by folder_prefix.
+
         blobs = bucket.list_blobs(prefix=folder_prefix)
 
-        # Define a distant future timestamp
         future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
         pic_arr = []
 
         for blob in blobs:
-            picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+            picture_url = blob.generate_signed_url(expiration=future_timestamp)
             pic_arr.append(picture_url)
 
         if len(pic_arr) == 0:
             print("No files found.")
 
         if post:
-            # Convert posts to a list of dictionaries
             post_details = {
                 'PostID': post.PostID,
                 'Title': post.Title,
@@ -169,8 +137,6 @@ def get_forum_posts():
 
         if search_query in post.Title or search_query in post.Content:
             search_data.append(post_details)
-
-    print(posts_arr)
 
     if search_data:
         return render_template('forum.html', posts = search_data)
@@ -187,45 +153,13 @@ def create_post_page():
 
 @app.route("/create_post", methods=['POST'])
 def create_post():
-    """
-    Create a post in the forum.
-    ---
-    tags:
-      - posts
-    requestBody:
-      required: true
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            type: object
-            properties:
-              Title:
-                type: string
-                description: Title of the post.
-              Content:
-                type: string
-                description: Content of the post.
-    responses:
-            200:
-                description: Post created successfully.
-                headers:
-                Location:
-                    description: URL of the created post.
-                    schema:
-                        type: string
-                        example: "/forum"
-            400:
-                description: Missing form data or invalid request.
-            500:
-                description: An error occurred while creating the post.
-    """
+
     title = request.form.get('Title')
     content = request.form.get('Content')
 
     if not title or not content:
         return 'Missing form data.', 400
-    
-    # Fetch user ID of user logged in
+
     loggedin_user_id = session.get('loggedin_user_id')
     print(loggedin_user_id)
 
@@ -243,29 +177,24 @@ def create_post():
     post_id = post.PostID
 
     if request.method == "POST":
-        # Get the uploaded photos from the HTML form
         photos = request.files.getlist("file")
 
-        # Filter out empty FileStorage objects
         photos = [photo for photo in photos if photo.filename]
         
         if photos:
             print("User uploaded photos, proceeding with upload")
-            # User uploaded photos, proceed with upload
-            # List to store upload results
+
             upload_results = []
 
-            # Upload each photo to Firebase Storage
             for photo in photos:
-                # Specify a unique path for each photo in Firebase Storage
                 photo_blob = bucket.blob(f"forum/{post_id}/{photo.filename}")
                 
                 # Upload the photo
                 try:
                     photo_blob.upload_from_file(photo)
-                    upload_results.append(True)  # Successful upload
+                    upload_results.append(True)
                 except Exception as e:
-                    upload_results.append(False)  # Failed upload
+                    upload_results.append(False)
                     print(f"Error uploading photo: {e}")
 
             # Check if all uploads were successful
@@ -273,47 +202,14 @@ def create_post():
                 all(upload_results)
                 print("Photos uploaded successfully!")
             except Exception as e:
-                print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
+                print("Failed to upload all photos. Please try again.")
 
     redirect_url = '/forum'
-    
-     # Redirect to the constructed URL
+
     return redirect(redirect_url)
 
 @app.route('/create_comment', methods=['POST'])
 def create_comment():
-    """
-    Create a comment in the forum.
-    ---
-    tags:
-      - create_comment
-    requestBody:
-      required: true
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            type: object
-            properties:
-              post_id:
-                type: string
-                description: ID of the post.
-              comment:
-                type: string
-                description: Content of the comment.
-    responses:
-            200:
-                description: Comment created successfully.
-                headers:
-                Location:
-                    description: URL of the created post.
-                    schema:
-                        type: string
-                        example: "/forum"
-            400:
-                description: Missing form data or invalid request.
-            500:
-                description: An error occurred while creating the comment.
-    """
     comment_content = request.form.get('comment')
     post_id = request.form.get('post_id')
 
@@ -334,29 +230,10 @@ def create_comment():
 
     redirect_url = '/forum'
     
-     # Redirect to the constructed URL
     return redirect(redirect_url)
 
 @app.route("/delete_post/<int:PostID>")
 def delete_post(PostID):
-    """
-    Delete a Post.
-
-    ---
-    tags:
-        -   Deletepost
-    parameters:
-        -   name: PostID
-            in: path
-            description: ID of the post to delete
-            required: true
-            type: integer
-    responses:
-        200:
-            description: Post deleted successfully
-        500:
-            description: An error occurred while deleting the post
-    """
     db.session.query(Forum).filter_by(PostID=PostID).delete()
     db.session.commit()
 
@@ -364,24 +241,6 @@ def delete_post(PostID):
 
 @app.route("/delete_comment/<int:CommentID>")
 def delete_comment(CommentID):
-    """
-    Delete a comment.
-
-    ---
-    tags:
-        -   Deletecomment
-    parameters:
-        -   name: CommentID
-            in: path
-            description: ID of the comment to delete
-            required: true
-            type: integer
-    responses:
-        200:
-            description: Comment deleted successfully
-        500:
-            description: An error occurred while deleting the comment
-    """
     db.session.query(Comments).filter_by(CommentID=CommentID).delete()
     db.session.commit()
 
@@ -389,22 +248,6 @@ def delete_comment(CommentID):
 
 @app.route("/update_post_page/<int:PostID>")
 def update_post_page(PostID):
-    """
-    Retrieve the page for updating a post.
-
-    This endpoint returns an HTML page containing a form for updating the post details.
-
-    ---
-    parameters:
-      - name: PostID
-        in: path
-        description: ID of the post to update
-        required: true
-        type: integer
-    responses:
-      200:
-        description: HTML page for updating the post
-    """
     post_details = db.session.query(Forum).filter(Forum.PostID == PostID).first()
     if post_details:
         post = {
@@ -416,45 +259,6 @@ def update_post_page(PostID):
 
 @app.route("/update_post/<int:PostID>", methods=['POST'])
 def update_post(PostID):
-    """
-    Update a post
-
-    ---
-    parameters:
-        -   name: PostID
-            in: path
-            description: ID of the post to be updated
-            required: true
-            type: integer
-        -   name: Title
-            in: formData
-            description: New title for the post
-            required: true
-            type: string
-        -   name: Content
-            in: formData
-            description: New content for the post
-            required: true
-            type: string
-        -   name: file
-            in: formData
-            description: Files to be uploaded (optional)
-            required: false
-            type: file
-            format: binary
-    responses:
-        '200':
-                description: Post updated successfully
-        '400':
-                description: Bad request - If the request does not contain valid data
-        '500':
-                description: Internal server error - If an error occurs while updating the post
-    consumes:
-        -   multipart/form-data
-    produces:
-        -   application/json
-
-    """
     Title = request.form.get('Title')
     Content = request.form.get('Content')
 
@@ -518,35 +322,6 @@ def update_post(PostID):
 
 @app.route("/update_comment/<int:CommentID>", methods=['POST'])
 def update_comment(CommentID):
-    """
-    Update a comment
-
-    ---
-    parameters:
-        -   name: CommentID
-            in: path
-            description: ID of the comment to be updated
-            required: true
-            type: integer
-        -   name: edited_comment
-            in: formData
-            description: New content for the comment
-            required: true
-            type: string
-            
-    responses:
-        '200':
-                description: Post updated successfully
-        '400':
-                description: Bad request - If the request does not contain valid data
-        '500':
-                description: Internal server error - If an error occurs while updating the post
-    consumes:
-        -   multipart/form-data
-    produces:
-        -   application/json
-
-    """
     edited_comment = request.form.get('edited_comment')
 
     comment = db.session.query(Comments).filter_by(CommentID = CommentID).first()
@@ -570,3 +345,4 @@ def update_comment(CommentID):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5006, debug=True)
+

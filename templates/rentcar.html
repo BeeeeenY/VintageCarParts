@@ -101,9 +101,9 @@
     <div class="d-grid gap-2 justify-content-center">
         <form id="sellerForm" action="http://127.0.0.1:5009/seller" method="POST" style="color:gray">
             <input type="hidden" id="SellerID" name="SellerID" value="{{ loggedin_user_id }}">
+            <button type="button" class="btn btn-primary btn-lg" onclick="viewCarListing()" style="width: 300px;">Browse Listings</button></br></br>
             <button type="submit" class="btn btn-success btn-lg" style="width: 300px;">List Your Car</button></br></br>
-            <button type="button" class="btn btn-danger btn-lg" onclick="manageCarRentals()" style="width: 300px;">Manage Rentals</button></br></br>
-            <button type="button" class="btn btn-primary btn-lg" onclick="viewCarListing()" style="width: 300px;">View Listings</button></br>
+            <button type="button" class="btn btn-danger btn-lg" onclick="manageCarRentals()" style="width: 300px;">Manage Rentals</button>
         </form>
     </div>
     

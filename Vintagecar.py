@@ -15,14 +15,11 @@ app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/products'
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/products"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize flasgger 
 app.config['SWAGGER'] = {
     'title': 'vintagecar microservice API',
     'version': 1.0,
@@ -32,7 +29,6 @@ app.config['SWAGGER'] = {
 swagger = Swagger(app)
 
 db = SQLAlchemy(app)
-
 
 class Parts(db.Model):
     __tablename__ = 'parts'
@@ -108,14 +104,13 @@ def get_all_parts():
         search_query = ""
     print(search_query)
 
-    parts_data = []  # List to hold data for each part
+    parts_data = []
     search_data = []
 
     # Fetch user ID of user logged in
     loggedin_user_id = session.get('loggedin_user_id')
     print(loggedin_user_id)
 
-    # Fetch all parts
     parts = db.session.query(Parts).all()
 
     for part in parts:
@@ -126,40 +121,33 @@ def get_all_parts():
             print(user_id)
 
             get_username_url = 'http://host.docker.internal:5004/get_username'
-            # get_username_url = 'http://127.0.0.1:5004/get_username'
 
             get_username_params = {'user_id': user_id}
             get_username_response = requests.get(get_username_url, params=get_username_params)
 
             if get_username_response.status_code == 200:
-                # Get the username from the response if needed
                 username = get_username_response.json().get('username')
                 print("Username:", username)
 
             part_id_str = str(part_id)
 
-            # Get a reference to the folder
             folder_prefix = 'parts/' + part_id_str + '/'
 
-            # Retrieves all the files within the folder specified by folder_prefix.
             blobs = bucket.list_blobs(prefix=folder_prefix)
 
-            # Initialize first_picture_url
             first_picture_url = None
 
-            # Define a distant future timestamp
             future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
             for blob in blobs:
-                first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+                first_picture_url = blob.generate_signed_url(expiration=future_timestamp) 
                 print("URL of the first picture:", first_picture_url)
-                break  # Stop after retrieving the first file's URL
+                break
 
             if first_picture_url is None:
                 print("No files found.")
 
             if part:
-                # Create a dictionary to hold part data
                 part_data = {
                     "PartID": part.PartID,
                     "ProductName": part.Name,
@@ -168,18 +156,15 @@ def get_all_parts():
                     "Brand": part.Brand,
                     "Model": part.Model,
                     "UserName": username,
-                    "Pic": first_picture_url,  # Pass the download URL to the HTML template
+                    "Pic": first_picture_url,
                     "Status": part.Status,
                 }
                 
                 if search_query in part.Name or search_query in part.Model or search_query in part.Brand:
                     print(search_query)
-                    search_data.append(part_data)  # Add part data to the list
+                    search_data.append(part_data)
                 else:
                     parts_data.append(part_data)
-
-    print(parts_data)
-    print(search_data)
 
     if search_data:
         return display_all_parts(search_data)
@@ -217,13 +202,11 @@ def find_by_partID(PartID):
     """
     buyer_id = session.get('loggedin_user_id')
 
-    # Fetch part details for the current part
     part_details = db.session.query(Parts).filter(Parts.PartID == PartID).first()
 
     if part_details:
         user_id = part_details.UserID
         
-        # Fetch username for the current user ID
         get_username_url = 'http://host.docker.internal:5004/get_username'
         get_username_params = {'user_id': user_id}
         get_username_response = requests.get(get_username_url, params=get_username_params)
@@ -233,7 +216,6 @@ def find_by_partID(PartID):
         else:
             username = "Unknown"
         
-        # Fetch comments for the current part
         comments = db.session.scalars(db.select(Comments).filter_by(PartID=PartID)).all()
 
         part_id_str = str(PartID)
@@ -259,7 +241,6 @@ def find_by_partID(PartID):
         }
         
         for comment in comments:
-            # Fetch username for the current comment's user ID
             get_comment_username_params = {'user_id': comment.UserID}
             get_comment_username_response = requests.get(get_username_url, params=get_comment_username_params)
 
@@ -303,7 +284,6 @@ def find_part_details():
     part = db.session.scalars(db.select(Parts).filter_by(PartID=partid).limit(1)).first()
     
     if part:
-        # Create a dictionary to hold part data
         part = {
             "PartID": partid,
             "ProductName": part.Name,
@@ -333,13 +313,11 @@ def seller_product_listing():
         search_query = ""
     print(search_query)
 
-    parts_data = []  # List to hold data for each parts
+    parts_data = []
     search_data = []
 
-    # Fetch user ID of user logged in
     loggedin_user_id = session.get('loggedin_user_id')
     
-    # Fetch all parts
     part_details = db.session.query(Parts).filter(Parts.UserID == loggedin_user_id).all()
 
     for part in part_details:
@@ -349,40 +327,35 @@ def seller_product_listing():
 
         print(part_id_str)
 
-        # Get a reference to the folder
         folder_prefix = 'parts/' + part_id_str + '/'
 
-        # Retrieves all the files within the folder specified by folder_prefix.
         blobs = bucket.list_blobs(prefix=folder_prefix)
 
-        # Initialize first_picture_url
         first_picture_url = None
 
-        # Define a distant future timestamp
         future_timestamp = dt.datetime.utcnow() + dt.timedelta(days=3650)
 
         for blob in blobs:
-            first_picture_url = blob.generate_signed_url(expiration=future_timestamp)  # URL expiration time in seconds (adjust as needed)
+            first_picture_url = blob.generate_signed_url(expiration=future_timestamp)
             print("URL of the first picture:", first_picture_url)
-            break  # Stop after retrieving the first file's URL
+            break
 
         if first_picture_url is None:
             print("No files found.")
 
     
         if part:
-            # Create a dictionary to hold part data
             part_data = {
                 "PartID": part.PartID,
                 "Name": part.Name,
                 "Price": part.Price,
                 "Quantity": part.QuantityAvailable,
                 "Status": part.Status,
-                "Pic": first_picture_url  # Pass the download URL to the HTML template
+                "Pic": first_picture_url
             }
 
             if search_query in part.Name:
-                search_data.append(part_data)  # Add part data to the list
+                search_data.append(part_data)
             else:
                 parts_data.append(part_data)
 
@@ -393,7 +366,6 @@ def seller_product_listing():
         return render_template("productlisting.html", data="There are no search results.")
     
     elif parts_data:
-        # Return the list of part data as JSON response
         return render_template('productlisting.html', parts = parts_data)
     
     else:
@@ -420,7 +392,6 @@ def update_part_page():
     part_details = db.session.query(Parts).filter(Parts.PartID == part_id).first()
 
     if part_details:
-        # Create a dictionary to hold part data
         part = {
             "PartID": part_details.PartID,
             "ProductName": part_details.Name,
@@ -502,37 +473,29 @@ def update_part(PartID):
             ), 500
         
         if request.method == "POST":
-            # Get the uploaded photos from the HTML form
             photos = request.files.getlist("file")
 
-            # Filter out empty FileStorage objects
             photos = [photo for photo in photos if photo.filename]
             
             if photos:
                 print("User uploaded photos, proceeding with upload")
-                # User uploaded photos, proceed with upload
-                # List to store upload results
                 upload_results = []
 
-                # Upload each photo to Firebase Storage
                 for photo in photos:
-                    # Specify a unique path for each photo in Firebase Storage
                     photo_blob = bucket.blob(f"parts/{PartID}/{photo.filename}")
                     
-                    # Upload the photo
                     try:
                         photo_blob.upload_from_file(photo)
-                        upload_results.append(True)  # Successful upload
+                        upload_results.append(True)
                     except Exception as e:
-                        upload_results.append(False)  # Failed upload
+                        upload_results.append(False)
                         print(f"Error uploading photo: {e}")
 
-                # Check if all uploads were successful
                 try:
                     all(upload_results)
                     print("Photos uploaded successfully!")
                 except Exception as e:
-                    print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
+                    print("Failed to upload all photos. Please try again.")
 
         return redirect(url_for('seller_product_listing'))
     
@@ -560,14 +523,6 @@ def create_review(PartID, OrderID):
     redirect_url = f'http://127.0.0.1:5005/review/{OrderID}'
     return redirect(redirect_url)
 
-@app.route('/get_country')
-def get_country():
-    part_id = request.args.get('part_id')
-    part = db.session.query(Parts).filter(Parts.PartID == part_id).first()
-    country = part.Location
-    print(country)
-    return jsonify(Country=country)
-
 @app.route("/reduce_quantity")
 def reduce_quantity():
     PartID = request.args.get('PartID')
@@ -579,12 +534,9 @@ def reduce_quantity():
     db.session.commit()
     return 'success', 200
 
-# Display all carparts
 def display_all_parts(parts_data):
-    # Render the template and pass data to it
     return render_template('template.html', parts=parts_data)
 
-# Render car parts details
 def display_part(part):
     return render_template('product.html', part=part)
 
@@ -592,7 +544,5 @@ def display_part(part):
 def store_page():
     return render_template('add.html')
 
-# if __name__ == '__main__':
-#     app.run(port=5002, debug=True)
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5002, debug=True)

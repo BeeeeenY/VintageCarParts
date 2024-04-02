@@ -42,7 +42,7 @@ class Forum(db.Model):
                     "LastUpdated": self.LastUpdated}
         
 class Comments(db.Model):
-    __tablename__ = 'Comments'  # Specify the correct table name here
+    __tablename__ = 'Comments'
     CommentID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     PostID = db.Column(db.Integer, nullable = False)
     UserID = db.Column(db.Integer)
@@ -189,7 +189,6 @@ def create_post():
             for photo in photos:
                 photo_blob = bucket.blob(f"forum/{post_id}/{photo.filename}")
                 
-                # Upload the photo
                 try:
                     photo_blob.upload_from_file(photo)
                     upload_results.append(True)
@@ -197,7 +196,6 @@ def create_post():
                     upload_results.append(False)
                     print(f"Error uploading photo: {e}")
 
-            # Check if all uploads were successful
             try:
                 all(upload_results)
                 print("Photos uploaded successfully!")
@@ -284,39 +282,31 @@ def update_post(PostID):
     print(post_id)
 
     if request.method == "POST":
-        # Get the uploaded photos from the HTML form
         photos = request.files.getlist("file")
 
         print(photos)
 
-        # Filter out empty FileStorage objects
         photos = [photo for photo in photos if photo.filename]
         
         if photos:
             print("User uploaded photos, proceeding with upload")
-            # User uploaded photos, proceed with upload
-            # List to store upload results
             upload_results = []
 
-            # Upload each photo to Firebase Storage
             for photo in photos:
-                # Specify a unique path for each photo in Firebase Storage
                 photo_blob = bucket.blob(f"forum/{post_id}/{photo.filename}")
                 
-                # Upload the photo
                 try:
                     photo_blob.upload_from_file(photo)
-                    upload_results.append(True)  # Successful upload
+                    upload_results.append(True)
                 except Exception as e:
-                    upload_results.append(False)  # Failed upload
+                    upload_results.append(False)
                     print(f"Error uploading photo: {e}")
 
-            # Check if all uploads were successful
             try:
                 all(upload_results)
                 print("Photos uploaded successfully!")
             except Exception as e:
-                print("Failed to upload all photos. Please try again.")  # Return 400 status code for client-side error
+                print("Failed to upload all photos. Please try again.")
 
     return redirect("/forum")
 

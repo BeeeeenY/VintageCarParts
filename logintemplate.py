@@ -1,19 +1,16 @@
 from flask import Flask, request, redirect, url_for, session, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-# from invokes import invoke_http
 import bcrypt
 import requests
 from os import environ
-
-from flask import jsonify
 
 app = Flask(__name__)
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:8889/Authentication"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/Authentication"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -27,7 +24,6 @@ class UserAuth(db.Model):
     Email = db.Column(db.String(255), unique=True, nullable=False)
     PasswordHash = db.Column(db.String(255), nullable=False)
 
-# Routes for authentication
 @app.route('/', methods=['GET', 'POST'])
 def login():
     error = None

@@ -203,9 +203,25 @@
                                         <span>Total Price:</span>
                                         <span style="font-weight:bold;color:orange;">$${(item.priceInCents * item.quantity / 100).toFixed(2)}</span>
                                     </p>
+                                    <button class="btn btn-outline-danger delete-btn" data-partid="${item.id}">Delete</button>
                                 </div>
                             `;
                             cartItemsContainer.appendChild(itemElement);
+                            const deleteBtn = itemElement.querySelector('.delete-btn');
+                            deleteBtn.addEventListener('click', function() {
+                                const partID = this.getAttribute('data-partid');
+                                fetch(`http://127.0.0.1:3000/remove-from-cart/${partID}`, {
+                                    method: 'DELETE'
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        window.location.reload();
+                                    } else {
+                                        console.error('Failed to remove item from cart');
+                                    }
+                                })
+                                .catch(error => console.error('Error:', error));
+                            });
                         });
                     }
                 })

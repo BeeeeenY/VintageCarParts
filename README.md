@@ -52,7 +52,7 @@ Update the dbURL environment variable in the `docker-compose.yml` file according
 - **For macOS:** `mysql+mysqlconnector://root:root@host.docker.internal:8889/orders`
 - **For Windows:** `mysql+mysqlconnector://root@host.docker.internal:3306/orders`
 
-Change the image names to your own Docker username in the `docker-compose.yml` file.
+Change the image names to your own Docker username in the `compose.yml` file.
 
 ## Usage
 
@@ -62,6 +62,15 @@ To build and run the microservices, use the following commands:
 docker-compose build
 docker-compose up
 ```
+
+### Accessing the Application
+
+Once the Docker containers are running, you can access the VintageCarParts web application by following these steps:
+
+1. **Open Your Web Browser**: Launch your preferred web browser on your local machine.
+
+2. **Navigate to the Application URL**: Enter the following URL in the address bar of your web browser:
+   
 
 ### Registering as a New User
 
